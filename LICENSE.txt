@@ -1,4 +1,6 @@
 
+MIT License
+
 piotserver - Raspberry Pi Internet Of Things
 
 Copyright 2025 Vinnie Moscaritolo
