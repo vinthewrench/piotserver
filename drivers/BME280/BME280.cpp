@@ -61,7 +61,7 @@ static void dumpHex(uint8_t* buffer, int length, int offset)
 */
 
 /* Sensor driver code for BME280 adpated from
-  https://github.com/boschsensortec/BME280_DeviceAPI
+  https://github https://github.com/boschsensortec/BME280_DeviceAPI
 */
 
 /*! @name BME280 chip identifier */

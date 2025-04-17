@@ -254,6 +254,7 @@
 		2EAB0ADC2DAC320D008BC701 /* ADS1115.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ADS1115.xcodeproj; path = drivers/ADS1115/ADS1115.xcodeproj; sourceTree = "<group>"; };
 		2EAB0B1E2DB0388C008BC701 /* PCA9536.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PCA9536.xcodeproj; path = drivers/PCA9536/PCA9536.xcodeproj; sourceTree = "<group>"; };
 		2EAB0B442DB0862F008BC701 /* notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = notes.txt; path = Notes/notes.txt; sourceTree = "<group>"; };
+		2EAB0B622DB17DD3008BC701 /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		2EAB537E2CFE46F000F8B585 /* pIoTServer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pIoTServer; sourceTree = BUILT_PRODUCTS_DIR; };
 		2EAB538A2CFE474900F8B585 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		2EAB538B2CFE474900F8B585 /* ServerCmdValidators.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ServerCmdValidators.hpp; sourceTree = "<group>"; };
@@ -325,6 +326,7 @@
 		2E3FB4EB2D0B9C18006171E7 /* Notes */ = {
 			isa = PBXGroup;
 			children = (
+				2EAB0B622DB17DD3008BC701 /* LICENSE.txt */,
 				2EAB0B442DB0862F008BC701 /* notes.txt */,
 				2E3FB4EC2D0B9C57006171E7 /* CMakeLists.txt */,
 				2E3FB4ED2D0B9C57006171E7 /* Dockerfile */,
