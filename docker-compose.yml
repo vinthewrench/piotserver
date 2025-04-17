@@ -1,0 +1,22 @@
+name: piotserver
+services:
+    piotserver:
+        container_name: piotserver
+        volumes:
+            - ~/piotserver/assets:/assets1
+            - ~/piotserver/plugins:/plugins
+            - /sys/firmware:/sys/firmware
+            - /proc:/proc
+        security_opt:
+            - seccomp:unconfined
+        ports:
+            - 8081:8081
+        devices:
+            - /dev/i2c-1
+            - /dev/gpiochip0
+        environment:
+            - TZ=America/Chicago
+        stdin_open: false
+        tty: true
+        image: piotserver:1.1.0
+        command: ./piotserver -d -p -f assets1

@@ -1,0 +1,329 @@
+{
+    "config": {
+        "access_keys": {},
+        "description": "The Raspbery Pi Irrigation System",
+        "lat_long": "34.46463, -93.36214",
+        "name": "Garden Irrigation"
+    },
+    "devices": [
+        {
+            "address": "0x48",
+            "data_type": "TEMPERATURE",
+            "deviceID": 1002,
+            "device_type": "TMP10X",
+            "interval": 5,
+            "key": "GREENHOUSE",
+            "title": "Greenhouse Temperature",
+            "track24Hr" : true,
+            "tracking": "track.range"
+        },
+        {
+            "device_type": "QWR_15093",
+            "deviceID": 1011,
+            "title": "Qwiic Relay",
+            
+            "pins": [
+                {
+                    "bit": 1,
+                    "data_type": "BOOL",
+                    "key": "QR_1",
+                    "title": "Greenhouse Light"
+                }
+             ]
+        },
+        
+        {
+                 "address": "28-00000035943e",
+                 "data_type": "TEMPERATURE",
+                 "description": "Plot A Soil Temperature",
+                 "deviceID": 1000,
+                 "device_type": "1wire",
+                 "interval": 3600,
+                 "key": "PLOT1",
+                 "title": "Soil Temp Plot A",
+                 "tracking": "track.range"
+             },
+        {
+            "address": "0x77",
+            "description": "Walk-In Cooler Environment Sensor",
+            "deviceID": 1004,
+            "device_type": "BME280",
+            "pins": [
+                {
+                    "data_type": "TEMPERATURE",
+                    "interval": 30,
+                    "key": "COOLER_TEMPERATURE",
+                    "title": "Walk-In Cooler Temperture",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "HUMIDITY",
+                    "key": "COOLER_HUMIDITY",
+                    "title": "Walk-In Cooler Humidity",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "BAROMETRIC",
+                    "key": "COOLER_PRESSURE"
+                }
+            ],
+            "title": "Walk-In Cooler"
+        },
+        {
+            "address": "0x44",
+            "description": "Outside Environment Sensor",
+            "deviceID": 1010,
+            "device_type": "SHT30",
+            "pins": [
+                {
+                    "data_type": "TEMPERATURE",
+                    "interval": 30,
+                    "key": "GARDEN_TEMPERATURE",
+                    "title": "Garden Temperture",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "HUMIDITY",
+                    "key": "GARDEN_HUMIDITY",
+                    "title": "Garden Humidity",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "SERIAL_NO",
+                    "key": "GARDEN_SERIAL_NO",
+                    "title": "Garden Sensor Serial No",
+                    "tracking": "dont.record"
+                }
+             ],
+            "title": "Garden"
+        },
+        {
+            "deviceID": 1007,
+            "device_type": "GPIO",
+            "pins": [
+                {
+                    "BCM": 5,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_1",
+                    "title": "relay 1"
+                },
+                {
+                    "BCM": 6,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_2",
+                    "title": "relay 2"
+                },
+                {
+                    "BCM": 13,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_3",
+                    "title": "relay 3"
+                },
+                {
+                    "BCM": 16,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_4",
+                    "title": "relay 4"
+                },
+                {
+                    "BCM": 19,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_5",
+                    "title": "relay 5"
+                },
+                {
+                    "BCM": 20,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_6",
+                    "title": "relay 6"
+                },
+                {
+                    "BCM": 21,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_7",
+                    "title": "relay 7"
+                },
+                {
+                    "BCM": 26,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_8",
+                    "title": "relay 8"
+                },
+                {
+                    "BCM": 22,
+                    "data_type": "BOOL",
+                    "gpio.flags": "0x20",
+                    "gpio.mode": "input",
+                    "key": "RAIN_SENSOR",
+                    "title": "rain sensor"
+                }
+            ],
+            "title": "RPi Relay Board"
+        }
+    ],
+    "values": [
+        {
+            "data_type": "INT",
+            "formula": "(SOLAR_SUNRISE  + SOLAR_SUNSET) / 2 ",
+            "key": "MID_DAY",
+            "title": "Mid Day",
+            "tracking": "track.changes"
+        },
+        {
+            "data_type": "INT",
+            "description": "A counter bumped each startup",
+            "initial.value": 0,
+            "key": "START_COUNT",
+            "title": "times restarted running",
+            "tracking": "track.latest"
+        }
+        ],
+    "sequence": [
+        {
+            "enable": true,
+            "sequenceID": "1001",
+            "name": "Test Sunrise task",
+            "trigger": {
+                "timeBase": "sunrise"
+            },
+            "steps": {
+                "action": {
+                    "cmd": "LOG",
+                    "value": "Wake up it sunrise "
+                }
+            }
+        },        
+        {
+            "enable": false,
+            "sequenceID": "1000",
+            "name": "sprinkler control",
+            "description": "day to day sprinkler sequence",
+            "trigger": {
+                "timeBase": "civil sunrise",
+                "offset": 10
+           },
+            "condition" : "RAIN_SENSOR == 0",
+            "on_abort":  {
+                "action": [
+                   {
+                       "cmd": "SET",
+                       "key": "RELAY_1",
+                       "value": "off"
+                   },
+                   {
+                       "cmd": "SET",
+                       "key": "RELAY_2",
+                       "value": "off"
+                   },
+                   {
+                       "cmd": "SET",
+                       "key": "RELAY_3",
+                       "value": "off"
+                   },
+                   {
+                       "cmd": "SET",
+                       "key": "RELAY_4",
+                       "value": "off"
+                   },
+                                
+                     {
+                       "cmd": "SET",
+                       "key": "RELAY_5",
+                       "value": "off"
+                   }
+   
+               ]
+            },
+            "steps": [
+                {
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_1",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_1",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_2",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_2",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_3",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_3",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_4",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_4",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_5",
+                            "value": "on"
+                        }
+                    ]
+                },
+                              {
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_5",
+                            "value": "off"
+                        }
+                       ]
+                }
+            ]
+        } 
+     ]    
+}

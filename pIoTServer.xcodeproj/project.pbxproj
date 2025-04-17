@@ -1,0 +1,992 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2E2008392D5E93DD007A01F8 /* Sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E2008382D5E93DD007A01F8 /* Sequence.cpp */; };
+		2E2008572D663AB4007A01F8 /* lunar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E2008562D663AB4007A01F8 /* lunar.cpp */; };
+		2E20085A2D664982007A01F8 /* Actuator_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E2008592D664982007A01F8 /* Actuator_Device.cpp */; };
+		2E3FB51F2D120575006171E7 /* sunset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FB51E2D120575006171E7 /* sunset.cpp */; };
+		2E3FB5222D1205AE006171E7 /* SolarTimeMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FB5212D1205AE006171E7 /* SolarTimeMgr.cpp */; };
+		2E3FB5362D135CF7006171E7 /* base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FB5352D135CF7006171E7 /* base64.cpp */; };
+		2E3FB5542D1CBE5F006171E7 /* macos_gpiod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FB5512D1CBE5F006171E7 /* macos_gpiod.cpp */; };
+		2E3FB5612D1DF69A006171E7 /* GPIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FB5602D1DF69A006171E7 /* GPIO.cpp */; };
+		2E3FB57D2D21E9A1006171E7 /* W1_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FB57C2D21E9A1006171E7 /* W1_Device.cpp */; };
+		2E3FB5B02D2899CF006171E7 /* RPi_RelayBoardDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FB5AF2D2899CF006171E7 /* RPi_RelayBoardDevice.cpp */; };
+		2E41282E2DA5D4EB00D90924 /* ADS1115.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E41282D2DA5D4EB00D90924 /* ADS1115.cpp */; };
+		2E4128352DA6B13000D90924 /* TankDepth_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E4128342DA6B13000D90924 /* TankDepth_Device.cpp */; };
+		2E4128392DA735E100D90924 /* Sprinkler_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E4128382DA735E100D90924 /* Sprinkler_Device.cpp */; };
+		2E4129102DAC116C00D90924 /* TMP10X.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E41290F2DAC116C00D90924 /* TMP10X.dylib */; };
+		2E4129252DAC13D600D90924 /* TMP10X.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2E41290F2DAC116C00D90924 /* TMP10X.dylib */; };
+		2E53F92F2D5950550001D619 /* LogMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E53F92E2D5950550001D619 /* LogMgr.cpp */; };
+		2E53F9402D59507B0001D619 /* TCPServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E53F9362D59507B0001D619 /* TCPServer.cpp */; };
+		2E53F9412D59507B0001D619 /* http_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 2E53F9312D59507B0001D619 /* http_parser.c */; };
+		2E53F9422D59507B0001D619 /* TimeStamp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E53F9382D59507B0001D619 /* TimeStamp.cpp */; };
+		2E5B763B2D3977CD00FDEFF7 /* pIoTServerEvaluator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E5B763A2D3977CD00FDEFF7 /* pIoTServerEvaluator.cpp */; };
+		2EAB0A412DAC2555008BC701 /* SHT25.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A402DAC2555008BC701 /* SHT25.dylib */; };
+		2EAB0A422DAC255F008BC701 /* SHT25.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A402DAC2555008BC701 /* SHT25.dylib */; };
+		2EAB0A582DAC271F008BC701 /* MCP23008.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A572DAC270B008BC701 /* MCP23008.dylib */; };
+		2EAB0A592DAC2724008BC701 /* SHT30.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A512DAC2701008BC701 /* SHT30.dylib */; };
+		2EAB0A5A2DAC272D008BC701 /* SHT30.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A512DAC2701008BC701 /* SHT30.dylib */; };
+		2EAB0A5B2DAC2733008BC701 /* MCP23008.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A572DAC270B008BC701 /* MCP23008.dylib */; };
+		2EAB0A622DAC280D008BC701 /* BME280.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A612DAC2804008BC701 /* BME280.dylib */; };
+		2EAB0A632DAC2813008BC701 /* BME280.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A612DAC2804008BC701 /* BME280.dylib */; };
+		2EAB0A6A2DAC28D8008BC701 /* MCP3427.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A692DAC28C6008BC701 /* MCP3427.dylib */; };
+		2EAB0A6B2DAC28DE008BC701 /* MCP3427.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A692DAC28C6008BC701 /* MCP3427.dylib */; };
+		2EAB0A722DAC2971008BC701 /* PCA9671.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A712DAC2964008BC701 /* PCA9671.dylib */; };
+		2EAB0A732DAC297A008BC701 /* PCA9671.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A712DAC2964008BC701 /* PCA9671.dylib */; };
+		2EAB0A7A2DAC29FE008BC701 /* TCA9534.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A792DAC29F6008BC701 /* TCA9534.dylib */; };
+		2EAB0A7B2DAC2A07008BC701 /* TCA9534.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A792DAC29F6008BC701 /* TCA9534.dylib */; };
+		2EAB0A8A2DAC2B28008BC701 /* QwiicButton.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A892DAC2B12008BC701 /* QwiicButton.dylib */; };
+		2EAB0A8B2DAC2B30008BC701 /* QwiicButton.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A892DAC2B12008BC701 /* QwiicButton.dylib */; };
+		2EAB0AA82DAC2DB4008BC701 /* VELM6030.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB0AA52DAC2DB4008BC701 /* VELM6030.cpp */; };
+		2EAB0AA92DAC2DB4008BC701 /* VELM6030_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB0AA72DAC2DB4008BC701 /* VELM6030_Device.cpp */; };
+		2EAB0AD42DAC307B008BC701 /* QWIIC_RELAY.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0AD32DAC3071008BC701 /* QWIIC_RELAY.dylib */; };
+		2EAB0AD52DAC307B008BC701 /* QWIIC_RELAY.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 2EAB0AD32DAC3071008BC701 /* QWIIC_RELAY.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		2EAB0AD72DAC308E008BC701 /* QWIIC_RELAY.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0AD32DAC3071008BC701 /* QWIIC_RELAY.dylib */; };
+		2EAB0AE22DAC322F008BC701 /* ADS1115.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0AE12DAC320D008BC701 /* ADS1115.dylib */; };
+		2EAB0B332DB038DE008BC701 /* PCA9536.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0B322DB038DE008BC701 /* PCA9536.dylib */; };
+		2EAB0B432DB038EA008BC701 /* PCA9536.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0B322DB038DE008BC701 /* PCA9536.dylib */; };
+		2EAB53902CFE474900F8B585 /* ServerNouns.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB538D2CFE474900F8B585 /* ServerNouns.cpp */; };
+		2EAB53912CFE474900F8B585 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB538A2CFE474900F8B585 /* main.cpp */; };
+		2EAB53AF2CFE476500F8B585 /* RESTServerConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB539E2CFE476500F8B585 /* RESTServerConnection.cpp */; };
+		2EAB53B02CFE476500F8B585 /* RESTutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB53A02CFE476500F8B585 /* RESTutils.cpp */; };
+		2EAB53B32CFE476500F8B585 /* yuarel.c in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB53AD2CFE476500F8B585 /* yuarel.c */; };
+		2EAB53B42CFE476500F8B585 /* sha256.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB53A42CFE476500F8B585 /* sha256.cpp */; };
+		2EAB53B62CFE476500F8B585 /* TCPClientInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB53A62CFE476500F8B585 /* TCPClientInfo.cpp */; };
+		2EAB53B72CFE476500F8B585 /* REST_URL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB539C2CFE476500F8B585 /* REST_URL.cpp */; };
+		2EAB53B92CFE476500F8B585 /* ServerCmdQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB53A22CFE476500F8B585 /* ServerCmdQueue.cpp */; };
+		2EAB53C02CFE500100F8B585 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB53BF2CFE500100F8B585 /* libsqlite3.tbd */; };
+		2EAB53CA2CFE5FAE00F8B585 /* pIoTServerMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB53C92CFE5FAE00F8B585 /* pIoTServerMgr.cpp */; };
+		2EAB53D62CFE799100F8B585 /* pIoTServerDB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB53D52CFE799100F8B585 /* pIoTServerDB.cpp */; };
+		2EAB53DF2CFE81EB00F8B585 /* pIoTServerAPISecretMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB53DE2CFE81EB00F8B585 /* pIoTServerAPISecretMgr.cpp */; };
+		2EAB53F72D04F14800F8B585 /* I2C.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB53F62D04F14800F8B585 /* I2C.cpp */; };
+		2ECA50152D308AA000565C13 /* EventTrigger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2ECA50132D308AA000565C13 /* EventTrigger.cpp */; };
+		2ECA50162D308AA000565C13 /* Action.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2ECA50112D308AA000565C13 /* Action.cpp */; };
+		2EF9643A2D8C6BCE00F9FA19 /* piotserver.props.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EF964372D8C6B9000F9FA19 /* piotserver.props.json */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2EAB0A502DAC2701008BC701 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2EAB0A4C2DAC2701008BC701 /* SHT30.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
+			remoteInfo = SHT30;
+		};
+		2EAB0A562DAC270B008BC701 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2EAB0A522DAC270A008BC701 /* MCP23008.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
+			remoteInfo = MCP23008;
+		};
+		2EAB0A602DAC2804008BC701 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2EAB0A5C2DAC2804008BC701 /* BME280.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
+			remoteInfo = BME280;
+		};
+		2EAB0A682DAC28C6008BC701 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2EAB0A642DAC28C6008BC701 /* MCP3427.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
+			remoteInfo = MCP3427;
+		};
+		2EAB0A702DAC2964008BC701 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2EAB0A6C2DAC2964008BC701 /* PCA9671.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
+			remoteInfo = PCA9671;
+		};
+		2EAB0A782DAC29F6008BC701 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2EAB0A742DAC29F6008BC701 /* TCA9534.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
+			remoteInfo = TCA9534;
+		};
+		2EAB0A882DAC2B12008BC701 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2EAB0A842DAC2B12008BC701 /* QwiicButton.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
+			remoteInfo = QwiicButton;
+		};
+		2EAB0AD22DAC3071008BC701 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2EAB0ACE2DAC3071008BC701 /* QWIIC_RELAY.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
+			remoteInfo = QWIIC_RELAY;
+		};
+		2EAB0AE02DAC320D008BC701 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2EAB0ADC2DAC320D008BC701 /* ADS1115.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
+			remoteInfo = ADS1115;
+		};
+		2EAB0B312DB038DE008BC701 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2EAB0B1E2DB0388C008BC701 /* PCA9536.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
+			remoteInfo = PCA9536;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		2E4128C52DAB032500D90924 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = plugins;
+			dstSubfolderSpec = 16;
+			files = (
+				2EAB0B432DB038EA008BC701 /* PCA9536.dylib in CopyFiles */,
+				2EAB0AE22DAC322F008BC701 /* ADS1115.dylib in CopyFiles */,
+				2EAB0AD72DAC308E008BC701 /* QWIIC_RELAY.dylib in CopyFiles */,
+				2EAB0A8B2DAC2B30008BC701 /* QwiicButton.dylib in CopyFiles */,
+				2EAB0A7B2DAC2A07008BC701 /* TCA9534.dylib in CopyFiles */,
+				2EAB0A732DAC297A008BC701 /* PCA9671.dylib in CopyFiles */,
+				2EAB0A6B2DAC28DE008BC701 /* MCP3427.dylib in CopyFiles */,
+				2EAB0A632DAC2813008BC701 /* BME280.dylib in CopyFiles */,
+				2EAB0A5B2DAC2733008BC701 /* MCP23008.dylib in CopyFiles */,
+				2EAB0A5A2DAC272D008BC701 /* SHT30.dylib in CopyFiles */,
+				2EAB0A422DAC255F008BC701 /* SHT25.dylib in CopyFiles */,
+				2E4129252DAC13D600D90924 /* TMP10X.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2EAB0AD62DAC307B008BC701 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				2EAB0AD52DAC307B008BC701 /* QWIIC_RELAY.dylib in Embed Libraries */,
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2EAB537C2CFE46F000F8B585 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				2EF9643A2D8C6BCE00F9FA19 /* piotserver.props.json in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		2E2008372D5E93DD007A01F8 /* Sequence.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Sequence.hpp; sourceTree = "<group>"; };
+		2E2008382D5E93DD007A01F8 /* Sequence.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Sequence.cpp; sourceTree = "<group>"; };
+		2E2008552D663AB4007A01F8 /* lunar.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = lunar.hpp; sourceTree = "<group>"; };
+		2E2008562D663AB4007A01F8 /* lunar.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = lunar.cpp; sourceTree = "<group>"; };
+		2E2008582D664982007A01F8 /* Actuator_Device.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Actuator_Device.hpp; sourceTree = "<group>"; };
+		2E2008592D664982007A01F8 /* Actuator_Device.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Actuator_Device.cpp; sourceTree = "<group>"; };
+		2E362E612D46A782007CC10F /* croncpp.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = croncpp.hpp; sourceTree = "<group>"; };
+		2E3FB4E72D0B972E006171E7 /* libcurl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcurl.tbd; path = usr/lib/libcurl.tbd; sourceTree = SDKROOT; };
+		2E3FB4EC2D0B9C57006171E7 /* CMakeLists.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		2E3FB4ED2D0B9C57006171E7 /* Dockerfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Dockerfile; sourceTree = "<group>"; };
+		2E3FB4EE2D0B9C57006171E7 /* Dockerfile_cpp */ = {isa = PBXFileReference; lastKnownFileType = text; path = Dockerfile_cpp; sourceTree = "<group>"; };
+		2E3FB51D2D120575006171E7 /* sunset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sunset.h; sourceTree = "<group>"; };
+		2E3FB51E2D120575006171E7 /* sunset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sunset.cpp; sourceTree = "<group>"; };
+		2E3FB5202D1205AE006171E7 /* SolarTimeMgr.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SolarTimeMgr.hpp; sourceTree = "<group>"; };
+		2E3FB5212D1205AE006171E7 /* SolarTimeMgr.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SolarTimeMgr.cpp; sourceTree = "<group>"; };
+		2E3FB5342D135CF7006171E7 /* base64.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = base64.hpp; sourceTree = "<group>"; };
+		2E3FB5352D135CF7006171E7 /* base64.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = base64.cpp; sourceTree = "<group>"; };
+		2E3FB5502D1CBE5F006171E7 /* macos_gpiod.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macos_gpiod.h; sourceTree = "<group>"; };
+		2E3FB5512D1CBE5F006171E7 /* macos_gpiod.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = macos_gpiod.cpp; sourceTree = "<group>"; };
+		2E3FB55F2D1DF69A006171E7 /* GPIO.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GPIO.hpp; sourceTree = "<group>"; };
+		2E3FB5602D1DF69A006171E7 /* GPIO.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GPIO.cpp; sourceTree = "<group>"; };
+		2E3FB56C2D207C53006171E7 /* pIoTServerDevice.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pIoTServerDevice.hpp; sourceTree = "<group>"; };
+		2E3FB57B2D21E9A1006171E7 /* W1_Device.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = W1_Device.hpp; sourceTree = "<group>"; };
+		2E3FB57C2D21E9A1006171E7 /* W1_Device.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = W1_Device.cpp; sourceTree = "<group>"; };
+		2E3FB5932D24A9BF006171E7 /* pIoTServerSchema.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pIoTServerSchema.hpp; sourceTree = "<group>"; };
+		2E3FB5AE2D2899CF006171E7 /* RPi_RelayBoardDevice.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RPi_RelayBoardDevice.hpp; sourceTree = "<group>"; };
+		2E3FB5AF2D2899CF006171E7 /* RPi_RelayBoardDevice.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RPi_RelayBoardDevice.cpp; sourceTree = "<group>"; };
+		2E4128252DA4689500D90924 /* sprinkler1.piotserver.props.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sprinkler1.piotserver.props.json; sourceTree = "<group>"; };
+		2E41282C2DA5D4EB00D90924 /* ADS1115.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ADS1115.hpp; sourceTree = "<group>"; };
+		2E41282D2DA5D4EB00D90924 /* ADS1115.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ADS1115.cpp; sourceTree = "<group>"; };
+		2E4128332DA6B13000D90924 /* TankDepth_Device.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TankDepth_Device.hpp; sourceTree = "<group>"; };
+		2E4128342DA6B13000D90924 /* TankDepth_Device.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TankDepth_Device.cpp; sourceTree = "<group>"; };
+		2E4128372DA735E100D90924 /* Sprinkler_Device.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Sprinkler_Device.hpp; sourceTree = "<group>"; };
+		2E4128382DA735E100D90924 /* Sprinkler_Device.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Sprinkler_Device.cpp; sourceTree = "<group>"; };
+		2E41290F2DAC116C00D90924 /* TMP10X.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = TMP10X.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		2E4129192DAC137F00D90924 /* TMP10X.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TMP10X.xcodeproj; path = drivers/TMP10X/TMP10X.xcodeproj; sourceTree = "<group>"; };
+		2E53F92D2D5950550001D619 /* LogMgr.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LogMgr.hpp; sourceTree = "<group>"; };
+		2E53F92E2D5950550001D619 /* LogMgr.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LogMgr.cpp; sourceTree = "<group>"; };
+		2E53F9302D59507B0001D619 /* http_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = http_parser.h; sourceTree = "<group>"; };
+		2E53F9312D59507B0001D619 /* http_parser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = http_parser.c; sourceTree = "<group>"; };
+		2E53F9322D59507B0001D619 /* json.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = json.hpp; sourceTree = "<group>"; };
+		2E53F9352D59507B0001D619 /* TCPServer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TCPServer.hpp; sourceTree = "<group>"; };
+		2E53F9362D59507B0001D619 /* TCPServer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TCPServer.cpp; sourceTree = "<group>"; };
+		2E53F9372D59507B0001D619 /* TimeStamp.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TimeStamp.hpp; sourceTree = "<group>"; };
+		2E53F9382D59507B0001D619 /* TimeStamp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeStamp.cpp; sourceTree = "<group>"; };
+		2E5B76392D3977CD00FDEFF7 /* pIoTServerEvaluator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pIoTServerEvaluator.hpp; sourceTree = "<group>"; };
+		2E5B763A2D3977CD00FDEFF7 /* pIoTServerEvaluator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pIoTServerEvaluator.cpp; sourceTree = "<group>"; };
+		2EA8AFE02D4C1D930007CFB9 /* docker-compose.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "docker-compose.yml"; sourceTree = "<group>"; };
+		2EAB0A3A2DAC252C008BC701 /* SHT25.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SHT25.xcodeproj; path = drivers/SHT25/SHT25.xcodeproj; sourceTree = SOURCE_ROOT; };
+		2EAB0A402DAC2555008BC701 /* SHT25.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = SHT25.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		2EAB0A4C2DAC2701008BC701 /* SHT30.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SHT30.xcodeproj; path = drivers/SHT30/SHT30.xcodeproj; sourceTree = "<group>"; };
+		2EAB0A522DAC270A008BC701 /* MCP23008.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MCP23008.xcodeproj; path = drivers/MCP23008/MCP23008.xcodeproj; sourceTree = "<group>"; };
+		2EAB0A5C2DAC2804008BC701 /* BME280.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BME280.xcodeproj; path = drivers/BME280/BME280.xcodeproj; sourceTree = "<group>"; };
+		2EAB0A642DAC28C6008BC701 /* MCP3427.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MCP3427.xcodeproj; path = drivers/MCP3427/MCP3427.xcodeproj; sourceTree = "<group>"; };
+		2EAB0A6C2DAC2964008BC701 /* PCA9671.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PCA9671.xcodeproj; path = drivers/PCA9671/PCA9671.xcodeproj; sourceTree = "<group>"; };
+		2EAB0A742DAC29F6008BC701 /* TCA9534.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TCA9534.xcodeproj; path = drivers/TCA9534/TCA9534.xcodeproj; sourceTree = "<group>"; };
+		2EAB0A842DAC2B12008BC701 /* QwiicButton.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = QwiicButton.xcodeproj; path = drivers/QwiicButton/QwiicButton.xcodeproj; sourceTree = "<group>"; };
+		2EAB0AA42DAC2DB4008BC701 /* VELM6030.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VELM6030.hpp; sourceTree = "<group>"; };
+		2EAB0AA52DAC2DB4008BC701 /* VELM6030.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VELM6030.cpp; sourceTree = "<group>"; };
+		2EAB0AA62DAC2DB4008BC701 /* VELM6030_Device.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VELM6030_Device.hpp; sourceTree = "<group>"; };
+		2EAB0AA72DAC2DB4008BC701 /* VELM6030_Device.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VELM6030_Device.cpp; sourceTree = "<group>"; };
+		2EAB0ACE2DAC3071008BC701 /* QWIIC_RELAY.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = QWIIC_RELAY.xcodeproj; path = drivers/QWIIC_RELAY/QWIIC_RELAY.xcodeproj; sourceTree = "<group>"; };
+		2EAB0ADC2DAC320D008BC701 /* ADS1115.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ADS1115.xcodeproj; path = drivers/ADS1115/ADS1115.xcodeproj; sourceTree = "<group>"; };
+		2EAB0B1E2DB0388C008BC701 /* PCA9536.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PCA9536.xcodeproj; path = drivers/PCA9536/PCA9536.xcodeproj; sourceTree = "<group>"; };
+		2EAB0B442DB0862F008BC701 /* notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = notes.txt; path = Notes/notes.txt; sourceTree = "<group>"; };
+		2EAB537E2CFE46F000F8B585 /* pIoTServer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pIoTServer; sourceTree = BUILT_PRODUCTS_DIR; };
+		2EAB538A2CFE474900F8B585 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		2EAB538B2CFE474900F8B585 /* ServerCmdValidators.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ServerCmdValidators.hpp; sourceTree = "<group>"; };
+		2EAB538D2CFE474900F8B585 /* ServerNouns.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ServerNouns.cpp; sourceTree = "<group>"; };
+		2EAB53922CFE476500F8B585 /* CommonDefs.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CommonDefs.hpp; sourceTree = "<group>"; };
+		2EAB53932CFE476500F8B585 /* date.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = date.h; sourceTree = "<group>"; };
+		2EAB53942CFE476500F8B585 /* hash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hash.h; sourceTree = "<group>"; };
+		2EAB53952CFE476500F8B585 /* hmac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hmac.h; sourceTree = "<group>"; };
+		2EAB539B2CFE476500F8B585 /* REST_URL.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = REST_URL.hpp; sourceTree = "<group>"; };
+		2EAB539C2CFE476500F8B585 /* REST_URL.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = REST_URL.cpp; sourceTree = "<group>"; };
+		2EAB539D2CFE476500F8B585 /* RESTServerConnection.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RESTServerConnection.hpp; sourceTree = "<group>"; };
+		2EAB539E2CFE476500F8B585 /* RESTServerConnection.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RESTServerConnection.cpp; sourceTree = "<group>"; };
+		2EAB539F2CFE476500F8B585 /* RESTutils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RESTutils.hpp; sourceTree = "<group>"; };
+		2EAB53A02CFE476500F8B585 /* RESTutils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RESTutils.cpp; sourceTree = "<group>"; };
+		2EAB53A12CFE476500F8B585 /* ServerCmdQueue.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ServerCmdQueue.hpp; sourceTree = "<group>"; };
+		2EAB53A22CFE476500F8B585 /* ServerCmdQueue.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ServerCmdQueue.cpp; sourceTree = "<group>"; };
+		2EAB53A32CFE476500F8B585 /* sha256.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sha256.h; sourceTree = "<group>"; };
+		2EAB53A42CFE476500F8B585 /* sha256.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sha256.cpp; sourceTree = "<group>"; };
+		2EAB53A52CFE476500F8B585 /* TCPClientInfo.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TCPClientInfo.hpp; sourceTree = "<group>"; };
+		2EAB53A62CFE476500F8B585 /* TCPClientInfo.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TCPClientInfo.cpp; sourceTree = "<group>"; };
+		2EAB53AB2CFE476500F8B585 /* Utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Utils.hpp; sourceTree = "<group>"; };
+		2EAB53AC2CFE476500F8B585 /* yuarel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = yuarel.h; sourceTree = "<group>"; };
+		2EAB53AD2CFE476500F8B585 /* yuarel.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = yuarel.c; sourceTree = "<group>"; };
+		2EAB53BF2CFE500100F8B585 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		2EAB53C72CFE5F0200F8B585 /* pIoTServerMgrCommon.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pIoTServerMgrCommon.hpp; sourceTree = "<group>"; };
+		2EAB53C82CFE5FAE00F8B585 /* pIoTServerMgr.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pIoTServerMgr.hpp; sourceTree = "<group>"; };
+		2EAB53C92CFE5FAE00F8B585 /* pIoTServerMgr.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pIoTServerMgr.cpp; sourceTree = "<group>"; };
+		2EAB53D42CFE799100F8B585 /* pIoTServerDB.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pIoTServerDB.hpp; sourceTree = "<group>"; };
+		2EAB53D52CFE799100F8B585 /* pIoTServerDB.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pIoTServerDB.cpp; sourceTree = "<group>"; };
+		2EAB53DD2CFE81EB00F8B585 /* pIoTServerAPISecretMgr.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pIoTServerAPISecretMgr.hpp; sourceTree = "<group>"; };
+		2EAB53DE2CFE81EB00F8B585 /* pIoTServerAPISecretMgr.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pIoTServerAPISecretMgr.cpp; sourceTree = "<group>"; };
+		2EAB53E62D0360E700F8B585 /* timespec_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = timespec_util.h; sourceTree = "<group>"; };
+		2EAB53E82D0377EE00F8B585 /* PropValKeys.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PropValKeys.hpp; sourceTree = "<group>"; };
+		2EAB53F52D04F14800F8B585 /* I2C.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = I2C.hpp; sourceTree = "<group>"; };
+		2EAB53F62D04F14800F8B585 /* I2C.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = I2C.cpp; sourceTree = "<group>"; };
+		2ECA50072D30536600565C13 /* ServerNouns.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ServerNouns.hpp; sourceTree = "<group>"; };
+		2ECA50112D308AA000565C13 /* Action.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Action.cpp; sourceTree = "<group>"; };
+		2ECA50132D308AA000565C13 /* EventTrigger.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EventTrigger.cpp; sourceTree = "<group>"; };
+		2ECA50142D308AA000565C13 /* EventAction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EventAction.hpp; sourceTree = "<group>"; };
+		2EF963C12D7637AC00F9FA19 /* exprtk.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = exprtk.hpp; sourceTree = "<group>"; };
+		2EF964372D8C6B9000F9FA19 /* piotserver.props.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = piotserver.props.json; sourceTree = "<group>"; };
+		2EF964382D8C6B9000F9FA19 /* sprinkler.piotserver.props.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sprinkler.piotserver.props.json; sourceTree = "<group>"; };
+		2EF964392D8C6B9000F9FA19 /* test.piotserver.props.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = test.piotserver.props.json; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2EAB537B2CFE46F000F8B585 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2EAB0B332DB038DE008BC701 /* PCA9536.dylib in Frameworks */,
+				2EAB0A8A2DAC2B28008BC701 /* QwiicButton.dylib in Frameworks */,
+				2EAB0AD42DAC307B008BC701 /* QWIIC_RELAY.dylib in Frameworks */,
+				2EAB0A7A2DAC29FE008BC701 /* TCA9534.dylib in Frameworks */,
+				2EAB0A722DAC2971008BC701 /* PCA9671.dylib in Frameworks */,
+				2EAB0A6A2DAC28D8008BC701 /* MCP3427.dylib in Frameworks */,
+				2EAB0A622DAC280D008BC701 /* BME280.dylib in Frameworks */,
+				2EAB0A592DAC2724008BC701 /* SHT30.dylib in Frameworks */,
+				2EAB0A582DAC271F008BC701 /* MCP23008.dylib in Frameworks */,
+				2EAB0A412DAC2555008BC701 /* SHT25.dylib in Frameworks */,
+				2E4129102DAC116C00D90924 /* TMP10X.dylib in Frameworks */,
+				2EAB53C02CFE500100F8B585 /* libsqlite3.tbd in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2E3FB4EB2D0B9C18006171E7 /* Notes */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB0B442DB0862F008BC701 /* notes.txt */,
+				2E3FB4EC2D0B9C57006171E7 /* CMakeLists.txt */,
+				2E3FB4ED2D0B9C57006171E7 /* Dockerfile */,
+				2E3FB4EE2D0B9C57006171E7 /* Dockerfile_cpp */,
+				2EA8AFE02D4C1D930007CFB9 /* docker-compose.yml */,
+			);
+			name = Notes;
+			sourceTree = "<group>";
+		};
+		2E3FB5522D1CBE5F006171E7 /* macincludes */ = {
+			isa = PBXGroup;
+			children = (
+				2E3FB5502D1CBE5F006171E7 /* macos_gpiod.h */,
+				2E3FB5512D1CBE5F006171E7 /* macos_gpiod.cpp */,
+			);
+			path = macincludes;
+			sourceTree = "<group>";
+		};
+		2E3FB5532D1CBE5F006171E7 /* macstuff */ = {
+			isa = PBXGroup;
+			children = (
+				2E3FB5522D1CBE5F006171E7 /* macincludes */,
+			);
+			path = macstuff;
+			sourceTree = "<group>";
+		};
+		2E41292E2DAC1EF200D90924 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2EAB0A442DAC26F4008BC701 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2EAB0A4D2DAC2701008BC701 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB0A512DAC2701008BC701 /* SHT30.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2EAB0A532DAC270A008BC701 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB0A572DAC270B008BC701 /* MCP23008.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2EAB0A5D2DAC2804008BC701 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB0A612DAC2804008BC701 /* BME280.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2EAB0A652DAC28C6008BC701 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB0A692DAC28C6008BC701 /* MCP3427.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2EAB0A6D2DAC2964008BC701 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB0A712DAC2964008BC701 /* PCA9671.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2EAB0A752DAC29F6008BC701 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB0A792DAC29F6008BC701 /* TCA9534.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2EAB0A852DAC2B12008BC701 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB0A892DAC2B12008BC701 /* QwiicButton.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2EAB0ACF2DAC3071008BC701 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB0AD32DAC3071008BC701 /* QWIIC_RELAY.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2EAB0ADD2DAC320D008BC701 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB0AE12DAC320D008BC701 /* ADS1115.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2EAB0B1F2DB0388C008BC701 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB0B322DB038DE008BC701 /* PCA9536.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2EAB53752CFE46F000F8B585 = {
+			isa = PBXGroup;
+			children = (
+				2EAB0A642DAC28C6008BC701 /* MCP3427.xcodeproj */,
+				2EAB0A522DAC270A008BC701 /* MCP23008.xcodeproj */,
+				2EAB0A4C2DAC2701008BC701 /* SHT30.xcodeproj */,
+				2EAB0A3A2DAC252C008BC701 /* SHT25.xcodeproj */,
+				2E4129192DAC137F00D90924 /* TMP10X.xcodeproj */,
+				2EAB0A5C2DAC2804008BC701 /* BME280.xcodeproj */,
+				2EAB0A6C2DAC2964008BC701 /* PCA9671.xcodeproj */,
+				2EAB0A742DAC29F6008BC701 /* TCA9534.xcodeproj */,
+				2EAB0A842DAC2B12008BC701 /* QwiicButton.xcodeproj */,
+				2EAB0ACE2DAC3071008BC701 /* QWIIC_RELAY.xcodeproj */,
+				2EAB0ADC2DAC320D008BC701 /* ADS1115.xcodeproj */,
+				2EAB0B1E2DB0388C008BC701 /* PCA9536.xcodeproj */,
+				2E3FB4EB2D0B9C18006171E7 /* Notes */,
+				2EAB53D82CFE7DE700F8B585 /* assets */,
+				2EAB538E2CFE474900F8B585 /* src */,
+				2E3FB5532D1CBE5F006171E7 /* macstuff */,
+				2EAB53BE2CFE500100F8B585 /* Frameworks */,
+				2EAB537F2CFE46F000F8B585 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2EAB537F2CFE46F000F8B585 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB537E2CFE46F000F8B585 /* pIoTServer */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2EAB538E2CFE474900F8B585 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				2EF963FB2D860F6700F9FA19 /* Devices */,
+				2EAB538A2CFE474900F8B585 /* main.cpp */,
+				2EAB538B2CFE474900F8B585 /* ServerCmdValidators.hpp */,
+				2EAB538D2CFE474900F8B585 /* ServerNouns.cpp */,
+				2ECA50072D30536600565C13 /* ServerNouns.hpp */,
+				2EAB53E82D0377EE00F8B585 /* PropValKeys.hpp */,
+				2EAB53DD2CFE81EB00F8B585 /* pIoTServerAPISecretMgr.hpp */,
+				2EAB53DE2CFE81EB00F8B585 /* pIoTServerAPISecretMgr.cpp */,
+				2EAB53C82CFE5FAE00F8B585 /* pIoTServerMgr.hpp */,
+				2EAB53C92CFE5FAE00F8B585 /* pIoTServerMgr.cpp */,
+				2EAB53D42CFE799100F8B585 /* pIoTServerDB.hpp */,
+				2EAB53D52CFE799100F8B585 /* pIoTServerDB.cpp */,
+				2E5B76392D3977CD00FDEFF7 /* pIoTServerEvaluator.hpp */,
+				2E5B763A2D3977CD00FDEFF7 /* pIoTServerEvaluator.cpp */,
+				2ECA50142D308AA000565C13 /* EventAction.hpp */,
+				2ECA50132D308AA000565C13 /* EventTrigger.cpp */,
+				2ECA50112D308AA000565C13 /* Action.cpp */,
+				2E2008372D5E93DD007A01F8 /* Sequence.hpp */,
+				2E2008382D5E93DD007A01F8 /* Sequence.cpp */,
+				2EAB53C72CFE5F0200F8B585 /* pIoTServerMgrCommon.hpp */,
+				2E3FB5932D24A9BF006171E7 /* pIoTServerSchema.hpp */,
+				2E3FB5202D1205AE006171E7 /* SolarTimeMgr.hpp */,
+				2E3FB5212D1205AE006171E7 /* SolarTimeMgr.cpp */,
+				2E2008552D663AB4007A01F8 /* lunar.hpp */,
+				2E2008562D663AB4007A01F8 /* lunar.cpp */,
+				2E3FB51D2D120575006171E7 /* sunset.h */,
+				2E3FB51E2D120575006171E7 /* sunset.cpp */,
+				2EAB53E62D0360E700F8B585 /* timespec_util.h */,
+				2E3FB5342D135CF7006171E7 /* base64.hpp */,
+				2E3FB5352D135CF7006171E7 /* base64.cpp */,
+				2EF963C12D7637AC00F9FA19 /* exprtk.hpp */,
+				2E362E612D46A782007CC10F /* croncpp.hpp */,
+				2EAB53922CFE476500F8B585 /* CommonDefs.hpp */,
+				2EAB53932CFE476500F8B585 /* date.h */,
+				2EAB53942CFE476500F8B585 /* hash.h */,
+				2EAB53952CFE476500F8B585 /* hmac.h */,
+				2EAB539B2CFE476500F8B585 /* REST_URL.hpp */,
+				2EAB539C2CFE476500F8B585 /* REST_URL.cpp */,
+				2EAB539D2CFE476500F8B585 /* RESTServerConnection.hpp */,
+				2EAB539E2CFE476500F8B585 /* RESTServerConnection.cpp */,
+				2EAB539F2CFE476500F8B585 /* RESTutils.hpp */,
+				2EAB53A02CFE476500F8B585 /* RESTutils.cpp */,
+				2EAB53A12CFE476500F8B585 /* ServerCmdQueue.hpp */,
+				2EAB53A22CFE476500F8B585 /* ServerCmdQueue.cpp */,
+				2EAB53A32CFE476500F8B585 /* sha256.h */,
+				2EAB53A42CFE476500F8B585 /* sha256.cpp */,
+				2EAB53A52CFE476500F8B585 /* TCPClientInfo.hpp */,
+				2EAB53A62CFE476500F8B585 /* TCPClientInfo.cpp */,
+				2EAB53AB2CFE476500F8B585 /* Utils.hpp */,
+				2E53F9302D59507B0001D619 /* http_parser.h */,
+				2E53F9312D59507B0001D619 /* http_parser.c */,
+				2E53F9352D59507B0001D619 /* TCPServer.hpp */,
+				2E53F9362D59507B0001D619 /* TCPServer.cpp */,
+				2E53F9372D59507B0001D619 /* TimeStamp.hpp */,
+				2E53F9382D59507B0001D619 /* TimeStamp.cpp */,
+				2E53F92D2D5950550001D619 /* LogMgr.hpp */,
+				2E53F92E2D5950550001D619 /* LogMgr.cpp */,
+				2E53F9322D59507B0001D619 /* json.hpp */,
+				2EAB53AC2CFE476500F8B585 /* yuarel.h */,
+				2EAB53AD2CFE476500F8B585 /* yuarel.c */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		2EAB53BE2CFE500100F8B585 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB0A402DAC2555008BC701 /* SHT25.dylib */,
+				2E41290F2DAC116C00D90924 /* TMP10X.dylib */,
+				2E3FB4E72D0B972E006171E7 /* libcurl.tbd */,
+				2EAB53BF2CFE500100F8B585 /* libsqlite3.tbd */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		2EAB53D82CFE7DE700F8B585 /* assets */ = {
+			isa = PBXGroup;
+			children = (
+				2EF964372D8C6B9000F9FA19 /* piotserver.props.json */,
+				2EF964382D8C6B9000F9FA19 /* sprinkler.piotserver.props.json */,
+				2E4128252DA4689500D90924 /* sprinkler1.piotserver.props.json */,
+				2EF964392D8C6B9000F9FA19 /* test.piotserver.props.json */,
+			);
+			path = assets;
+			sourceTree = "<group>";
+		};
+		2EF963FB2D860F6700F9FA19 /* Devices */ = {
+			isa = PBXGroup;
+			children = (
+				2EAB53F52D04F14800F8B585 /* I2C.hpp */,
+				2EAB53F62D04F14800F8B585 /* I2C.cpp */,
+				2E3FB56C2D207C53006171E7 /* pIoTServerDevice.hpp */,
+				2E3FB5AE2D2899CF006171E7 /* RPi_RelayBoardDevice.hpp */,
+				2E3FB5AF2D2899CF006171E7 /* RPi_RelayBoardDevice.cpp */,
+				2E3FB55F2D1DF69A006171E7 /* GPIO.hpp */,
+				2E3FB5602D1DF69A006171E7 /* GPIO.cpp */,
+				2E4128372DA735E100D90924 /* Sprinkler_Device.hpp */,
+				2E4128382DA735E100D90924 /* Sprinkler_Device.cpp */,
+				2E2008582D664982007A01F8 /* Actuator_Device.hpp */,
+				2E2008592D664982007A01F8 /* Actuator_Device.cpp */,
+				2E4128332DA6B13000D90924 /* TankDepth_Device.hpp */,
+				2E4128342DA6B13000D90924 /* TankDepth_Device.cpp */,
+				2E41282C2DA5D4EB00D90924 /* ADS1115.hpp */,
+				2E41282D2DA5D4EB00D90924 /* ADS1115.cpp */,
+				2EAB0AA42DAC2DB4008BC701 /* VELM6030.hpp */,
+				2EAB0AA52DAC2DB4008BC701 /* VELM6030.cpp */,
+				2EAB0AA62DAC2DB4008BC701 /* VELM6030_Device.hpp */,
+				2EAB0AA72DAC2DB4008BC701 /* VELM6030_Device.cpp */,
+				2E3FB57B2D21E9A1006171E7 /* W1_Device.hpp */,
+				2E3FB57C2D21E9A1006171E7 /* W1_Device.cpp */,
+			);
+			name = Devices;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2EAB537D2CFE46F000F8B585 /* pIoTServer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2EAB53852CFE46F000F8B585 /* Build configuration list for PBXNativeTarget "pIoTServer" */;
+			buildPhases = (
+				2EAB537A2CFE46F000F8B585 /* Sources */,
+				2EAB537B2CFE46F000F8B585 /* Frameworks */,
+				2EAB537C2CFE46F000F8B585 /* CopyFiles */,
+				2E4128C52DAB032500D90924 /* CopyFiles */,
+				2EAB0AD62DAC307B008BC701 /* Embed Libraries */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = pIoTServer;
+			packageProductDependencies = (
+			);
+			productName = piServer;
+			productReference = 2EAB537E2CFE46F000F8B585 /* pIoTServer */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2EAB53762CFE46F000F8B585 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1610;
+				TargetAttributes = {
+					2EAB537D2CFE46F000F8B585 = {
+						CreatedOnToolsVersion = 16.1;
+					};
+				};
+			};
+			buildConfigurationList = 2EAB53792CFE46F000F8B585 /* Build configuration list for PBXProject "pIoTServer" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 2EAB53752CFE46F000F8B585;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 2EAB537F2CFE46F000F8B585 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 2EAB0ADD2DAC320D008BC701 /* Products */;
+					ProjectRef = 2EAB0ADC2DAC320D008BC701 /* ADS1115.xcodeproj */;
+				},
+				{
+					ProductGroup = 2EAB0A5D2DAC2804008BC701 /* Products */;
+					ProjectRef = 2EAB0A5C2DAC2804008BC701 /* BME280.xcodeproj */;
+				},
+				{
+					ProductGroup = 2EAB0A532DAC270A008BC701 /* Products */;
+					ProjectRef = 2EAB0A522DAC270A008BC701 /* MCP23008.xcodeproj */;
+				},
+				{
+					ProductGroup = 2EAB0A652DAC28C6008BC701 /* Products */;
+					ProjectRef = 2EAB0A642DAC28C6008BC701 /* MCP3427.xcodeproj */;
+				},
+				{
+					ProductGroup = 2EAB0B1F2DB0388C008BC701 /* Products */;
+					ProjectRef = 2EAB0B1E2DB0388C008BC701 /* PCA9536.xcodeproj */;
+				},
+				{
+					ProductGroup = 2EAB0A6D2DAC2964008BC701 /* Products */;
+					ProjectRef = 2EAB0A6C2DAC2964008BC701 /* PCA9671.xcodeproj */;
+				},
+				{
+					ProductGroup = 2EAB0ACF2DAC3071008BC701 /* Products */;
+					ProjectRef = 2EAB0ACE2DAC3071008BC701 /* QWIIC_RELAY.xcodeproj */;
+				},
+				{
+					ProductGroup = 2EAB0A852DAC2B12008BC701 /* Products */;
+					ProjectRef = 2EAB0A842DAC2B12008BC701 /* QwiicButton.xcodeproj */;
+				},
+				{
+					ProductGroup = 2EAB0A442DAC26F4008BC701 /* Products */;
+					ProjectRef = 2EAB0A3A2DAC252C008BC701 /* SHT25.xcodeproj */;
+				},
+				{
+					ProductGroup = 2EAB0A4D2DAC2701008BC701 /* Products */;
+					ProjectRef = 2EAB0A4C2DAC2701008BC701 /* SHT30.xcodeproj */;
+				},
+				{
+					ProductGroup = 2EAB0A752DAC29F6008BC701 /* Products */;
+					ProjectRef = 2EAB0A742DAC29F6008BC701 /* TCA9534.xcodeproj */;
+				},
+				{
+					ProductGroup = 2E41292E2DAC1EF200D90924 /* Products */;
+					ProjectRef = 2E4129192DAC137F00D90924 /* TMP10X.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				2EAB537D2CFE46F000F8B585 /* pIoTServer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		2EAB0A512DAC2701008BC701 /* SHT30.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = SHT30.dylib;
+			remoteRef = 2EAB0A502DAC2701008BC701 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2EAB0A572DAC270B008BC701 /* MCP23008.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = MCP23008.dylib;
+			remoteRef = 2EAB0A562DAC270B008BC701 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2EAB0A612DAC2804008BC701 /* BME280.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = BME280.dylib;
+			remoteRef = 2EAB0A602DAC2804008BC701 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2EAB0A692DAC28C6008BC701 /* MCP3427.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = MCP3427.dylib;
+			remoteRef = 2EAB0A682DAC28C6008BC701 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2EAB0A712DAC2964008BC701 /* PCA9671.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = PCA9671.dylib;
+			remoteRef = 2EAB0A702DAC2964008BC701 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2EAB0A792DAC29F6008BC701 /* TCA9534.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = TCA9534.dylib;
+			remoteRef = 2EAB0A782DAC29F6008BC701 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2EAB0A892DAC2B12008BC701 /* QwiicButton.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = QwiicButton.dylib;
+			remoteRef = 2EAB0A882DAC2B12008BC701 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2EAB0AD32DAC3071008BC701 /* QWIIC_RELAY.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = QWIIC_RELAY.dylib;
+			remoteRef = 2EAB0AD22DAC3071008BC701 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2EAB0AE12DAC320D008BC701 /* ADS1115.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = ADS1115.dylib;
+			remoteRef = 2EAB0AE02DAC320D008BC701 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2EAB0B322DB038DE008BC701 /* PCA9536.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = PCA9536.dylib;
+			remoteRef = 2EAB0B312DB038DE008BC701 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2EAB537A2CFE46F000F8B585 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2EAB53D62CFE799100F8B585 /* pIoTServerDB.cpp in Sources */,
+				2EAB53AF2CFE476500F8B585 /* RESTServerConnection.cpp in Sources */,
+				2E3FB5B02D2899CF006171E7 /* RPi_RelayBoardDevice.cpp in Sources */,
+				2E2008572D663AB4007A01F8 /* lunar.cpp in Sources */,
+				2EAB53B02CFE476500F8B585 /* RESTutils.cpp in Sources */,
+				2E3FB57D2D21E9A1006171E7 /* W1_Device.cpp in Sources */,
+				2E2008392D5E93DD007A01F8 /* Sequence.cpp in Sources */,
+				2E20085A2D664982007A01F8 /* Actuator_Device.cpp in Sources */,
+				2E4128352DA6B13000D90924 /* TankDepth_Device.cpp in Sources */,
+				2EAB53B32CFE476500F8B585 /* yuarel.c in Sources */,
+				2E3FB5542D1CBE5F006171E7 /* macos_gpiod.cpp in Sources */,
+				2E53F92F2D5950550001D619 /* LogMgr.cpp in Sources */,
+				2EAB53CA2CFE5FAE00F8B585 /* pIoTServerMgr.cpp in Sources */,
+				2EAB53B42CFE476500F8B585 /* sha256.cpp in Sources */,
+				2EAB53DF2CFE81EB00F8B585 /* pIoTServerAPISecretMgr.cpp in Sources */,
+				2E3FB5222D1205AE006171E7 /* SolarTimeMgr.cpp in Sources */,
+				2EAB53B62CFE476500F8B585 /* TCPClientInfo.cpp in Sources */,
+				2EAB53B72CFE476500F8B585 /* REST_URL.cpp in Sources */,
+				2E3FB5612D1DF69A006171E7 /* GPIO.cpp in Sources */,
+				2E4128392DA735E100D90924 /* Sprinkler_Device.cpp in Sources */,
+				2E41282E2DA5D4EB00D90924 /* ADS1115.cpp in Sources */,
+				2EAB53F72D04F14800F8B585 /* I2C.cpp in Sources */,
+				2EAB53B92CFE476500F8B585 /* ServerCmdQueue.cpp in Sources */,
+				2EAB53902CFE474900F8B585 /* ServerNouns.cpp in Sources */,
+				2E3FB5362D135CF7006171E7 /* base64.cpp in Sources */,
+				2EAB53912CFE474900F8B585 /* main.cpp in Sources */,
+				2ECA50152D308AA000565C13 /* EventTrigger.cpp in Sources */,
+				2EAB0AA82DAC2DB4008BC701 /* VELM6030.cpp in Sources */,
+				2EAB0AA92DAC2DB4008BC701 /* VELM6030_Device.cpp in Sources */,
+				2E53F9402D59507B0001D619 /* TCPServer.cpp in Sources */,
+				2E53F9412D59507B0001D619 /* http_parser.c in Sources */,
+				2E53F9422D59507B0001D619 /* TimeStamp.cpp in Sources */,
+				2ECA50162D308AA000565C13 /* Action.cpp in Sources */,
+				2E3FB51F2D120575006171E7 /* sunset.cpp in Sources */,
+				2E5B763B2D3977CD00FDEFF7 /* pIoTServerEvaluator.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2EAB53832CFE46F000F8B585 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = c17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		2EAB53842CFE46F000F8B585 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = c17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		2EAB53862CFE46F000F8B585 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++23";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = assets/piotserver.props.json;
+				DEVELOPMENT_TEAM = PDXWT4JFG9;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_WARN_PEDANTIC = YES;
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/macstuff/macincludes";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		2EAB53872CFE46F000F8B585 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++23";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = assets/piotserver.props.json;
+				DEVELOPMENT_TEAM = PDXWT4JFG9;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_WARN_PEDANTIC = YES;
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/macstuff/macincludes";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2EAB53792CFE46F000F8B585 /* Build configuration list for PBXProject "pIoTServer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2EAB53832CFE46F000F8B585 /* Debug */,
+				2EAB53842CFE46F000F8B585 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2EAB53852CFE46F000F8B585 /* Build configuration list for PBXNativeTarget "pIoTServer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2EAB53862CFE46F000F8B585 /* Debug */,
+				2EAB53872CFE46F000F8B585 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2EAB53762CFE46F000F8B585 /* Project object */;
+}

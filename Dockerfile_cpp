@@ -1,0 +1,24 @@
+FROM dtcooper/raspberrypi-os:bookworm
+VOLUME "/project1"
+
+WORKDIR "/project1"
+ 
+
+RUN apt-get update \
+   && apt-get -y --no-install-recommends install \
+        clang-19 clang++-19  \
+        build-essential \
+       cmake \
+        git-core \
+        sqlite3 \
+        libsqlite3-dev \
+        i2c-tools \
+        gpiod \
+        libgpiod-dev \
+        curl \
+    libcurl4-openssl-dev \
+        nano \
+   && rm -rf /var/lib/apt/lists/*  \
+   && update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 100 \
+   && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100
+

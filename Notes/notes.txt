@@ -1,0 +1,251 @@
+
+#setup pi
+ 
+sudo nano /etc/hostname
+
+sudo apt update  
+sudo apt-get upgrade  
+sudo raspi-config
+ 
+mkdir ~/.ssh 
+cd .ssh  
+cat > ~/.ssh/id_ed25519.pub
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL+njR6G/woViJprLyxjXZyEaF37ZyYwIxs4IBzkRWyO
+mv ~/.ssh/id_ed25519.pub ~/.ssh/authorized_keys  
+
+cd ~ && chmod 600 ~/.ssh/* && chmod 700 ~/.ssh && chmod 644 ~/.ssh/*.pub
+logout
+
+#sudo apt install -y clang --install-suggests
+
+sudo apt-get install clang-19
+sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 100
+sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100
+
+sudo update-alternatives --config clang
+sudo update-alternatives --config clang++
+
+clang --version
+clang++ --version
+
+
+sudo apt install -y cmake
+sudo apt install -y htop
+sudo apt-get install -y i2c-tools  
+sudo apt-get install -y  git-core
+sudo apt-get install -y  sqlite3  
+sudo apt-get install -y  libsqlite3-dev
+ 
+
+
+ sudo apt install rpi-connect
+ 
+------------------------------
+ #docker
+ 
+ sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+# Add the repository to Apt sources:
+echo   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+$(. /etc/os-release && echo "$VERSION_CODENAME") stable" |   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo usermod -aG docker $USER
+logout
+
+docker version
+docker compose version
+sudo docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer-ce
+
+------------------------------------------------------------------------------
+
+  raspberry pi connect
+ 
+ https://connect.raspberrypi.com/devices
+ rpi-connect on
+ 
+
+
+-------------
+
+
+sudo apt-get install gpiod libgpiod-dev
+pinctrl set 4 op
+pinctrl  set 4 dh
+pinctrl  set 4 dl
+
+
+-----------
+
+sudo apt-get install libcurl4-openssl-dev
+
+scp -r /Users/vinnie/Desktop/projects/pIoTServer vinnie@royal2:
+
+ rsync -av --exclude='.git' --exclude='*.xcodeproj' --exclude='*.DS_Store'  /Users/vinnie/Desktop/projects/pIoTServer  vinnie@royal2:
+
+docker build -f Dockerfile_cpp -t cpp-build-base:0.1.0 .
+docker build --no-cache . -t piotserver:1.0.0
+docker run -d --name=pIoTServer --rm -p 8081:8081 --device /dev/i2c-1  -it pIoTServer:1.0.0
+ 
+// devices:
+//  - "/dev/i2c-1:/dev/i2c-1"  
+
+
+
+docker exec -it piotserver:1.0.0 /bin/bash
+
+Dockerfile_cpp
+----
+FROM alpine:latest
+
+VOLUME "/project"
+
+WORKDIR "/project"
+
+RUN apk update && \
+    apk upgrade && \
+    apk --update add \
+    clang \
+    clang-dev \
+    alpine-sdk \
+    dpkg \
+    cmake \
+    ccache \
+        bash \
+        && \
+    rm -rf /var/cache/apk/*
+
+
+docker run -d -it -p 1880:1880 -v node_red_data:/data --name mynodered nodered/node-red
+
+
+---
+
+ 
+FROM dtcooper/raspberrypi-os:bookworm
+
+
+GPIO PINS used
+
+ 4   -  dtoverlay=w1-gpio,gpiopin=4
+ 
+ 5
+ 6
+13
+16
+19
+20
+21
+26
+
+
+14  UART TX
+15  UART RX
+18  PCM CLK
+
+10  MOSI
+9   MISO
+11  SCLK
+
+free
+
+17
+27
+22
+23
+24
+0
+25
+8
+7
+1
+
+
+sudo i2cdetect -y 1
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- --
+10: 10 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+20: 20 -- -- -- -- -- -- 27 -- -- -- -- -- -- -- --
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+40: -- -- -- -- -- -- -- -- 48 49 -- -- -- -- -- --
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+60: -- -- -- -- -- -- -- -- 68 -- -- -- -- -- 6e --
+70: -- -- -- -- -- -- -- 77
+
+
+https://libgpiod-dlang.dpldocs.info/gpiod.html
+
+https://github.com/sparkfun/SparkFun_Ambient_Light_Sensor_Arduino_Library
+
+----------------
+
+rsync -q -av --exclude='.git' --exclude='*.xcodeproj' --exclude='*.DS_Store'  /Users/vinnie/Desktop/projects/piotserver  vinnie@royal2:
+
+cmake .
+make
+./piotserver  -d  -p -f assets
+
+nohup ./piotserver  -d  -p -f assets  &
+
+ 
+-----------
+
+ rsync -av --exclude='.git' --exclude='*.xcodeproj' --exclude='*.DS_Store'  /Users/vinnie/Desktop/projects/piotserver  vinnie@royal2:
+ 
+docker build -f Dockerfile_cpp -t cpp-build-base:0.1.0 .
+
+docker build --no-cache . -t piotserver:1.1.0
+
+docker run  --name=piotserver --rm  -v ~/piotserver/assets:/assets -p 8081:8081 --device /dev/i2c-1 --device /dev/gpiochip0  -it piotserver:1.0.0 ./piotserver -d -p -f assets
+
+docker compose up -d
+docker compose stop piotserver
+
+-------
+
+---
+cloudflare  docker-compose.yml
+name: cloudflare
+services:
+  cloudflare:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-tunnel
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=eyJhIjoiNDg0NTE3MjQ2ZTcyYjMwMGQ4MTA2ZjRhMjVkZGQ1ZGMiLCJ0IjoiZGIzYWFlYzItYWY3ZC00YzlhLTlmMzYtMjI3MDljYTBlYTE1IiwicyI6Ik5ETTNNbU0wTkdFdE9UVmxPUzAwTURJMkxXSTVPRFV0WlRreFlUaGpPVFF4WWpneCJ9
+    tmpfs:
+      - /var/log
+------
+
+
+
+sudo apt-get install clang-19
+sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 100
+sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100
+
+sudo update-alternatives --config clang
+sudo update-alternatives --config clang++
+
+clang --version
+clang++ --version
+
+
+--
+
+ln -s /usr/bin/clang-19 /usr/bin/clang
+ln -s /usr/bin/clang++-19 /usr/bin/clang++
+
+
+
+sudo service piotserver start # start the service
+sudo service piotserver stop # stop the service
+sudo service piotserver restart # restart the service
+sudo service piotserver status # check service status
+
+
+read gpio state
+pinctrl get 22
+22: ip    -- | hi // GPIO22 = input

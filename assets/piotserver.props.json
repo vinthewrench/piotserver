@@ -1,0 +1,405 @@
+{
+    "config": {
+        "access_keys": {},
+        "description": "The Raspbery Pi Irrigation System",
+        "lat_long": "34.465382, -93.362540",
+        "name": "Garden Irrigation"
+    },
+    "devices": [
+        {
+            "address": "0x48",
+            "data_type": "TEMPERATURE",
+            "device_type": "TMP10X",
+            "interval": 30,
+            "key": "TEMP 48",
+            "title": "Temperature 48",
+            "tracking": "track.range"
+        },
+        {
+            "address": "0x4E",
+            "data_type": "TEMPERATURE",
+            "device_type": "TMP10X",
+            "interval": 30,
+            "key": "TEMP 49",
+            "title": "Temperature 49",
+            "tracking": "track.range"
+        },
+        
+        {
+            "address": "/mnt/1wire/28.793434000000/",
+            "data_type": "TEMPERATURE",
+            "description": "Plot A Soil Temperature",
+             "device_type": "1wire",
+            "interval": 3600,
+            "key": "PLOT1",
+            "title": "Soil Temp Plot A",
+            "tracking": "track.changes"
+        },
+
+        {
+        "address": "/mnt/1wire/28.B9F533000000/",
+        "data_type": "TEMPERATURE",
+        "description": "Plot B Soil Temperature",
+        "device_type": "1wire",
+        "interval": 3600,
+        "key": "PLOT2",
+        "title": "Soil Temp Plot B",
+        "tracking": "track.changes"
+        },
+
+        {
+            "address": "0x44",
+            "description": "Outside Environment Sensor",
+            "device_type": "SHT30",
+            "pins": [
+                {
+                    "data_type": "TEMPERATURE",
+                    "interval": 30,
+                    "key": "GARDEN_TEMPERATURE",
+                    "title": "Garden Temperture",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "HUMIDITY",
+                    "key": "GARDEN_HUMIDITY",
+                    "title": "Garden Humidity",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "SERIAL_NO",
+                    "key": "GARDEN_SERIAL_NO",
+                    "title": "Garden Sensor Serial No",
+                    "tracking": "dont.record"
+                }
+             ],
+            "title": "Garden"
+        },
+        {
+            "address": "0x40",
+            "description": "Walk-In Cooler Environment Sensor",
+            "device_type": "SHT25",
+            "pins": [
+                {
+                    "data_type": "TEMPERATURE",
+                    "interval": 30,
+                    "key": "COOLER_TEMPERATURE",
+                    "title": "Walk-In Cooler Temperture",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "HUMIDITY",
+                    "key": "COOLER_HUMIDITY",
+                    "title": "Walk-In Cooler Humidity",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "SERIAL_NO",
+                    "key": "COOLER_SERIAL_NO",
+                    "title": "Cooler Sensor Serial No",
+                    "tracking": "dont.record"
+                }
+            ]
+        },
+        {
+            "device_type": "MCP23008",
+            "address": "0x20",
+            "title": "NCD Relay+I/O",
+            "interval": 5,
+            "pins": [
+                {
+                    "bit": 0,
+                    "data_type": "BOOL",
+                    "key": "BIG_RELAY",
+                    "title": "Big Relay",
+                    "gpio.mode": "output"
+                },
+                {
+                    "bit": 1,
+                    "data_type": "BOOL",
+                    "key": "BIG_RELAY2",
+                    "title": "Big Relay2",
+                    "gpio.mode": "output"
+                },
+   
+                {
+                    "bit": 7,
+                    "data_type": "BOOL",
+                    "key": "RAIN_SENSOR",
+                    "title": "Orbit Rain Sensor",
+                    "gpio.mode": "input"
+                }
+            ]
+        },
+   
+       {
+           "address": "0x41",
+           "device_type": "PCA9536",
+           "enable": true,
+           "pins": [
+               {
+                   "bit": 0,
+                   "data_type": "BOOL",
+                   "key": "RLY41_CH1",
+                   "title": "Relay 41 CH1",
+                   "gpio.mode": "output"
+               },
+               {
+                   "bit": 1,
+                   "data_type": "BOOL",
+                   "key": "RLY41_CH2",
+                   "title": "Relay 41 CH2",
+                   "gpio.mode": "output"
+               }
+           ]
+       },
+        {
+            "address": "0x49",
+            "data_type": "PERCENT",
+            "device_type": "TANK_DEPTH",
+            "interval": 10,
+            "key": "TANK_DEPTH",
+            "title": "Amount of Water in Tank",
+            "tracking": "track.range",
+            "other.props"     : {
+                "tank.empty" : 7800,
+                "tank.full"  : 15000,
+                "tank.gals" : 2000
+            }
+        },
+        {
+            "device_type": "GPIO",
+            "pins": [
+                {
+                    "BCM": 5,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_1",
+                    "title": "relay 1"
+                },
+                {
+                    "BCM": 6,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_2",
+                    "title": "relay 2"
+                },
+                {
+                    "BCM": 13,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_3",
+                    "title": "relay 3"
+                },
+                {
+                    "BCM": 16,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_4",
+                    "title": "relay 4"
+                },
+                {
+                    "BCM": 19,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_5",
+                    "title": "relay 5"
+                },
+                {
+                    "BCM": 20,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_6",
+                    "title": "relay 6"
+                },
+                {
+                    "BCM": 21,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_7",
+                    "title": "relay 7"
+                },
+                {
+                    "BCM": 26,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_8",
+                    "title": "relay 8"
+                },
+                {
+                    "BCM": 22,
+                    "data_type": "BOOL",
+                    "gpio.flags": "0x20",
+                    "gpio.mode": "input",
+                    "key": "RAIN_SENSOR",
+                    "title": "rain sensor"
+                }
+            ],
+            "title": "RPi Relay Board"
+        },
+        {
+            "device_type": "SPRINKLER",
+            "pins": [
+                {
+                    "key": "SPRK_BOOSTER",
+                    "data_type": "BOOSTER",
+                    "other.props"     : {
+                        "proxy_key": "RELAY_1",
+                         "duration":   5
+                     }
+                },
+
+                {
+                    "key": "SPRK_MASTER",
+                    "data_type": "MASTER_RELAY",
+                    "other.props"     : {
+                        "proxy_key": "BIG_RELAY",
+                        "duration":   4
+                     }
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_1",
+                    "title": "plot A",
+                    "other.props"     : {
+                        "proxy_key": "RELAY_2"
+                     }
+                 },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_2",
+                    "title": "plot B",
+                    "other.props"     : {
+                        "proxy_key": "RELAY_3"
+                    }
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_3",
+                    "title": "plot C",
+                    "other.props"     : {
+                        "proxy_key": "RELAY_4"
+                    }
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_4",
+                    "title": "plot D",
+                    "other.props"     : {
+                        "proxy_key": "RELAY_5"
+                    }
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_5",
+                    "title": "relay 5",
+                    "other.props"     : {
+                        "proxy_key": "RELAY_6"
+                    }
+                    
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_6",
+                    "title": "relay 6",
+                    "other.props"     : {
+                        "proxy_key": "RELAY_7"
+                    }
+                }
+            ]
+        }
+      ],
+    "values": [
+        {
+            
+          "data_type": "INT",
+          "key": "TANK_DEPTH_RAW",
+          "initial.value": 0
+       },
+        {
+          "data_type": "FLOAT",
+          "key": "TANK_DEPTH_GALS",
+          "initial.value": 0
+       }
+
+
+            ],
+    "sequence": [
+        {
+                   "enable": true,
+                   "sequenceID": "1000",
+                   "name": "sprinkler control",
+                   "description": "day to day sprinkler sequence",
+                   "trigger": {
+                       "timeBase": "civil sunrise",
+                       "offset": 10
+                  },
+                   "on_abort":  {
+                       "action": [
+                          {
+                              "cmd": "SET",
+                              "key": "SPRK_1",
+                              "value": "off"
+                          },
+                          {
+                              "cmd": "SET",
+                              "key": "SPRK_2",
+                              "value": "off"
+                          }
+                          ]
+                   },
+                   "steps": [
+                       {
+                           "duration": 10,
+                           "action": [
+                               {
+                                   "cmd": "SET",
+                                   "key": "SPRK_1",
+                                   "value": "on"
+                               }
+                           ]
+                       },
+                       {
+                           "duration": 10,
+                           "action": [
+                               {
+                                   "cmd": "SET",
+                                   "key": "SPRK_1",
+                                   "value": "off"
+                               },
+                               {
+                                   "cmd": "SET",
+                                   "key": "SPRK_2",
+                                   "value": "on"
+                               }
+                           ]
+                       },
+                       {
+                           "duration": 10,
+                           "action": [
+                               {
+                                   "cmd": "SET",
+                                   "key": "SPRK_2",
+                                   "value": "off"
+                               },
+                               {
+                                   "cmd": "SET",
+                                   "key": "SPRK_3",
+                                   "value": "on"
+                               }
+                           ]
+                       },
+                       {
+                           "duration": 10,
+                           "action": [
+                               {
+                                   "cmd": "SET",
+                                   "key": "SPRK_3",
+                                   "value": "off"
+                               }
+                           ]
+                       }
+                      
+                   ]
+               }
+    ]
+}

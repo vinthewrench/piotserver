@@ -1,0 +1,889 @@
+{
+    "config": {
+        "access_keys": {},
+        "description": "The Raspbery Pi Lab Test Unit",
+        "lat_long": "34.46463, -93.36214",
+        
+        
+        "name": "lab test"
+    },
+    "devices": [
+        {
+            "device_type": "QWR_16810",
+             "title": "Qwiic Relay",
+             "pins": [
+                {
+                    "bit": 1,
+                    "data_type": "BOOL",
+                    "key": "QR_1"
+                },
+                {
+                    "bit": 2,
+                    "data_type": "BOOL",
+                    "key": "QR_2"
+                },
+                {
+                    "bit": 3,
+                    "data_type": "BOOL",
+                    "key": "QR_3"
+                },
+                {
+                    "bit": 4,
+                    "data_type": "BOOL",
+                    "key": "QR_4"
+                }
+            ]
+        },
+
+        {
+            "deviceID": 2000,
+            "device_type": "ACTUATOR",
+            
+            "pins": [
+                {
+                    "data_type": "ACTUATOR",
+                    "key": "DOOR_1_STATE",
+                    "read_only": true
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "DOOR_1",
+                    "read_only": false,
+                    "tracking": "ignore"
+                }
+            ],
+            
+            "description": "PA-07 Door Actuator",
+            "title": "Actuator 1",
+            "params" : {
+                "extend" : "RELAY_1",
+                "retract" :"RELAY_2",
+                "duration":   3
+            }
+        },
+        {
+            "address": "28-00000035853d",
+            "data_type": "TEMPERATURE",
+            "description": "Plot A Soil Temperature",
+            "deviceID": 1000,
+            "device_type": "1wire",
+            "interval": 3600,
+            "key": "PLOT1",
+            "title": "Soil Temp Plot A",
+            "tracking": "track.changes"
+        },
+        {
+            "address": "28-0c6cd446749d",
+            "data_type": "TEMPERATURE",
+            "description": "Plot B Soil Temperature",
+            "deviceID": 1001,
+            "device_type": "1wire",
+            "interval": 3600,
+            "key": "PLOT2",
+            "title": "Soil Temp Plot B",
+            "tracking": "track.changes"
+        },
+        {
+            "address": "0x48",
+            "data_type": "TEMPERATURE",
+            "deviceID": 1002,
+            "device_type": "TMP10X",
+            "interval": 30,
+            "key": "INSIDE",
+            "title": "Inside Temperature",
+            "tracking": "track.changes"
+        },
+        {
+            "address": "0x49",
+            "data_type": "TEMPERATURE",
+            "deviceID": 1003,
+            "device_type": "TMP10X",
+            "interval": 15,
+            "key": "OUTSIDE",
+            "title": "Outside Temperature",
+            "tracking": "track.changes"
+        },
+        {
+            "address": "0x77",
+            "description": "Walk-In Cooler Environment Sensor",
+            "deviceID": 1004,
+            "device_type": "BME280",
+            "pins": [
+                {
+                    "data_type": "TEMPERATURE",
+                    "interval": 30,
+                    "key": "COOLER_TEMPERATURE",
+                    "title": "Walk-In Cooler Temperture",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "HUMIDITY",
+                    "key": "COOLER_HUMIDITY",
+                    "title": "Walk-In Cooler Humidity",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "BAROMETRIC",
+                    "key": "COOLER_PRESSURE"
+                }
+            ],
+            "title": "Walk-In Cooler"
+        },
+        {
+            "address": "0x68",
+            "description": "Meyers Creek Pump Tank",
+            "deviceID": 1005,
+            "device_type": "MCP3427",
+            "enable": false,
+            "key": "TANK_DEPTH",
+            "pins": [
+                {
+                    "CH": 1,
+                    "data_type": "VOLTS",
+                    "interval": 60,
+                    "key": "TANK_DEPTH",
+                    "tracking": "track.changes"
+                }
+            ],
+            "title": "Water Tank"
+        },
+        {
+            "address": "0x27",
+            "deviceID": 1006,
+            "device_type": "TCA9534",
+            "enable": false,
+            "pins": [
+                {
+                    "bit": 1,
+                    "data_type": "BOOL",
+                    "key": "TCA_CH1",
+                    "title": "tca 1"
+                },
+                {
+                    "bit": 2,
+                    "data_type": "BOOL",
+                    "key": "TCA_CH2",
+                    "title": "tca 2"
+                },
+                {
+                    "bit": 3,
+                    "data_type": "BOOL",
+                    "key": "TCA_CH3",
+                    "title": "tca 3"
+                },
+                {
+                    "bit": 4,
+                    "data_type": "BOOL",
+                    "key": "TCA_CH4",
+                    "title": "tca 4"
+                },
+                {
+                    "bit": 5,
+                    "data_type": "BOOL",
+                    "key": "TCA_CH5",
+                    "title": "tca 5"
+                },
+                {
+                    "bit": 6,
+                    "data_type": "BOOL",
+                    "key": "TCA_CH6",
+                    "title": "tca 6"
+                },
+                {
+                    "bit": 7,
+                    "data_type": "BOOL",
+                    "key": "TCA_CH7",
+                    "title": "tca 7"
+                }
+            ],
+            "title": "SparkFun Qwiic GPIO"
+        },
+        {
+            "deviceID": 1007,
+            "device_type": "GPIO",
+            "pins": [
+                {
+                    "BCM": 5,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_1",
+                    "title": "relay 1"
+                },
+                {
+                    "BCM": 6,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_2",
+                    "title": "relay 2"
+                },
+                {
+                    "BCM": 13,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_3",
+                    "title": "relay 3"
+                },
+                {
+                    "BCM": 16,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_4",
+                    "title": "relay 4"
+                },
+                {
+                    "BCM": 19,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_5",
+                    "title": "relay 5"
+                },
+                {
+                    "BCM": 20,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_6",
+                    "title": "relay 6"
+                },
+                {
+                    "BCM": 21,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_7",
+                    "title": "relay 7"
+                },
+                {
+                    "BCM": 26,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_8",
+                    "title": "relay 8"
+                },
+                {
+                    "BCM": 22,
+                    "data_type": "BOOL",
+                    "gpio.flags": "0x20",
+                    "gpio.mode": "input",
+                    "key": "RAIN_SENSOR",
+                    "title": "rain sensor"
+                }
+            ],
+            "title": "RPi Relay Board"
+        },
+        {
+            "address": "0x20",
+            "deviceID": 1008,
+            "device_type": "PCA9671",
+            "enable": true,
+            "pins": [
+                {
+                    "bit": 1,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH1",
+                    "title": "plot A"
+                },
+                {
+                    "bit": 2,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH2",
+                    "title": "plot B"
+                },
+                {
+                    "bit": 3,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH3",
+                    "title": "plot C"
+                },
+                {
+                    "bit": 4,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH4",
+                    "title": "plot D"
+                },
+                {
+                    "bit": 5,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH5",
+                    "title": "relay 5"
+                },
+                {
+                    "bit": 6,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH6",
+                    "title": "relay 6"
+                },
+                {
+                    "bit": 7,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH7",
+                    "title": "relay 7"
+                },
+                {
+                    "bit": 8,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH8",
+                    "title": "relay 8"
+                },
+                {
+                    "bit": 9,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH9",
+                    "title": "relay 9"
+                },
+                {
+                    "bit": 10,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH10",
+                    "title": "relay 10"
+                },
+                {
+                    "bit": 11,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH11",
+                    "title": "relay 11"
+                },
+                {
+                    "bit": 12,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH12",
+                    "title": "relay 12"
+                },
+                {
+                    "bit": 13,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH13",
+                    "title": "relay 13"
+                },
+                {
+                    "bit": 14,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH14",
+                    "title": "relay 14"
+                },
+                {
+                    "bit": 15,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH15",
+                    "title": "relay 15"
+                },
+                {
+                    "bit": 16,
+                    "data_type": "BOOL",
+                    "key": "0x20_CH16",
+                    "title": "relay 16"
+                }
+            ],
+            "title": "I2C Relay Board"
+        },
+        {
+            "address": "0x6F",
+            "description": "GREEN QwiicButton ",
+            "deviceID": 1009,
+            "device_type": "QwiicButton",
+            "pins": [
+                {
+                    "data_type": "BOOL",
+                    "key": "GREEN_BUTTON_STATE",
+                    "read_only": true
+                },
+                {
+                    "data_type": "STRING",
+                    "key": "GREEN_BUTTON_LIGHT",
+                    "read_only": false
+                }
+            ],
+            "title": "The GREEN QwiicButton "
+        },
+        {
+            "address": "0x10",
+            "data_type": "LUX",
+            "deviceID": 1100,
+            "device_type": "VELM6030",
+            "interval": 30,
+            "key": "SUNLIGHT",
+            "title": "Outside Light Intensity",
+            "tracking": "track.changes"
+        },
+        {
+            "address": "0x44",
+            "description": "Outside Environment Sensor",
+            "deviceID": 1010,
+            "device_type": "SHT30",
+            "pins": [
+                {
+                    "data_type": "TEMPERATURE",
+                    "interval": 30,
+                    "key": "GARDEN_TEMPERATURE",
+                    "title": "Garden Temperture",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "HUMIDITY",
+                    "key": "GARDEN_HUMIDITY",
+                    "title": "Garden Humidity",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "SERIAL_NO",
+                    "key": "GARDEN_SERIAL_NO",
+                    "title": "Garden Sensor Serial No",
+                    "tracking": "dont.record"
+                }
+             ],
+            "title": "Garden"
+        }
+    ],
+    "values": [
+        {
+            "data_type": "INT",
+            "formula": "(SOLAR_SUNRISE  + SOLAR_SUNSET) / 2 ",
+            "key": "MID_DAY",
+            "title": "Mid Day",
+            "tracking": "track.changes"
+        },
+        {
+            "data_type": "STRING",
+            "description": "A key named FOO, used to test the value assignments",
+            "initial.value": "FOO VALUE",
+            "key": "FOO",
+            "title": "A Foo Value",
+            "tracking": "track.changes"
+        },
+        {
+            "data_type": "INT",
+            "description": "A key named TESLA, used to test the value assignments",
+            "initial.value": 369,
+            "key": "TESLA",
+            "read_only": true,
+            "title": "Nikola Tesla Secret Number",
+            "tracking": "dont.record"
+        },
+        {
+            "data_type": "BINARY",
+            "description": "A key named COUNTER, used to test the value assignments",
+            "initial.value": 0,
+            "key": "COUNTER",
+            "title": "just a counter",
+            "tracking": "dont.record"
+        },
+        {
+            "data_type": "INT",
+            "description": "A key named HOURS, used to test the value cron",
+            "initial.value": 0,
+            "key": "HOURS",
+            "title": "just another  counter",
+            "tracking": "dont.record"
+        },
+        {
+            "data_type": "INT",
+            "description": "A counter bumped each startup",
+            "initial.value": 0,
+            "key": "START_COUNT",
+            "title": "times restarted running",
+            "tracking": "track.latest"
+        },
+        {
+            "data_type": "FLOAT",
+            "description": "PAR (photo active radiation)",
+            "key": "SUNLIGHT.PAR",
+            "title": "PAR (photo active radiation)",
+            "tracking": "track.changes"
+        }
+    ],
+    "sequence": [
+        {
+            "enable": true,
+            "sequenceID": "1001",
+            "name": "Test Sunrise task",
+            "trigger": {
+                "timeBase": "sunrise"
+            },
+            "steps": {
+                "action": {
+                    "cmd": "LOG",
+                    "value": "Wake up it sunrise "
+                }
+            }
+        },
+        {
+            "enable": true,
+            "sequenceID": "1002",
+            "name": "Test civil sunrise task",
+            "trigger": {
+                "timeBase": "civil sunrise"
+            },
+            "steps": {
+                "action": {
+                    "cmd": "LOG",
+                    "value": "Wake up it civil sunrise "
+                }
+            }
+        },
+        
+        {
+            "enable": true,
+            "sequenceID": "1000",
+            "name": "sprinkler control",
+            "description": "day to day sprinkler sequence",
+            "trigger": {
+                "timeBase": "civil sunrise",
+                "offset": 10
+           },
+            "condition" : "RAIN_SENSOR == 0",
+            "on_abort":  {
+                "action": [
+                   {
+                       "cmd": "SET",
+                       "key": "0x20_CH1",
+                       "value": "off"
+                   },
+                   {
+                       "cmd": "SET",
+                       "key": "0x20_CH2",
+                       "value": "off"
+                   },
+                   {
+                       "cmd": "SET",
+                       "key": "0x20_CH3",
+                       "value": "off"
+                   },
+                   {
+                       "cmd": "SET",
+                       "key": "0x20_CH4",
+                       "value": "off"
+                   }
+               ]
+            },
+            "steps": [
+                {
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "0x20_CH1",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "0x20_CH1",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "0x20_CH2",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "0x20_CH2",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "0x20_CH3",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "0x20_CH3",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "0x20_CH4",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "0x20_CH4",
+                            "value": "off"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "enable": false,
+            "sequenceID": "2001",
+            "name": "Stupid Startup Task",
+            "trigger": {
+                "event": "startup"
+            },
+            "steps": {
+                "action": {
+                    "cmd": "LOG",
+                    "value": "Startup message"
+                }
+            }
+        },
+        {
+            "enable": false,
+            "sequenceID": "2000",
+            "name": "startup Tasks",
+            "description": "Toggle relays on startup",
+            "trigger": {
+                "timeBase": "sunrise",
+                "offset": 20
+            },
+            "steps": [
+                {
+                    "duration": 5,
+                    "name" : "Step 1 in startup",
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "DOOR_1",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "name" : "Step 2 in startup",
+                    "duration": 2,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "DOOR_1",
+                            "value": "off"
+                        }           ]
+                },
+                {
+                    "name" : "Step 3 in startup",
+                    "duration": 5,
+                    "action": [
+                          {
+                            "cmd": "SET",
+                            "key": "RELAY_3",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "name" : "Step 4 in startup",
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_3",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_4",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "name" : "Step 5 in startup",
+                    "duration":5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_4",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_5",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "name" : "Step 6 in startup",
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_5",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_6",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "name" : "Step 7 in startup",
+                    "duration": 5,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_6",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_7",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "name" : "Finish startup",
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_7",
+                            "value": "off"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "enable": true,
+            "sequenceID": "3000",
+            "name": "shutdown",
+            "description": "shut the server down",
+            "trigger": {
+                "event": "shutdown"
+            },
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "0x20_CH16",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "GREEN_BUTTON_LIGHT",
+                            "value": "false"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_3",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_1",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_7",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_8",
+                            "value": "off"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "enable": true,
+               "sequenceID": "4000",
+               "name": "other startup task",
+               "description": "fool with device on startup",
+               "trigger": {
+                 "event": "startup"
+               },
+               "steps": {
+                   "action": [
+                       {
+                           "cmd": "EVAL",
+                           "expression": "START_COUNT := START_COUNT + 1"
+                       },
+                       {
+                           "cmd": "SET",
+                           "key": "GREEN_BUTTON_LIGHT",
+                           "value": "25, 1200, 500"
+                       }
+                   ]
+               }
+        },
+        
+        {
+            "enable": true,
+            "sequenceID": "5000",
+            "name": "hourly task",
+            "description": "Fiddle with relay 8",
+            "trigger": {
+                "cron": "@hourly"
+            },
+            "steps":
+            [
+                {
+                    "duration": 5,
+                    "name" : "Step 1 hourly",
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_8",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "name" : "Step 2 hourly",
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RELAY_8",
+                            "value": "off"
+                        }           ]
+                }
+            ]
+            
+        },
+        {
+            "enable": true,
+               "sequenceID": "5001",
+               "name": "CHAIN task",
+               "description": "run exec 5000",
+               "trigger": {
+                 "event": "manual"
+               },
+               "steps": {
+                   "action": [
+                        {
+                           "cmd": "RUN.SEQUENCE",
+                           "key": "5000"
+                       }
+                   ]
+               }
+        }
+     ],
+    "sequence.groups": [
+        {
+            
+            "sequenceIDs": [
+                "1001",
+                "1002"
+            ],
+            "groupID": "1000",
+            "name": "Morning test group"
+        }
+    ],
+    
+    "keys.manual": [
+     ]
+}
