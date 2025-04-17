@@ -1,4 +1,3 @@
-
 MIT License
 
 piotserver - Raspberry Pi Internet Of Things
