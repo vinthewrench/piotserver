@@ -114,6 +114,7 @@ public:
     ~pIoTServerMgr();
     
     void setAssetDirectoryPath(string filePath);
+    void setPropFileName(string name);
     
     void start();
     void stop();
@@ -138,7 +139,7 @@ public:
     void setActiveConnections(bool isActive);
     bool setValues(keyValueMap_t states);
 
-    bool initDataBase(string assetPath = "");
+    bool initDataBase();
 
     pIoTServerDB*        getDB() {return &_db; };
 
@@ -154,7 +155,8 @@ private:
     mt19937                        _rng;
 
     string                  _assetDirectoryPath;
-    
+    string                  _propsFileName;
+
     bool                    processEvents();        // do stuff here when we are not busy.
     bool                    _shouldReconcileEvents;        // part of startup  combine any unrun events.
 

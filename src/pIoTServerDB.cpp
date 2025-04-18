@@ -1283,7 +1283,7 @@ bool pIoTServerDB::setKeyManualMode(string key, bool manual){
         else
             _keysInManualMode.erase(key);
         
-        savePropertiesToFile();
+        saveProperties();
         return true;
     }
     return false;
@@ -1404,7 +1404,7 @@ bool pIoTServerDB::setProperty(string key, string value){
     if(shouldUpdate) {
         _props[key] = value;
         _didChangeProperties  = shouldUpdate;
-        savePropertiesToFile();
+        saveProperties();
         
     }
     
@@ -1415,7 +1415,7 @@ bool pIoTServerDB::removeProperty(string key){
     
     if(_props.count(key)){
         _props.erase(key);
-        savePropertiesToFile();
+        saveProperties();
         return true;
     }
     return false;
@@ -1427,7 +1427,7 @@ bool pIoTServerDB::setPropertyIfNone(string key, string value){
     
     if(_props.count(key) == 0){
         _props[key] = value;
-        savePropertiesToFile();
+        saveProperties();
         return true;
     }
     return false;
@@ -1639,7 +1639,7 @@ bool pIoTServerDB::setConfigProperty(string key, string value){
         _props.at(PROP_CONFIG) = config;
         
         _didChangeProperties  = true;;
-        savePropertiesToFile();
+        saveProperties();
         return true;
     }
  
@@ -1658,7 +1658,7 @@ bool pIoTServerDB::removeConfigProperty(string key){
             _props.at(PROP_CONFIG) = config;
             
             _didChangeProperties  = true;;
-            savePropertiesToFile();
+            saveProperties();
             return true;
             
             
@@ -1672,19 +1672,18 @@ bool pIoTServerDB::removeConfigProperty(string key){
 
 //MARK: - Database Persistent operations
 
-bool pIoTServerDB::restorePropertiesFromFile(string filePath){
+bool pIoTServerDB::restorePropertiesFromFile(string propFileNameIn, string assetDirPathIn){
     
     std::ifstream    ifs;
     bool                 statusOk = false;
+     
+    string  propFileName = propFileNameIn.empty()?defaultPropertyFileName():propFileNameIn;
+    string  assetsPath = assetDirPathIn.empty()?"assets":assetDirPathIn;
     
-    
-    string pathName = defaultPropertyFileName();
-    // create a file path
-    
-    _propertyFilePath = pathName;
-    
-    if(filePath.size())
-        _propertyFilePath = filePath + "/" + pathName;
+    if(assetsPath.empty())
+        _propertyFilePath = propFileName;
+    else
+        _propertyFilePath = assetsPath + "/" + propFileName;
   
     LOGT_DEBUG("OPEN Property File: %s", _propertyFilePath.c_str());
  
@@ -1753,8 +1752,23 @@ bool pIoTServerDB::restorePropertiesFromFile(string filePath){
     return statusOk;
 }
 
+bool pIoTServerDB::savePropertiesToFile(string propFileNameIn, string assetDirPathIn){
+  
+    string  propFileName = propFileNameIn.empty()?defaultPropertyFileName():propFileNameIn;
+    string  assetsPath = assetDirPathIn.empty()?"assets":assetDirPathIn;
+    
+    if(assetsPath.empty())
+        _propertyFilePath = propFileName;
+    else
+        _propertyFilePath = assetsPath + "/" + propFileName;
+  
+    LOGT_DEBUG("Save Property File: %s", _propertyFilePath.c_str());
 
-bool pIoTServerDB::savePropertiesToFile(string filePath){
+    return saveProperties();
+}
+
+
+bool pIoTServerDB::saveProperties(){
     
     std::lock_guard<std::mutex> lock(_mutex);
     bool statusOk = false;
@@ -1862,7 +1876,7 @@ bool pIoTServerDB::apiSecretCreate(string APIkey, string APISecret){
         _props.at(PROP_CONFIG) = config;
         
         _didChangeProperties  = true;;
-        savePropertiesToFile();
+        saveProperties();
         return true;
     }
     
@@ -1890,7 +1904,7 @@ bool pIoTServerDB::apiSecretSetSecret(string APIkey, string APISecret){
             _props.at(PROP_CONFIG) = config;
             
             _didChangeProperties  = true;;
-            savePropertiesToFile();
+            saveProperties();
             return true;
             
         }
@@ -1916,7 +1930,7 @@ bool pIoTServerDB::apiSecretDelete(string APIkey){
             _props.at(PROP_CONFIG) = config;
             
             _didChangeProperties  = true;;
-            savePropertiesToFile();
+            saveProperties();
             return true;
             
         }
@@ -2691,7 +2705,7 @@ bool pIoTServerDB::sequenceSetName(sequenceID_t sid, string name){
         Sequence* seq =  &_sequences[sid];
         seq->_name = name;
     }
-    savePropertiesToFile();
+    saveProperties();
     return true;
 }
 
@@ -2706,7 +2720,7 @@ bool pIoTServerDB::sequenceSetDescription(sequenceID_t sid, string desc){
         Sequence* seq =  &_sequences[sid];
         seq->_description = desc;
     }
-    savePropertiesToFile();
+    saveProperties();
     return true;
 }
 
@@ -2722,7 +2736,7 @@ bool pIoTServerDB::sequenceSetEnable(sequenceID_t sid, bool enable){
         seq->_enable = enable;
     }
     
-    savePropertiesToFile();
+    saveProperties();
     return true;
 }
  
@@ -2764,7 +2778,7 @@ bool pIoTServerDB::sequenceSave(Sequence seq, sequenceID_t* sidOut){
         _sequences[sid] = seq;
     }
     
-    savePropertiesToFile();
+    saveProperties();
     
     if(sidOut)
         *sidOut = sid;
@@ -2783,7 +2797,7 @@ bool pIoTServerDB::sequenceDelete(sequenceID_t sid){
    
         _sequences.erase(sid);
     }
-    savePropertiesToFile();
+    saveProperties();
     return true;
 }
 
@@ -2810,7 +2824,7 @@ bool pIoTServerDB::sequenceUpdate(sequenceID_t sid, Sequence newSequence){
         seq->_enable = newSequence._enable;
 
     }
-    savePropertiesToFile();
+    saveProperties();
     return true;
 }
 
@@ -3259,7 +3273,7 @@ bool pIoTServerDB::sequenceGroupCreate(sequenceGroupID_t* sgidOUT, const string 
         _sequenceGroups[sgid] = info;
     }
     
-    savePropertiesToFile();
+    saveProperties();
     
     if(sgidOUT)
         *sgidOUT = sgid;
@@ -3276,7 +3290,7 @@ bool pIoTServerDB::sequenceGroupDelete(sequenceGroupID_t sgid){
         
         _sequenceGroups.erase(sgid);
     }
-    savePropertiesToFile();
+    saveProperties();
     
     return true;
 }
@@ -3308,7 +3322,7 @@ bool pIoTServerDB::sequenceGroupSetName(sequenceGroupID_t seqGroupID, string nam
         sequenceGroupInfo_t* info  =  &_sequenceGroups[seqGroupID];
         info->name = name;
     }
-    savePropertiesToFile();
+    saveProperties();
     return true;
 }
 
@@ -3337,7 +3351,7 @@ bool pIoTServerDB::sequenceGroupAddSequence(sequenceGroupID_t seqGroupID,  seque
         sequenceGroupInfo_t* info  =  &_sequenceGroups[seqGroupID];
         info->sequenceIDs.insert(sid);
     }
-    savePropertiesToFile();
+    saveProperties();
     
     return true;
 }
@@ -3357,7 +3371,7 @@ bool pIoTServerDB::sequenceGroupRemoveSequence(sequenceGroupID_t seqGroupID, seq
         
         info->sequenceIDs.erase(sid);
     }
-    savePropertiesToFile();
+    saveProperties();
     return true;
 }
 

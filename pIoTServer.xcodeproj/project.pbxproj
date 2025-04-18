@@ -20,37 +20,27 @@
 		2E41282E2DA5D4EB00D90924 /* ADS1115.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E41282D2DA5D4EB00D90924 /* ADS1115.cpp */; };
 		2E4128352DA6B13000D90924 /* TankDepth_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E4128342DA6B13000D90924 /* TankDepth_Device.cpp */; };
 		2E4128392DA735E100D90924 /* Sprinkler_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E4128382DA735E100D90924 /* Sprinkler_Device.cpp */; };
-		2E4129102DAC116C00D90924 /* TMP10X.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E41290F2DAC116C00D90924 /* TMP10X.dylib */; };
 		2E4129252DAC13D600D90924 /* TMP10X.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2E41290F2DAC116C00D90924 /* TMP10X.dylib */; };
 		2E53F92F2D5950550001D619 /* LogMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E53F92E2D5950550001D619 /* LogMgr.cpp */; };
 		2E53F9402D59507B0001D619 /* TCPServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E53F9362D59507B0001D619 /* TCPServer.cpp */; };
 		2E53F9412D59507B0001D619 /* http_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 2E53F9312D59507B0001D619 /* http_parser.c */; };
 		2E53F9422D59507B0001D619 /* TimeStamp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E53F9382D59507B0001D619 /* TimeStamp.cpp */; };
 		2E5B763B2D3977CD00FDEFF7 /* pIoTServerEvaluator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E5B763A2D3977CD00FDEFF7 /* pIoTServerEvaluator.cpp */; };
-		2EAB0A412DAC2555008BC701 /* SHT25.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A402DAC2555008BC701 /* SHT25.dylib */; };
 		2EAB0A422DAC255F008BC701 /* SHT25.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A402DAC2555008BC701 /* SHT25.dylib */; };
-		2EAB0A582DAC271F008BC701 /* MCP23008.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A572DAC270B008BC701 /* MCP23008.dylib */; };
-		2EAB0A592DAC2724008BC701 /* SHT30.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A512DAC2701008BC701 /* SHT30.dylib */; };
 		2EAB0A5A2DAC272D008BC701 /* SHT30.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A512DAC2701008BC701 /* SHT30.dylib */; };
 		2EAB0A5B2DAC2733008BC701 /* MCP23008.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A572DAC270B008BC701 /* MCP23008.dylib */; };
-		2EAB0A622DAC280D008BC701 /* BME280.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A612DAC2804008BC701 /* BME280.dylib */; };
 		2EAB0A632DAC2813008BC701 /* BME280.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A612DAC2804008BC701 /* BME280.dylib */; };
-		2EAB0A6A2DAC28D8008BC701 /* MCP3427.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A692DAC28C6008BC701 /* MCP3427.dylib */; };
 		2EAB0A6B2DAC28DE008BC701 /* MCP3427.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A692DAC28C6008BC701 /* MCP3427.dylib */; };
-		2EAB0A722DAC2971008BC701 /* PCA9671.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A712DAC2964008BC701 /* PCA9671.dylib */; };
 		2EAB0A732DAC297A008BC701 /* PCA9671.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A712DAC2964008BC701 /* PCA9671.dylib */; };
-		2EAB0A7A2DAC29FE008BC701 /* TCA9534.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A792DAC29F6008BC701 /* TCA9534.dylib */; };
 		2EAB0A7B2DAC2A07008BC701 /* TCA9534.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A792DAC29F6008BC701 /* TCA9534.dylib */; };
-		2EAB0A8A2DAC2B28008BC701 /* QwiicButton.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0A892DAC2B12008BC701 /* QwiicButton.dylib */; };
 		2EAB0A8B2DAC2B30008BC701 /* QwiicButton.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A892DAC2B12008BC701 /* QwiicButton.dylib */; };
 		2EAB0AA82DAC2DB4008BC701 /* VELM6030.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB0AA52DAC2DB4008BC701 /* VELM6030.cpp */; };
 		2EAB0AA92DAC2DB4008BC701 /* VELM6030_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB0AA72DAC2DB4008BC701 /* VELM6030_Device.cpp */; };
-		2EAB0AD42DAC307B008BC701 /* QWIIC_RELAY.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0AD32DAC3071008BC701 /* QWIIC_RELAY.dylib */; };
 		2EAB0AD52DAC307B008BC701 /* QWIIC_RELAY.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 2EAB0AD32DAC3071008BC701 /* QWIIC_RELAY.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		2EAB0AD72DAC308E008BC701 /* QWIIC_RELAY.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0AD32DAC3071008BC701 /* QWIIC_RELAY.dylib */; };
 		2EAB0AE22DAC322F008BC701 /* ADS1115.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0AE12DAC320D008BC701 /* ADS1115.dylib */; };
-		2EAB0B332DB038DE008BC701 /* PCA9536.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAB0B322DB038DE008BC701 /* PCA9536.dylib */; };
 		2EAB0B432DB038EA008BC701 /* PCA9536.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0B322DB038DE008BC701 /* PCA9536.dylib */; };
+		2EAB0B662DB2D139008BC701 /* garden.props.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0B652DB2BE39008BC701 /* garden.props.json */; };
 		2EAB53902CFE474900F8B585 /* ServerNouns.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB538D2CFE474900F8B585 /* ServerNouns.cpp */; };
 		2EAB53912CFE474900F8B585 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB538A2CFE474900F8B585 /* main.cpp */; };
 		2EAB53AF2CFE476500F8B585 /* RESTServerConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB539E2CFE476500F8B585 /* RESTServerConnection.cpp */; };
@@ -179,9 +169,10 @@
 		2EAB537C2CFE46F000F8B585 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 12;
-			dstPath = "";
+			dstPath = assets;
 			dstSubfolderSpec = 16;
 			files = (
+				2EAB0B662DB2D139008BC701 /* garden.props.json in CopyFiles */,
 				2EF9643A2D8C6BCE00F9FA19 /* piotserver.props.json in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -257,7 +248,8 @@
 		2EAB0B622DB17DD3008BC701 /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		2EAB0B632DB1BE5D008BC701 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		2EAB0B642DB1D52A008BC701 /* The piotserver.props.json file.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = "The piotserver.props.json file.md"; path = "Notes/The piotserver.props.json file.md"; sourceTree = "<group>"; };
-		2EAB537E2CFE46F000F8B585 /* pIoTServer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pIoTServer; sourceTree = BUILT_PRODUCTS_DIR; };
+		2EAB0B652DB2BE39008BC701 /* garden.props.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = garden.props.json; sourceTree = "<group>"; };
+		2EAB537E2CFE46F000F8B585 /* piotserver */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = piotserver; sourceTree = BUILT_PRODUCTS_DIR; };
 		2EAB538A2CFE474900F8B585 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		2EAB538B2CFE474900F8B585 /* ServerCmdValidators.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ServerCmdValidators.hpp; sourceTree = "<group>"; };
 		2EAB538D2CFE474900F8B585 /* ServerNouns.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ServerNouns.cpp; sourceTree = "<group>"; };
@@ -307,17 +299,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2EAB0B332DB038DE008BC701 /* PCA9536.dylib in Frameworks */,
-				2EAB0A8A2DAC2B28008BC701 /* QwiicButton.dylib in Frameworks */,
-				2EAB0AD42DAC307B008BC701 /* QWIIC_RELAY.dylib in Frameworks */,
-				2EAB0A7A2DAC29FE008BC701 /* TCA9534.dylib in Frameworks */,
-				2EAB0A722DAC2971008BC701 /* PCA9671.dylib in Frameworks */,
-				2EAB0A6A2DAC28D8008BC701 /* MCP3427.dylib in Frameworks */,
-				2EAB0A622DAC280D008BC701 /* BME280.dylib in Frameworks */,
-				2EAB0A592DAC2724008BC701 /* SHT30.dylib in Frameworks */,
-				2EAB0A582DAC271F008BC701 /* MCP23008.dylib in Frameworks */,
-				2EAB0A412DAC2555008BC701 /* SHT25.dylib in Frameworks */,
-				2E4129102DAC116C00D90924 /* TMP10X.dylib in Frameworks */,
 				2EAB53C02CFE500100F8B585 /* libsqlite3.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -478,7 +459,7 @@
 		2EAB537F2CFE46F000F8B585 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2EAB537E2CFE46F000F8B585 /* pIoTServer */,
+				2EAB537E2CFE46F000F8B585 /* piotserver */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -564,6 +545,7 @@
 		2EAB53D82CFE7DE700F8B585 /* assets */ = {
 			isa = PBXGroup;
 			children = (
+				2EAB0B652DB2BE39008BC701 /* garden.props.json */,
 				2EF964372D8C6B9000F9FA19 /* piotserver.props.json */,
 				2EF964382D8C6B9000F9FA19 /* sprinkler.piotserver.props.json */,
 				2E4128252DA4689500D90924 /* sprinkler1.piotserver.props.json */,
@@ -603,9 +585,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		2EAB537D2CFE46F000F8B585 /* pIoTServer */ = {
+		2EAB537D2CFE46F000F8B585 /* piotserver */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2EAB53852CFE46F000F8B585 /* Build configuration list for PBXNativeTarget "pIoTServer" */;
+			buildConfigurationList = 2EAB53852CFE46F000F8B585 /* Build configuration list for PBXNativeTarget "piotserver" */;
 			buildPhases = (
 				2EAB537A2CFE46F000F8B585 /* Sources */,
 				2EAB537B2CFE46F000F8B585 /* Frameworks */,
@@ -617,11 +599,11 @@
 			);
 			dependencies = (
 			);
-			name = pIoTServer;
+			name = piotserver;
 			packageProductDependencies = (
 			);
 			productName = piServer;
-			productReference = 2EAB537E2CFE46F000F8B585 /* pIoTServer */;
+			productReference = 2EAB537E2CFE46F000F8B585 /* piotserver */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -702,7 +684,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				2EAB537D2CFE46F000F8B585 /* pIoTServer */,
+				2EAB537D2CFE46F000F8B585 /* piotserver */,
 			);
 		};
 /* End PBXProject section */
@@ -983,7 +965,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2EAB53852CFE46F000F8B585 /* Build configuration list for PBXNativeTarget "pIoTServer" */ = {
+		2EAB53852CFE46F000F8B585 /* Build configuration list for PBXNativeTarget "piotserver" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2EAB53862CFE46F000F8B585 /* Debug */,

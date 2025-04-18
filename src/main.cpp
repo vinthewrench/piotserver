@@ -27,7 +27,8 @@ int        gVerbose_flag    = 0;
 int        gDebug_flag        = 0;
 int        gPrint_flag        = 0;
 
-char*      gAssetsFilePath        = NULL;
+char*      gAssetsDirFilePath        = NULL;
+char*      gPropsFileName        = NULL;
 
 
 /* for command line processing */
@@ -60,7 +61,8 @@ static argTable_t sArgTable[] =
     { kArg_Count,    &gVerbose_flag ,       "verbose",  'v',    "Enables verbose output" },
     { kArg_Count,    &gDebug_flag    ,      "debug",    'd',    "Enables debug output" },
     { kArg_Count,    &gPrint_flag    ,      "print",    'p',    "Print on Terminal" },
-    { kArg_String,   &gAssetsFilePath,        NULL,     'f',    " Assets Directory path" },
+    { kArg_String,   &gPropsFileName,        "props",     'f',    " Property File path" },
+    { kArg_String,   &gAssetsDirFilePath,    "assets",     ' ',    " Assets Directory path" },
   };
 
 #define TableEntries  ((int)(sizeof(sArgTable) /  sizeof(argTable_t)))
@@ -174,8 +176,11 @@ int main(int argc, const char * argv[]) {
     }
  
     pIoTServerMgr*  pIoTServer = pIoTServerMgr::shared();
-    if(IsntNull(gAssetsFilePath))
-        pIoTServer->setAssetDirectoryPath(string(gAssetsFilePath));
+    if(IsntNull(gAssetsDirFilePath))
+        pIoTServer->setAssetDirectoryPath(string(gAssetsDirFilePath));
+
+    if(IsntNull(gPropsFileName))
+        pIoTServer->setPropFileName(string(gPropsFileName));
     
     pIoTServer->start();
 

@@ -118,8 +118,10 @@ class pIoTServerDB  {
     typedef vector<tuple <time_t, double, double >  >historicRanges_t;
 
     // MARK: - properties // persistent
-    bool savePropertiesToFile(string filePath = "") ;
-    bool restorePropertiesFromFile(string filePath = "");
+    bool savePropertiesToFile(string fileName, string assetDirPath) ;
+    bool saveProperties();
+    
+    bool restorePropertiesFromFile(string fileName, string assetDirPath);
  
     bool setProperty(string key, string value);
     bool setProperty(string key, nlohmann::json  j);

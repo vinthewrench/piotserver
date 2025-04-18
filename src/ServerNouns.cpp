@@ -1163,7 +1163,7 @@ static bool Values_NounHandler_PUT(ServerCmdQueue* cmdQueue,
                  then remove it from the manual key list */
                 
                 if(db->isKeyInManualMode(key) && autoRequested){
-                    db->setKeyManualMode(key, false);
+                    success = db->setKeyManualMode(key, false);
                 }
                 
                 /* if we try and set it to true or false,

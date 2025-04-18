@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2EAB537D2CFE46F000F8B585"
-               BuildableName = "pIoTServer"
-               BlueprintName = "pIoTServer"
+               BuildableName = "piotserver"
+               BlueprintName = "piotserver"
                ReferencedContainer = "container:pIoTServer.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -46,23 +46,19 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2EAB537D2CFE46F000F8B585"
-            BuildableName = "pIoTServer"
-            BlueprintName = "pIoTServer"
+            BuildableName = "piotserver"
+            BlueprintName = "piotserver"
             ReferencedContainer = "container:pIoTServer.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-d"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
             argument = "-p"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-f /Users/vinnie/Desktop/assets1 "
-            isEnabled = "NO">
+            argument = "-d"
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
@@ -77,8 +73,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2EAB537D2CFE46F000F8B585"
-            BuildableName = "pIoTServer"
-            BlueprintName = "pIoTServer"
+            BuildableName = "piotserver"
+            BlueprintName = "piotserver"
             ReferencedContainer = "container:pIoTServer.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

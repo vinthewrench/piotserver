@@ -25,11 +25,30 @@ write some stuff here
 * Actuator
 * Tank Depth Sensor
  
+ #### Hardware
+ * [nodeLynk I²C](https://ncd.io/blog/nodelynk-i2c/)
+ * [SparkFun Qwiic](https://www.sparkfun.com/qwiic)
+ * [adafruit I²C](https://www.adafruit.com/category/613)
+ * [Iowa Scaled Engineering](https://www.iascaled.com/store/)
+ * [Waveshare](https://www.waveshare.com/product/raspberry-pi/hats.htm)
+ 
 # Articles
 
 pointer to substack
 
 ## Status
+
+## Build system and hardware
+
+Runs on Raspberry Pi (Bookworm)
+
+tested on 
+*  Raspberry Pi Zero 2 W Rev 1.0
+*  Raspberry Pi 5 Model B Rev 1.0
+*  Docker version 27.4.0, build bde2b89
+
+Why is there an Xcode file?
+ - I do debugging on Xcode / should probably move to VSCode
 
 ## Installing and Building on Raspberry Pi
 

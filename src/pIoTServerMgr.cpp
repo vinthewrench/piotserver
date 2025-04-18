@@ -543,6 +543,10 @@ void pIoTServerMgr::setAssetDirectoryPath(string path){
     _assetDirectoryPath = path;
 }
 
+void pIoTServerMgr::setPropFileName(string name){
+    _propsFileName = name;
+}
+
 
 pIoTServerMgr::~pIoTServerMgr(){
     
@@ -562,12 +566,11 @@ pIoTServerMgr::~pIoTServerMgr(){
 }
 
 
-bool pIoTServerMgr::initDataBase(string assetPath ){
+bool pIoTServerMgr::initDataBase( ){
     
     bool success = false;
-    //   _db.clear();
     
-    if(!_db.restorePropertiesFromFile(assetPath))
+      if(!_db.restorePropertiesFromFile(_propsFileName, _assetDirectoryPath))
         throw pIoTServerException("restorePropertiesFromFile Failed");
     
     // setup logfile path
@@ -577,11 +580,13 @@ bool pIoTServerMgr::initDataBase(string assetPath ){
         LogMgr::shared()->setLogFilePath(str);
     }
     else {
-        string logfilepath = "logfile.txt";
-        // create a file path
         
-        if(assetPath.size())
-            logfilepath = assetPath + "/" + logfilepath;
+        string  logfileName = "logfile.txt";
+        
+        string logfilepath  = _assetDirectoryPath.empty()
+                ?logfileName
+                : _assetDirectoryPath + "/" + logfileName;
+   
         LogMgr::shared()->setLogFilePath(logfilepath);
     }
     
@@ -594,7 +599,7 @@ bool pIoTServerMgr::initDataBase(string assetPath ){
         }
     }
     
-    success =  _db.initLogDatabase(assetPath);
+    success =  _db.initLogDatabase(_assetDirectoryPath);
     
     return success;
 }
@@ -605,7 +610,7 @@ void pIoTServerMgr::start(){
         return;
     
     try {
-        initDataBase(_assetDirectoryPath);
+        initDataBase();
         loadGlobalValues();
         
         LOGT_DEBUG("Start pIoTServer");
@@ -1209,7 +1214,7 @@ bool pIoTServerMgr::setDeviceProperties(string deviceID, json &j){
                     entry[it.key()] = it.value();
                 }
                 _db.setProperty(string(JSON_ARG_DEVICES), deviceProps);
-                _db.savePropertiesToFile();
+                _db.saveProperties();
                 
                 break;
             }
