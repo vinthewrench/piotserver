@@ -1,0 +1,427 @@
+{
+    "config": {
+        "access_keys": {},
+        "description": "The Raspbery Pi Irrigation System",
+        "lat_long": "34.46463, -93.36214",
+        "name": "Garden Irrigation"
+    },
+    "devices": [
+        {
+            "address": "/mnt/1wire/28.793434000000/",
+            "data_type": "TEMPERATURE",
+            "description": "Plot A Soil DS2482",
+            "device_type": "1wire",
+            "interval": 3600,
+            "key": "PLOT1",
+            "title": "Soil Temp Plot A",
+            "tracking": "track.changes"
+        },
+        {
+            "address": "/mnt/1wire/28.B9F533000000/",
+            "data_type": "TEMPERATURE",
+            "description": "Greenhouse DS2482",
+            "device_type": "1wire",
+            "interval": 3600,
+            "key": "GREENHOUSE",
+            "title": "Greenhouse Temperature",
+            "tracking": "track.changes"
+        },
+        {
+            "address": "0x40",
+            "description": "Walk-In Cooler Environment Sensor",
+            "device_type": "SHT25",
+            "pins": [
+                {
+                    "data_type": "TEMPERATURE",
+                    "interval": 30,
+                    "key": "COOLER_TEMPERATURE",
+                    "title": "Walk-In Cooler Temperture",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "HUMIDITY",
+                    "key": "COOLER_HUMIDITY",
+                    "title": "Walk-In Cooler Humidity",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "SERIAL_NO",
+                    "key": "COOLER_SERIAL_NO",
+                    "title": "Cooler Sensor Serial No",
+                    "tracking": "dont.record"
+                }
+            ]
+        },
+        {
+            "address": "0x44",
+            "description": "Outside Environment Sensor",
+            "device_type": "SHT30",
+            "pins": [
+                {
+                    "data_type": "TEMPERATURE",
+                    "interval": 30,
+                    "key": "GARDEN_TEMPERATURE",
+                    "title": "Garden Temperture",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "HUMIDITY",
+                    "key": "GARDEN_HUMIDITY",
+                    "title": "Garden Humidity",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "SERIAL_NO",
+                    "key": "GARDEN_SERIAL_NO",
+                    "title": "Garden Sensor Serial No",
+                    "tracking": "dont.record"
+                }
+            ],
+            "title": "Garden"
+        },
+        {
+            "device_type": "MCP23008",
+            "address": "0x20",
+            "title": "NCD Relay+I/O",
+            "interval": 5,
+            "pins": [
+                {
+                    "bit": 0,
+                    "data_type": "BOOL",
+                    "key": "GREENHOUSE_LIGHT",
+                    "title": "Greenhouse Light",
+                    "gpio.mode": "output"
+                },
+                {
+                    "bit": 7,
+                    "data_type": "BOOL",
+                    "key": "RAIN_SENSOR",
+                    "title": "Orbit Rain Sensor",
+                    "gpio.mode": "input"
+                }
+            ]
+        },
+        {
+            "device_type": "GPIO",
+            "pins": [
+                {
+                    "BCM": 5,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_1",
+                    "title": "relay 1"
+                },
+                {
+                    "BCM": 6,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_2",
+                    "title": "relay 2"
+                },
+                {
+                    "BCM": 13,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_3",
+                    "title": "relay 3"
+                },
+                {
+                    "BCM": 16,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_4",
+                    "title": "relay 4"
+                },
+                {
+                    "BCM": 19,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_5",
+                    "title": "relay 5"
+                },
+                {
+                    "BCM": 20,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_6",
+                    "title": "relay 6"
+                },
+                {
+                    "BCM": 21,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_7",
+                    "title": "relay 7"
+                },
+                {
+                    "BCM": 26,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_8",
+                    "title": "relay 8"
+                }
+            ],
+            "title": "RPi Relay Board"
+        },
+        {
+            "device_type": "SPRINKLER",
+            "pins": [
+                {
+                    "key": "SPRK_BOOSTER",
+                    "data_type": "BOOSTER",
+                    "other.props": {
+                        "proxy_key": "RELAY_8",
+                        "duration": 5
+                    }
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_1",
+                    "title": "plot A",
+                    "other.props": {
+                        "proxy_key": "RELAY_1"
+                    }
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_2",
+                    "title": "plot B",
+                    "other.props": {
+                        "proxy_key": "RELAY_2"
+                    }
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_3",
+                    "title": "plot C",
+                    "other.props": {
+                        "proxy_key": "RELAY_3"
+                    }
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_4",
+                    "title": "plot D",
+                    "other.props": {
+                        "proxy_key": "RELAY_4"
+                    }
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_5",
+                    "title": "relay 5",
+                    "other.props": {
+                        "proxy_key": "RELAY_5"
+                    }
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_6",
+                    "title": "relay 6",
+                    "other.props": {
+                        "proxy_key": "RELAY_6"
+                    }
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_7",
+                    "title": "relay 7",
+                    "other.props": {
+                        "proxy_key": "RELAY_7"
+                    }
+                }
+ 
+            ]
+        }
+    ],
+    "values": [],
+    "sequence": [
+        {
+            "enable": true,
+            "sequenceID": "1001",
+            "name": "Greenhouse light on",
+            "trigger": {
+                "timeBase": "sunset"
+            },
+            "steps": [
+                {
+                    "duration": 120,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GREENHOUSE_LIGHT",
+                            "value": "on"
+                        }
+                    ]
+                }
+            ]
+          },
+        
+        {
+            "enable": true,
+            "sequenceID": "1000",
+            "name": "sprinkler control",
+            "description": "day to day sprinkler sequence",
+            "condition" : "RAIN_SENSOR == 0",
+            "trigger": {
+                "timeBase": "civil sunrise",
+                "offset": 10
+            },
+            "on_abort": {
+                "action": [
+                    {
+                        "cmd": "SET",
+                        "key": "SPRK_1",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "SPRK_2",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "SPRK_3",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "SPRK_4",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "SPRK_5",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "SPRK_6",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "SPRK_7",
+                        "value": "off"
+                    }
+                ]
+            },
+            "steps": [
+                {
+                    "duration": 10,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_1",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "duration": 10,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_1",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_2",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "duration": 10,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_2",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_3",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "duration": 10,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_3",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_4",
+                            "value": "on"
+                        }
+                    ]
+                },
+
+                {
+                    "duration": 10,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_4",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_5",
+                            "value": "on"
+                        }
+                    ]
+                },
+
+                {
+                    "duration": 10,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_5",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_6",
+                            "value": "on"
+                        }
+                    ]
+                },
+
+                {
+                    "duration": 10,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_6",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_7",
+                            "value": "on"
+                        }
+                    ]
+                },
+                {
+                    "duration": 10,
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_7",
+                            "value": "off"
+                        }
+                    ]
+                }
+
+            ]
+        }
+    ]
+}
