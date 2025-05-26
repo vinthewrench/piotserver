@@ -113,7 +113,7 @@
                     "data_type": "TEMPERATURE",
                     "interval": 30,
                     "key": "COOLER_TEMPERATURE",
-                    "title": "Walk-In Cooler Temperture",
+                    "title": "Walk-In Cooler Temperature",
                     "tracking": "track.changes"
                 },
                 {
@@ -413,7 +413,7 @@
                     "data_type": "TEMPERATURE",
                     "interval": 30,
                     "key": "GARDEN_TEMPERATURE",
-                    "title": "Garden Temperture",
+                    "title": "Garden Temperature",
                     "tracking": "track.changes"
                 },
                 {
@@ -887,3 +887,4 @@
     "keys.manual": [
      ]
 }
+

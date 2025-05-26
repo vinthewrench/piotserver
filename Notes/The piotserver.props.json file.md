@@ -55,7 +55,7 @@ https://jsonformatter.org/
           "data_type": "TEMPERATURE",
           "interval": 30,
           "key": "GARDEN_TEMPERATURE",
-          "title": "Garden Temperture",
+          "title": "Garden Temperature",
           "tracking": "track.range"
         },
         {
