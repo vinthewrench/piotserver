@@ -146,6 +146,9 @@ public:
       // sequence
     bool startRunningSequence(sequenceID_t sid,
                         boolCallback_t callback = NULL);
+    
+
+    bool abortSequence(sequenceID_t sid);
  
     bool updateValuesFromSnapShot(vector<pIoTServerDB::numericValueSnapshot_t> & snapshot);
 

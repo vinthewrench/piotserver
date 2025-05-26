@@ -1462,7 +1462,7 @@ bool pIoTServerMgr::processEvents(){
                 string condition = _db.sequenceGetCondition(sid);
                 
                 string msg = "ABORTED SEQUENCE " + SequenceID_to_string(sid)
-                +  "\"" + name  +  "\" condition: \"  " + condition +  "\"";
+                +  " \"" + name  +  "\" condition: \"  " + condition +  "\"";
                 
                 _db.logAlert(ALERT_MESSAGE, msg);
                 
@@ -1528,6 +1528,7 @@ bool pIoTServerMgr::processEvents(){
     }
     return ranEvents > 0;;
 }
+
 
 //MARK: -  events / sequences / actions
 
@@ -1785,6 +1786,49 @@ bool pIoTServerMgr::startRunningSequence(sequenceID_t sid,
     if(cb) (cb)(success);
     return success;
 }
+
+bool pIoTServerMgr::abortSequence(sequenceID_t sid){
+    
+    bool success  = false;
+    
+    if( _db.sequenceIDIsValid(sid)){
+        
+        solarTimes_t solar;
+        if(SolarTimeMgr::shared()->getSolarEventTimes(solar)){
+            
+            time_t now = time(NULL);
+            struct tm* tm = localtime(&now);
+            time_t localNow  = (now + tm->tm_gmtoff);
+            
+            string name = _db.sequenceGetName(sid);
+            string condition = _db.sequenceGetCondition(sid);
+            
+            string msg = "ABORTED SEQUENCE " + SequenceID_to_string(sid)
+            +  " \"" + name  +  "\"";
+            
+            _db.logAlert(ALERT_MESSAGE, msg);
+            
+            LOGT_INFO(msg.c_str());
+            
+            // check if we are in the middle of a sequence.
+            uint stepNo = 0;
+            _db.sequenceNextStepNumberToRun(sid,stepNo);
+            
+            // reset the sequence
+            _db.sequenceReset(sid);
+            _db.sequenceSetLastRunTime(sid, localNow);
+            
+            // if we already started a sequence,  run abort
+            if(stepNo > 0){
+                runAbortActions(sid);
+            }
+        }
+      }
+ 
+    return success;
+}
+
+
 
 // MARK: -   EsyBox Pump
 

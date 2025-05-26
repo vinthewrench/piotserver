@@ -1870,45 +1870,62 @@ static bool Sequence_NounHandler_PATCH(ServerCmdQueue* cmdQueue,
      
            bool failed = false;
            bool success = false;
-    
-           // set name
-           string newName;
-           if(v1.getStringFromJSON(JSON_ARG_NAME, url.body(), newName)){
-               if(db->sequenceSetName(sid, newName)) {
-                   reply[string(JSON_ARG_SEQUENCE_ID)] = to_hex<unsigned short>(sid);
-                   reply[string(JSON_ARG_NAME)] = newName;
-                   success = true;
+           
+           bool  abort = false;
+           if(v1.getBoolFromJSON(JSON_ARG_ABORT, url.body(), abort)){
+               
+               if(pIoTServer->abortSequence(sid)){
+                reply[string(JSON_ARG_SEQUENCE_ID)] = to_hex<unsigned short>(sid);
+                reply[JSON_ARG_ABORT] = true;
+                success = true;
                }
-               else {
+               else
+               {
                    failed = true;
                }
            }
-    //
-           // set Description
-           string newDescr;
-           if(v1.getStringFromJSON(PROP_DESCRIPTION, url.body(), newDescr)){
-               if(db->sequenceSetDescription(sid, newDescr)) {
-                   reply[string(JSON_ARG_SEQUENCE_ID)] = to_hex<unsigned short>(sid);
-                   reply[string(PROP_DESCRIPTION)] = newDescr;
-                   success = true;
+           else {
+        
+               // set name
+               string newName;
+               if(v1.getStringFromJSON(JSON_ARG_NAME, url.body(), newName)){
+                   if(db->sequenceSetName(sid, newName)) {
+                       reply[string(JSON_ARG_SEQUENCE_ID)] = to_hex<unsigned short>(sid);
+                       reply[string(JSON_ARG_NAME)] = newName;
+                       success = true;
+                   }
+                   else {
+                       failed = true;
+                   }
                }
-               else {
-                   failed = true;
+        //
+               // set Description
+               string newDescr;
+               if(v1.getStringFromJSON(PROP_DESCRIPTION, url.body(), newDescr)){
+                   if(db->sequenceSetDescription(sid, newDescr)) {
+                       reply[string(JSON_ARG_SEQUENCE_ID)] = to_hex<unsigned short>(sid);
+                       reply[string(PROP_DESCRIPTION)] = newDescr;
+                       success = true;
+                   }
+                   else {
+                       failed = true;
+                   }
                }
+        
+               bool  enable = false;
+               if(v1.getBoolFromJSON(JSON_ARG_ENABLE, url.body(), enable)){
+                   if(db->sequenceSetEnable(sid, enable)) {
+                       reply[string(JSON_ARG_SEQUENCE_ID)] = to_hex<unsigned short>(sid);
+                       reply[JSON_ARG_ENABLE] = enable;
+                       success = true;
+                   }
+                   else {
+                       failed = true;
+                   }
+               }
+
            }
-    
-           bool  enable = false;
-           if(v1.getBoolFromJSON(JSON_ARG_ENABLE, url.body(), enable)){
-               if(db->sequenceSetEnable(sid, enable)) {
-                   reply[string(JSON_ARG_SEQUENCE_ID)] = to_hex<unsigned short>(sid);
-                   reply[JSON_ARG_ENABLE] = enable;
-                   success = true;
-               }
-               else {
-                   failed = true;
-               }
-           }
-    
+  
            if(success) {
                makeStatusJSON(reply,STATUS_OK);
                (completion) (reply, STATUS_OK);

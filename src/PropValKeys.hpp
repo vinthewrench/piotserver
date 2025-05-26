@@ -274,6 +274,7 @@ constexpr static string_view JSON_ARG_ON_ABORT         = "on_abort";
 
 constexpr static string_view JSON_ARG_POST_ACTION       = "post.action";
 constexpr static string_view JSON_ARG_TRIGGER            = "trigger";
+constexpr static string_view JSON_ARG_ABORT            = "abort";
 
 constexpr static string_view JSON_ARG_DURATION       = "duration";
 
