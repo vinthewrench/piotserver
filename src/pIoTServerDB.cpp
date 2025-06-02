@@ -179,8 +179,12 @@ valueSchemaUnits_t schemaUnitsForString(string str){
         {"STRING", STRING},
         {"BINARY", BINARY},
         {"FLOAT", FLOAT},
-        
+        {"SECONDS", SECONDS},
+        {"MINUTES", MINUTES},
+        {"mA",MILLIAMPS},            // mA
+        {"mV", MILLIVOLTS},            // mV
         {"VOLTS" , VOLTS},
+        {"AMPS" , AMPS},
         {"TEMPERATURE" , DEGREES_C},
         {"HUMIDITY" , RH},
         {"BAROMETRIC" , HPA},
@@ -193,6 +197,7 @@ valueSchemaUnits_t schemaUnitsForString(string str){
         {"SERIAL_NO" , SERIAL_NO},
  
     };
+    
     
     auto it =  scMap.find(str);
     if (it != scMap.end()) units = it->second;

@@ -27,8 +27,6 @@ constexpr string_view NOUN_RANGE                  = "range";
 constexpr string_view NOUN_LOG                       = "log";
 constexpr string_view NOUN_ALERTS                   = "alerts";
 constexpr string_view NOUN_DEVICES                  = "devices";
-constexpr string_view NOUN_EVENTS                = "events";
-constexpr string_view NOUN_EVENTS_GROUPS        = "event.groups";
 constexpr string_view NOUN_SEQUENCES              = "sequences";
 constexpr string_view NOUN_SEQUENCE_GROUPS        = "sequence.groups";
 
@@ -213,7 +211,7 @@ constexpr static string_view PROP_DEVICE_SPRINKLER    = "SPRINKLER";
  //constexpr static string_view PROP_SENSOR_ID_SHT25        = "SHT25";
  //constexpr static string_view PROP_SENSOR_ID_ADS1115     = "ADS1115";
  //constexpr static string_view PROP_DEVICE_PCA9671         = "PCA9671";
- //constexpr static string_view PROP_DEVICE_TCA9534         = "TCA9534";
+ //constexpr static string_view PROP_DEVICE_SAMPLE         = "SAMPLE";
 
  */
 constexpr static string_view PROP_DEVICE_BUILT_IN    = "@@@@";

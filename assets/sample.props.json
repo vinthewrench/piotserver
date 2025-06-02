@@ -1,0 +1,10 @@
+{
+    "devices": [
+        {
+            "device_type": "SAMPLE",
+            "data_type": "SECONDS",
+            "key":      "RUN_TIME",
+            "title":    "Run Time"
+        }
+    ]
+}

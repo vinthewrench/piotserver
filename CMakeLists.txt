@@ -86,9 +86,7 @@ add_subdirectory("drivers/SHT25")
 add_subdirectory("drivers/SHT30")
 add_subdirectory("drivers/TCA9534")
 add_subdirectory("drivers/TMP10X")
+add_subdirectory("drivers/SAMPLE")
 
 add_executable("${APP_NAME}" ${SOURCES})
 target_link_libraries("${APP_NAME}" ${PROJECT_LINK_LIBS})
-
-add_custom_command(TARGET "${APP_NAME}" POST_BUILD
-  COMMAND ls -al plugins/ )

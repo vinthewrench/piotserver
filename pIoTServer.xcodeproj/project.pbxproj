@@ -57,6 +57,8 @@
 		2EAB53F72D04F14800F8B585 /* I2C.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB53F62D04F14800F8B585 /* I2C.cpp */; };
 		2ECA50152D308AA000565C13 /* EventTrigger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2ECA50132D308AA000565C13 /* EventTrigger.cpp */; };
 		2ECA50162D308AA000565C13 /* Action.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2ECA50112D308AA000565C13 /* Action.cpp */; };
+		2EF13F7A2DEE466900BE1D2F /* SAMPLE.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EF13F712DEE460700BE1D2F /* SAMPLE.dylib */; };
+		2EF13F7C2DEE478100BE1D2F /* sample.props.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EF13F7B2DEE478100BE1D2F /* sample.props.json */; };
 		2EF9643A2D8C6BCE00F9FA19 /* piotserver.props.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EF964372D8C6B9000F9FA19 /* piotserver.props.json */; };
 /* End PBXBuildFile section */
 
@@ -131,6 +133,13 @@
 			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
 			remoteInfo = PCA9536;
 		};
+		2EF13F702DEE460700BE1D2F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2EF13F642DEE460700BE1D2F /* SAMPLE.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
+			remoteInfo = SAMPLE;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -140,6 +149,7 @@
 			dstPath = plugins;
 			dstSubfolderSpec = 16;
 			files = (
+				2EF13F7A2DEE466900BE1D2F /* SAMPLE.dylib in CopyFiles */,
 				2EAB0B432DB038EA008BC701 /* PCA9536.dylib in CopyFiles */,
 				2EAB0AE22DAC322F008BC701 /* ADS1115.dylib in CopyFiles */,
 				2EAB0AD72DAC308E008BC701 /* QWIIC_RELAY.dylib in CopyFiles */,
@@ -172,6 +182,7 @@
 			dstPath = assets;
 			dstSubfolderSpec = 16;
 			files = (
+				2EF13F7C2DEE478100BE1D2F /* sample.props.json in CopyFiles */,
 				2EAB0B662DB2D139008BC701 /* garden.props.json in CopyFiles */,
 				2EF9643A2D8C6BCE00F9FA19 /* piotserver.props.json in CopyFiles */,
 			);
@@ -288,6 +299,8 @@
 		2ECA50112D308AA000565C13 /* Action.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Action.cpp; sourceTree = "<group>"; };
 		2ECA50132D308AA000565C13 /* EventTrigger.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EventTrigger.cpp; sourceTree = "<group>"; };
 		2ECA50142D308AA000565C13 /* EventAction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EventAction.hpp; sourceTree = "<group>"; };
+		2EF13F642DEE460700BE1D2F /* SAMPLE.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SAMPLE.xcodeproj; path = drivers/SAMPLE/SAMPLE.xcodeproj; sourceTree = "<group>"; };
+		2EF13F7B2DEE478100BE1D2F /* sample.props.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sample.props.json; sourceTree = "<group>"; };
 		2EF963C12D7637AC00F9FA19 /* exprtk.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = exprtk.hpp; sourceTree = "<group>"; };
 		2EF964372D8C6B9000F9FA19 /* piotserver.props.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = piotserver.props.json; sourceTree = "<group>"; };
 		2EF964382D8C6B9000F9FA19 /* sprinkler.piotserver.props.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sprinkler.piotserver.props.json; sourceTree = "<group>"; };
@@ -447,6 +460,7 @@
 				2EAB0ACE2DAC3071008BC701 /* QWIIC_RELAY.xcodeproj */,
 				2EAB0ADC2DAC320D008BC701 /* ADS1115.xcodeproj */,
 				2EAB0B1E2DB0388C008BC701 /* PCA9536.xcodeproj */,
+				2EF13F642DEE460700BE1D2F /* SAMPLE.xcodeproj */,
 				2E3FB4EB2D0B9C18006171E7 /* Notes */,
 				2EAB53D82CFE7DE700F8B585 /* assets */,
 				2EAB538E2CFE474900F8B585 /* src */,
@@ -546,12 +560,21 @@
 			isa = PBXGroup;
 			children = (
 				2EAB0B652DB2BE39008BC701 /* garden.props.json */,
+				2EF13F7B2DEE478100BE1D2F /* sample.props.json */,
 				2EF964372D8C6B9000F9FA19 /* piotserver.props.json */,
 				2EF964382D8C6B9000F9FA19 /* sprinkler.piotserver.props.json */,
 				2E4128252DA4689500D90924 /* sprinkler1.piotserver.props.json */,
 				2EF964392D8C6B9000F9FA19 /* test.piotserver.props.json */,
 			);
 			path = assets;
+			sourceTree = "<group>";
+		};
+		2EF13F652DEE460700BE1D2F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2EF13F712DEE460700BE1D2F /* SAMPLE.dylib */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		2EF963FB2D860F6700F9FA19 /* Devices */ = {
@@ -666,6 +689,10 @@
 					ProjectRef = 2EAB0A842DAC2B12008BC701 /* QwiicButton.xcodeproj */;
 				},
 				{
+					ProductGroup = 2EF13F652DEE460700BE1D2F /* Products */;
+					ProjectRef = 2EF13F642DEE460700BE1D2F /* SAMPLE.xcodeproj */;
+				},
+				{
 					ProductGroup = 2EAB0A442DAC26F4008BC701 /* Products */;
 					ProjectRef = 2EAB0A3A2DAC252C008BC701 /* SHT25.xcodeproj */;
 				},
@@ -758,6 +785,13 @@
 			fileType = "compiled.mach-o.dylib";
 			path = PCA9536.dylib;
 			remoteRef = 2EAB0B312DB038DE008BC701 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2EF13F712DEE460700BE1D2F /* SAMPLE.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = SAMPLE.dylib;
+			remoteRef = 2EF13F702DEE460700BE1D2F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
