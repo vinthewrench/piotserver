@@ -1,0 +1,46 @@
+{
+  "devices": [
+    {
+      "address": "0x41",
+      "device_type": "PCA9536",
+      "pins": [
+        {
+          "bit": 0,
+          "data_type": "BOOL",
+          "gpio.mode": "output",
+          "key": "RELAY_1"
+        },
+        {
+          "bit": 1,
+          "data_type": "BOOL",
+          "gpio.mode": "output",
+          "key": "RELAY_2"
+        }
+      ],
+      "title": "Actuator Relays"
+    },
+    {
+      "description": "PA-07 Door Actuator",
+      "device_type": "ACTUATOR",
+      "params": {
+        "duration": 3,
+        "extend": "RELAY_1",
+        "retract": "RELAY_2"
+      },
+      "pins": [
+        {
+          "data_type": "ACTUATOR",
+          "key": "DOOR_1_STATE",
+          "read_only": true
+        },
+        {
+          "data_type": "BOOL",
+          "key": "DOOR_1",
+          "read_only": false,
+          "tracking": "ignore"
+        }
+      ],
+      "title": "Actuator 1"
+    }
+  ]
+}
