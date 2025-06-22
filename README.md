@@ -1,5 +1,7 @@
 # piotserver - Raspberry Pi Internet of Things server 
 
+# Articles
+
 * [Farm automation made easy as Pi](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part)
 * [Controlling the Irrigation valves.](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-23c)
 * [Reading the Temperature with 1-wire Sensors](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-a4c)
@@ -44,9 +46,6 @@
  * [Iowa Scaled Engineering](https://www.iascaled.com/store/)
  * [Waveshare](https://www.waveshare.com/product/raspberry-pi/hats.htm)
  
-# Articles
-
-pointer to substack
 
 ## Status
 
