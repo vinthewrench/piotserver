@@ -1,9 +1,21 @@
 # piotserver - Raspberry Pi Internet of Things server 
 
-write some stuff here
-
-# Features
-
+* [Farm automation made easy as Pi](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part)
+* [Controlling the Irrigation valves.](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-23c)
+* [Reading the Temperature with 1-wire Sensors](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-a4c)
+* [Using the I2C protocol to communicate to sensors.](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-688)
+* [Reading Environmental Data with I2C](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-a03)
+* [Rain Sensors](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-cfd)
+* [More I/O](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-61b)
+* [Getting the data and controlling the devices from the REST API](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-8e7)
+* [Writing your own device plug-ins](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-9ef)
+* [Using software devices to build on the hardware.](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-094)
+* [How to make things happen automatically](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-12f)
+* [How to make things happen on time](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-eb8)
+* [There are always conditions to evaluate](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-3aa)
+* [Rolling my own I²C and 1-Wire interface card](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-2a8)
+ 
+ 
 ######  I2C Hardware Devices
 * [TMP10X -  Low-Power Digital Temperature Sensor](https://www.ti.com/product/TMP102) 
 * [SHT25 -  ±1.8% Digital humidity and temperature sensor](https://sensirion.com/products/catalog/SHT25)
