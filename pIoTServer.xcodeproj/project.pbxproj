@@ -59,6 +59,7 @@
 		2ECA50162D308AA000565C13 /* Action.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2ECA50112D308AA000565C13 /* Action.cpp */; };
 		2EF13F7A2DEE466900BE1D2F /* SAMPLE.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EF13F712DEE460700BE1D2F /* SAMPLE.dylib */; };
 		2EF13F7C2DEE478100BE1D2F /* sample.props.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EF13F7B2DEE478100BE1D2F /* sample.props.json */; };
+		2EF13FA92DF0EB5E00BE1D2F /* ch10.props.json in Sources */ = {isa = PBXBuildFile; fileRef = 2EF13F972DF0EB5C00BE1D2F /* ch10.props.json */; };
 		2EF9643A2D8C6BCE00F9FA19 /* piotserver.props.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EF964372D8C6B9000F9FA19 /* piotserver.props.json */; };
 /* End PBXBuildFile section */
 
@@ -301,6 +302,7 @@
 		2ECA50142D308AA000565C13 /* EventAction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EventAction.hpp; sourceTree = "<group>"; };
 		2EF13F642DEE460700BE1D2F /* SAMPLE.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SAMPLE.xcodeproj; path = drivers/SAMPLE/SAMPLE.xcodeproj; sourceTree = "<group>"; };
 		2EF13F7B2DEE478100BE1D2F /* sample.props.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sample.props.json; sourceTree = "<group>"; };
+		2EF13F972DF0EB5C00BE1D2F /* ch10.props.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ch10.props.json; sourceTree = "<group>"; };
 		2EF963C12D7637AC00F9FA19 /* exprtk.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = exprtk.hpp; sourceTree = "<group>"; };
 		2EF964372D8C6B9000F9FA19 /* piotserver.props.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = piotserver.props.json; sourceTree = "<group>"; };
 		2EF964382D8C6B9000F9FA19 /* sprinkler.piotserver.props.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sprinkler.piotserver.props.json; sourceTree = "<group>"; };
@@ -561,6 +563,7 @@
 			children = (
 				2EAB0B652DB2BE39008BC701 /* garden.props.json */,
 				2EF13F7B2DEE478100BE1D2F /* sample.props.json */,
+				2EF13F972DF0EB5C00BE1D2F /* ch10.props.json */,
 				2EF964372D8C6B9000F9FA19 /* piotserver.props.json */,
 				2EF964382D8C6B9000F9FA19 /* sprinkler.piotserver.props.json */,
 				2E4128252DA4689500D90924 /* sprinkler1.piotserver.props.json */,
@@ -640,6 +643,7 @@
 				TargetAttributes = {
 					2EAB537D2CFE46F000F8B585 = {
 						CreatedOnToolsVersion = 16.1;
+						LastSwiftMigration = 1610;
 					};
 				};
 			};
@@ -831,6 +835,7 @@
 				2EAB0AA82DAC2DB4008BC701 /* VELM6030.cpp in Sources */,
 				2EAB0AA92DAC2DB4008BC701 /* VELM6030_Device.cpp in Sources */,
 				2E53F9402D59507B0001D619 /* TCPServer.cpp in Sources */,
+				2EF13FA92DF0EB5E00BE1D2F /* ch10.props.json in Sources */,
 				2E53F9412D59507B0001D619 /* http_parser.c in Sources */,
 				2E53F9422D59507B0001D619 /* TimeStamp.cpp in Sources */,
 				2ECA50162D308AA000565C13 /* Action.cpp in Sources */,
@@ -961,6 +966,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++23";
+				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = assets/piotserver.props.json;
@@ -969,6 +975,8 @@
 				GCC_WARN_PEDANTIC = YES;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/macstuff/macincludes";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -976,6 +984,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++23";
+				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = assets/piotserver.props.json;
@@ -984,6 +993,7 @@
 				GCC_WARN_PEDANTIC = YES;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/macstuff/macincludes";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};

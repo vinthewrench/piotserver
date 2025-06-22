@@ -444,16 +444,19 @@ pIoTServerDevice* pIoTServerMgr::createpIoTServerDevice(string driverName, strin
     string dllPath = "plugins/" + driverName + DLL_EXT;
     // load the symbols
     void *handle = dlopen(dllPath.c_str(), RTLD_LAZY);
-    
-    pIoTServerDeviceFactory_t* create_plugin = (pIoTServerDeviceFactory_t*) dlsym(handle, "factory");
-    if(create_plugin){
-        // create an instance of the class
-        pIoTServerDevice* plugin = create_plugin(deviceID, driverName);
-        if(plugin){
-            LOGT_INFO("Created plugin for %s(%s)",driverName.c_str(), deviceID.c_str() );
-            return plugin;
+    if(handle){
+        pIoTServerDeviceFactory_t* create_plugin = (pIoTServerDeviceFactory_t*) dlsym(handle, "factory");
+        if(create_plugin){
+            // create an instance of the class
+            pIoTServerDevice* plugin = create_plugin(deviceID, driverName);
+            if(plugin){
+                LOGT_INFO("Created plugin for %s(%s)",driverName.c_str(), deviceID.c_str() );
+                return plugin;
+            }
         }
     }
+    
+
     // try hardcoded
     
     pIoTServerDevice::builtInDevicefactoryCallback_t factory;
