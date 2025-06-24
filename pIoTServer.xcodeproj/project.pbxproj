@@ -26,6 +26,7 @@
 		2E53F9412D59507B0001D619 /* http_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 2E53F9312D59507B0001D619 /* http_parser.c */; };
 		2E53F9422D59507B0001D619 /* TimeStamp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E53F9382D59507B0001D619 /* TimeStamp.cpp */; };
 		2E5B763B2D3977CD00FDEFF7 /* pIoTServerEvaluator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E5B763A2D3977CD00FDEFF7 /* pIoTServerEvaluator.cpp */; };
+		2E7D2A8F2E09FB3C000B8F6E /* PWRgate.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2E7D2A8E2E09FB21000B8F6E /* PWRgate.dylib */; };
 		2EAB0A422DAC255F008BC701 /* SHT25.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A402DAC2555008BC701 /* SHT25.dylib */; };
 		2EAB0A5A2DAC272D008BC701 /* SHT30.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A512DAC2701008BC701 /* SHT30.dylib */; };
 		2EAB0A5B2DAC2733008BC701 /* MCP23008.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A572DAC270B008BC701 /* MCP23008.dylib */; };
@@ -36,8 +37,6 @@
 		2EAB0A8B2DAC2B30008BC701 /* QwiicButton.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A892DAC2B12008BC701 /* QwiicButton.dylib */; };
 		2EAB0AA82DAC2DB4008BC701 /* VELM6030.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB0AA52DAC2DB4008BC701 /* VELM6030.cpp */; };
 		2EAB0AA92DAC2DB4008BC701 /* VELM6030_Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EAB0AA72DAC2DB4008BC701 /* VELM6030_Device.cpp */; };
-		2EAB0AD52DAC307B008BC701 /* QWIIC_RELAY.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 2EAB0AD32DAC3071008BC701 /* QWIIC_RELAY.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		2EAB0AD72DAC308E008BC701 /* QWIIC_RELAY.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0AD32DAC3071008BC701 /* QWIIC_RELAY.dylib */; };
 		2EAB0AE22DAC322F008BC701 /* ADS1115.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0AE12DAC320D008BC701 /* ADS1115.dylib */; };
 		2EAB0B432DB038EA008BC701 /* PCA9536.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0B322DB038DE008BC701 /* PCA9536.dylib */; };
 		2EAB0B662DB2D139008BC701 /* garden.props.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0B652DB2BE39008BC701 /* garden.props.json */; };
@@ -64,6 +63,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		2E7D2A8D2E09FB21000B8F6E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2E7D2A892E09FB21000B8F6E /* PWRgate.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
+			remoteInfo = PWRgate;
+		};
 		2EAB0A502DAC2701008BC701 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 2EAB0A4C2DAC2701008BC701 /* SHT30.xcodeproj */;
@@ -113,13 +119,6 @@
 			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
 			remoteInfo = QwiicButton;
 		};
-		2EAB0AD22DAC3071008BC701 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 2EAB0ACE2DAC3071008BC701 /* QWIIC_RELAY.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
-			remoteInfo = QWIIC_RELAY;
-		};
 		2EAB0AE02DAC320D008BC701 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 2EAB0ADC2DAC320D008BC701 /* ADS1115.xcodeproj */;
@@ -150,10 +149,10 @@
 			dstPath = plugins;
 			dstSubfolderSpec = 16;
 			files = (
+				2E7D2A8F2E09FB3C000B8F6E /* PWRgate.dylib in CopyFiles */,
 				2EF13F7A2DEE466900BE1D2F /* SAMPLE.dylib in CopyFiles */,
 				2EAB0B432DB038EA008BC701 /* PCA9536.dylib in CopyFiles */,
 				2EAB0AE22DAC322F008BC701 /* ADS1115.dylib in CopyFiles */,
-				2EAB0AD72DAC308E008BC701 /* QWIIC_RELAY.dylib in CopyFiles */,
 				2EAB0A8B2DAC2B30008BC701 /* QwiicButton.dylib in CopyFiles */,
 				2EAB0A7B2DAC2A07008BC701 /* TCA9534.dylib in CopyFiles */,
 				2EAB0A732DAC297A008BC701 /* PCA9671.dylib in CopyFiles */,
@@ -164,17 +163,6 @@
 				2EAB0A422DAC255F008BC701 /* SHT25.dylib in CopyFiles */,
 				2E4129252DAC13D600D90924 /* TMP10X.dylib in CopyFiles */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2EAB0AD62DAC307B008BC701 /* Embed Libraries */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				2EAB0AD52DAC307B008BC701 /* QWIIC_RELAY.dylib in Embed Libraries */,
-			);
-			name = "Embed Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2EAB537C2CFE46F000F8B585 /* CopyFiles */ = {
@@ -239,6 +227,7 @@
 		2E53F9382D59507B0001D619 /* TimeStamp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeStamp.cpp; sourceTree = "<group>"; };
 		2E5B76392D3977CD00FDEFF7 /* pIoTServerEvaluator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pIoTServerEvaluator.hpp; sourceTree = "<group>"; };
 		2E5B763A2D3977CD00FDEFF7 /* pIoTServerEvaluator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pIoTServerEvaluator.cpp; sourceTree = "<group>"; };
+		2E7D2A892E09FB21000B8F6E /* PWRgate.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PWRgate.xcodeproj; path = drivers/PWRgate/PWRgate.xcodeproj; sourceTree = "<group>"; };
 		2EA8AFE02D4C1D930007CFB9 /* docker-compose.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "docker-compose.yml"; sourceTree = "<group>"; };
 		2EAB0A3A2DAC252C008BC701 /* SHT25.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SHT25.xcodeproj; path = drivers/SHT25/SHT25.xcodeproj; sourceTree = SOURCE_ROOT; };
 		2EAB0A402DAC2555008BC701 /* SHT25.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = SHT25.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -360,6 +349,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		2E7D2A8A2E09FB21000B8F6E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2E7D2A8E2E09FB21000B8F6E /* PWRgate.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		2EAB0A442DAC26F4008BC701 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -426,7 +423,6 @@
 		2EAB0ACF2DAC3071008BC701 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2EAB0AD32DAC3071008BC701 /* QWIIC_RELAY.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -450,6 +446,7 @@
 		2EAB53752CFE46F000F8B585 = {
 			isa = PBXGroup;
 			children = (
+				2E7D2A892E09FB21000B8F6E /* PWRgate.xcodeproj */,
 				2EAB0A642DAC28C6008BC701 /* MCP3427.xcodeproj */,
 				2EAB0A522DAC270A008BC701 /* MCP23008.xcodeproj */,
 				2EAB0A4C2DAC2701008BC701 /* SHT30.xcodeproj */,
@@ -619,7 +616,6 @@
 				2EAB537B2CFE46F000F8B585 /* Frameworks */,
 				2EAB537C2CFE46F000F8B585 /* CopyFiles */,
 				2E4128C52DAB032500D90924 /* CopyFiles */,
-				2EAB0AD62DAC307B008BC701 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -685,6 +681,10 @@
 					ProjectRef = 2EAB0A6C2DAC2964008BC701 /* PCA9671.xcodeproj */;
 				},
 				{
+					ProductGroup = 2E7D2A8A2E09FB21000B8F6E /* Products */;
+					ProjectRef = 2E7D2A892E09FB21000B8F6E /* PWRgate.xcodeproj */;
+				},
+				{
 					ProductGroup = 2EAB0ACF2DAC3071008BC701 /* Products */;
 					ProjectRef = 2EAB0ACE2DAC3071008BC701 /* QWIIC_RELAY.xcodeproj */;
 				},
@@ -721,6 +721,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		2E7D2A8E2E09FB21000B8F6E /* PWRgate.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = PWRgate.dylib;
+			remoteRef = 2E7D2A8D2E09FB21000B8F6E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		2EAB0A512DAC2701008BC701 /* SHT30.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
@@ -768,13 +775,6 @@
 			fileType = "compiled.mach-o.dylib";
 			path = QwiicButton.dylib;
 			remoteRef = 2EAB0A882DAC2B12008BC701 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		2EAB0AD32DAC3071008BC701 /* QWIIC_RELAY.dylib */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.dylib";
-			path = QWIIC_RELAY.dylib;
-			remoteRef = 2EAB0AD22DAC3071008BC701 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		2EAB0AE12DAC320D008BC701 /* ADS1115.dylib */ = {
@@ -969,7 +969,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = assets/piotserver.props.json;
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = PDXWT4JFG9;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_WARN_PEDANTIC = YES;
@@ -987,7 +987,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = assets/piotserver.props.json;
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = PDXWT4JFG9;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_WARN_PEDANTIC = YES;

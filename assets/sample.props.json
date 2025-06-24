@@ -5,6 +5,49 @@
             "data_type": "SECONDS",
             "key":      "RUN_TIME",
             "title":    "Run Time"
+        },
+        
+        {
+            "device_type": "PWRGate",
+            "params" : {
+                "tty" : "/dev/tty.usbmodem14201",
+                "tty" : "/dev/tty.Bluetooth-Incoming-Port",
+                "speed": 9600
+            },
+
+             "pins": [
+                {
+                    "bit": 1,
+                    "data_type": "STRING",
+                    "key": "PWR STATUS",
+                    "title": "PWRGate STATUS"
+                },
+                {
+                    "bit": 2,
+                    "data_type": "VOLTS",
+                    "key": "POWER_SUPPLY",
+                    "title": "Power Supply"
+                },
+                {
+                    "bit": 3,
+                    "data_type": "VOLTS",
+                    "key": "BATTERY_VOLTS",
+                    "title": "Battery Volts"
+                },
+                {
+                    "bit": 4,
+                    "data_type": "AMPS",
+                    "key": "CHARGE_AMPS",
+                    "title": "Charge Current"
+                },
+                {
+                    "bit": 5,
+                    "data_type": "VOLTS",
+                    "key": "SOLAR_VOLTS",
+                    "title": "Solar Volts"
+                }
+
+            ]
         }
     ]
 }

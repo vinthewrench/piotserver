@@ -148,6 +148,7 @@ make
 
 # test it
  ./piotserver  -d  -p -f assets
+ ./piotserver -d -p --assets garden -f garden.props.json
  ```
  
 Once you have setup the proper piotserver.props.json script and your devices are working
