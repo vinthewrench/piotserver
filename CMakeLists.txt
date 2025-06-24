@@ -86,6 +86,7 @@ add_subdirectory("drivers/SHT25")
 add_subdirectory("drivers/SHT30")
 add_subdirectory("drivers/TCA9534")
 add_subdirectory("drivers/TMP10X")
+add_subdirectory("drivers/PWRgate")
 add_subdirectory("drivers/SAMPLE")
 
 add_executable("${APP_NAME}" ${SOURCES})
