@@ -323,8 +323,6 @@ void PWRgate_Device::stop(){
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
      }
     _thread.join();
-
-    
 }
 
 bool PWRgate_Device::setEnabled(bool enable){
@@ -496,8 +494,7 @@ void PWRgate_Device::actionThread(){
         }
    
         /* wait for something to happen on the socket */
-        
-        // we use a timeout so we can end this thread when _isSetup is false
+        // we use a timeout so we can end this thread when _running is false
         struct timeval selTimeout;
         selTimeout.tv_sec = 2;       /* timeout (secs.) */
         selTimeout.tv_usec = 0;            /* 200000 microseconds */
@@ -507,9 +504,9 @@ void PWRgate_Device::actionThread(){
         
         int numReady = select(_max_fds+1, &dup, NULL, NULL, &selTimeout);
         if( numReady == -1 ) {
-            LOGT_ERROR("Serial port %s select() Error: %d %s", _ttyPath.c_str(),
-                       errno, strerror(errno));
-            pg_state = STATE_ERROR;
+//            LOGT_ERROR("Serial port %s select() Error: %d %s", _ttyPath.c_str(),
+//                       errno, strerror(errno));
+             pg_state = STATE_ERROR;
             break;
         }
         else if(numReady == 0){
@@ -520,13 +517,14 @@ void PWRgate_Device::actionThread(){
             }
              continue;
         }
-        else  if ((_fd != -1)  && FD_ISSET(_fd, &dup)) {
+        else if ((_fd != -1)  && FD_ISSET(_fd, &dup)) {
             
             u_int8_t c;
             size_t nbytes =  (size_t)::read( _fd, &c, 1 );
             
             if(nbytes == 1){
 
+    //            printf("%02x %c \n", c,c);
                 switch (pg_state) {
                         
                     case  STATE_INIT:
@@ -579,12 +577,12 @@ void PWRgate_Device::actionThread(){
                                     _charge_current     = charge_current;
                                     _sol_volts          = sol_volts ;
     
-                                   cout << "state: " << chargeState
-                                   << " PS: " << ps_volts << "V"
-                                   << " BAT: " <<  bat_volts << "V"
-                                   << " @ " <<  charge_current << "A"
-                                   << " SOL: " <<  sol_volts << "V"
-                                   << endl;
+//                                   cout << "state: " << chargeState
+//                                   << " PS: " << ps_volts << "V"
+//                                   << " BAT: " <<  bat_volts << "V"
+//                                   << " @ " <<  charge_current << "A"
+//                                   << " SOL: " <<  sol_volts << "V"
+//                                   << endl;
 
                                     _dataDidChange = true;
                                 }
