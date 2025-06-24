@@ -26,7 +26,7 @@
 		2E53F9412D59507B0001D619 /* http_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 2E53F9312D59507B0001D619 /* http_parser.c */; };
 		2E53F9422D59507B0001D619 /* TimeStamp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E53F9382D59507B0001D619 /* TimeStamp.cpp */; };
 		2E5B763B2D3977CD00FDEFF7 /* pIoTServerEvaluator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E5B763A2D3977CD00FDEFF7 /* pIoTServerEvaluator.cpp */; };
-		2E7D2A8F2E09FB3C000B8F6E /* PWRgate.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2E7D2A8E2E09FB21000B8F6E /* PWRgate.dylib */; };
+		2E7D2AC52E0B0D2D000B8F6E /* PWRGATE.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2E7D2AB72E0B0D23000B8F6E /* PWRGATE.dylib */; };
 		2EAB0A422DAC255F008BC701 /* SHT25.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A402DAC2555008BC701 /* SHT25.dylib */; };
 		2EAB0A5A2DAC272D008BC701 /* SHT30.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A512DAC2701008BC701 /* SHT30.dylib */; };
 		2EAB0A5B2DAC2733008BC701 /* MCP23008.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2EAB0A572DAC270B008BC701 /* MCP23008.dylib */; };
@@ -63,12 +63,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		2E7D2A8D2E09FB21000B8F6E /* PBXContainerItemProxy */ = {
+		2E7D2AB62E0B0D23000B8F6E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 2E7D2A892E09FB21000B8F6E /* PWRgate.xcodeproj */;
+			containerPortal = 2E7D2A892E09FB21000B8F6E /* PWRGATE.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 2E41286D2DAAFE2E00D90924;
-			remoteInfo = PWRgate;
+			remoteInfo = PWRGATE;
 		};
 		2EAB0A502DAC2701008BC701 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -149,7 +149,7 @@
 			dstPath = plugins;
 			dstSubfolderSpec = 16;
 			files = (
-				2E7D2A8F2E09FB3C000B8F6E /* PWRgate.dylib in CopyFiles */,
+				2E7D2AC52E0B0D2D000B8F6E /* PWRGATE.dylib in CopyFiles */,
 				2EF13F7A2DEE466900BE1D2F /* SAMPLE.dylib in CopyFiles */,
 				2EAB0B432DB038EA008BC701 /* PCA9536.dylib in CopyFiles */,
 				2EAB0AE22DAC322F008BC701 /* ADS1115.dylib in CopyFiles */,
@@ -227,7 +227,7 @@
 		2E53F9382D59507B0001D619 /* TimeStamp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeStamp.cpp; sourceTree = "<group>"; };
 		2E5B76392D3977CD00FDEFF7 /* pIoTServerEvaluator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pIoTServerEvaluator.hpp; sourceTree = "<group>"; };
 		2E5B763A2D3977CD00FDEFF7 /* pIoTServerEvaluator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pIoTServerEvaluator.cpp; sourceTree = "<group>"; };
-		2E7D2A892E09FB21000B8F6E /* PWRgate.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PWRgate.xcodeproj; path = drivers/PWRgate/PWRgate.xcodeproj; sourceTree = "<group>"; };
+		2E7D2A892E09FB21000B8F6E /* PWRGATE.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PWRGATE.xcodeproj; path = drivers/PWRGATE/PWRGATE.xcodeproj; sourceTree = "<group>"; };
 		2EA8AFE02D4C1D930007CFB9 /* docker-compose.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "docker-compose.yml"; sourceTree = "<group>"; };
 		2EAB0A3A2DAC252C008BC701 /* SHT25.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SHT25.xcodeproj; path = drivers/SHT25/SHT25.xcodeproj; sourceTree = SOURCE_ROOT; };
 		2EAB0A402DAC2555008BC701 /* SHT25.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = SHT25.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -349,10 +349,10 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		2E7D2A8A2E09FB21000B8F6E /* Products */ = {
+		2E7D2AAD2E0B0D23000B8F6E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2E7D2A8E2E09FB21000B8F6E /* PWRgate.dylib */,
+				2E7D2AB72E0B0D23000B8F6E /* PWRGATE.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -446,7 +446,7 @@
 		2EAB53752CFE46F000F8B585 = {
 			isa = PBXGroup;
 			children = (
-				2E7D2A892E09FB21000B8F6E /* PWRgate.xcodeproj */,
+				2E7D2A892E09FB21000B8F6E /* PWRGATE.xcodeproj */,
 				2EAB0A642DAC28C6008BC701 /* MCP3427.xcodeproj */,
 				2EAB0A522DAC270A008BC701 /* MCP23008.xcodeproj */,
 				2EAB0A4C2DAC2701008BC701 /* SHT30.xcodeproj */,
@@ -681,8 +681,8 @@
 					ProjectRef = 2EAB0A6C2DAC2964008BC701 /* PCA9671.xcodeproj */;
 				},
 				{
-					ProductGroup = 2E7D2A8A2E09FB21000B8F6E /* Products */;
-					ProjectRef = 2E7D2A892E09FB21000B8F6E /* PWRgate.xcodeproj */;
+					ProductGroup = 2E7D2AAD2E0B0D23000B8F6E /* Products */;
+					ProjectRef = 2E7D2A892E09FB21000B8F6E /* PWRGATE.xcodeproj */;
 				},
 				{
 					ProductGroup = 2EAB0ACF2DAC3071008BC701 /* Products */;
@@ -721,11 +721,11 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		2E7D2A8E2E09FB21000B8F6E /* PWRgate.dylib */ = {
+		2E7D2AB72E0B0D23000B8F6E /* PWRGATE.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			path = PWRgate.dylib;
-			remoteRef = 2E7D2A8D2E09FB21000B8F6E /* PBXContainerItemProxy */;
+			path = PWRGATE.dylib;
+			remoteRef = 2E7D2AB62E0B0D23000B8F6E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		2EAB0A512DAC2701008BC701 /* SHT30.dylib */ = {

@@ -236,7 +236,7 @@
         {
             "device_type": "PWRGate",
             "params" : {
-                "tty" : "/dev/tty.ttyACM0",
+                "tty" : "/dev/ttyACM0",
                 "speed": 9600
             },
 

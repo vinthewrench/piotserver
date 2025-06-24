@@ -164,8 +164,8 @@ PWRgate_Device::PWRgate_Device(string devID, string driverName){
     _dataDidChange      = false;
     
        json j = {
-             { PROP_DEVICE_MFG_URL, "https://powerwerx.com/west-mountain-radio-epic-pwrgate"},
-              { PROP_DEVICE_MFG_PART, "West Mountain Radio Epic PWRgate 12V Backup Power System"},
+            { PROP_DEVICE_MFG_URL, "https://powerwerx.com/west-mountain-radio-epic-pwrgate"},
+            { PROP_DEVICE_MFG_PART, "West Mountain Radio Epic PWRgate 12V Backup Power System"},
        };
     
     setProperties(j);
@@ -316,7 +316,6 @@ void PWRgate_Device::stop(){
     LOGT_DEBUG("PowerGate stop");
 
     _deviceState = DEVICE_STATE_DISCONNECTED;
-    
     _running = false;
    
     // wait for action thread to complete
@@ -488,7 +487,7 @@ void PWRgate_Device::actionThread(){
         int lastError = 0;
         
         // is the port setup yet?
-        if (! isConnected()){
+        if (! isConnected() && _running){
             if(!openSerialPort(lastError)){
                 std::this_thread::sleep_for(std::chrono::seconds(2));
                 continue;

@@ -27,7 +27,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		2E41286D2DAAFE2E00D90924 /* PWRgate.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = PWRgate.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		2E41286D2DAAFE2E00D90924 /* PWRGATE.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = PWRGATE.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E4128EA2DAC105200D90924 /* CommonDefs.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = CommonDefs.hpp; path = ../../src/CommonDefs.hpp; sourceTree = SOURCE_ROOT; };
 		2E4128EB2DAC105200D90924 /* json.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = json.hpp; path = ../../src/json.hpp; sourceTree = SOURCE_ROOT; };
 		2E4128F62DAC106900D90924 /* CMakeLists.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
@@ -87,7 +87,7 @@
 		2E41286E2DAAFE2E00D90924 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2E41286D2DAAFE2E00D90924 /* PWRgate.dylib */,
+				2E41286D2DAAFE2E00D90924 /* PWRGATE.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -117,9 +117,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		2E41286C2DAAFE2E00D90924 /* PWRgate */ = {
+		2E41286C2DAAFE2E00D90924 /* PWRGATE */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2E4128712DAAFE2E00D90924 /* Build configuration list for PBXNativeTarget "PWRgate" */;
+			buildConfigurationList = 2E4128712DAAFE2E00D90924 /* Build configuration list for PBXNativeTarget "PWRGATE" */;
 			buildPhases = (
 				2E4128692DAAFE2E00D90924 /* Headers */,
 				2E41286A2DAAFE2E00D90924 /* Sources */,
@@ -129,11 +129,11 @@
 			);
 			dependencies = (
 			);
-			name = PWRgate;
+			name = PWRGATE;
 			packageProductDependencies = (
 			);
 			productName = TCA9534;
-			productReference = 2E41286D2DAAFE2E00D90924 /* PWRgate.dylib */;
+			productReference = 2E41286D2DAAFE2E00D90924 /* PWRGATE.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -150,7 +150,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 2E4128682DAAFE2E00D90924 /* Build configuration list for PBXProject "PWRgate" */;
+			buildConfigurationList = 2E4128682DAAFE2E00D90924 /* Build configuration list for PBXProject "PWRGATE" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -164,7 +164,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2E41286C2DAAFE2E00D90924 /* PWRgate */,
+				2E41286C2DAAFE2E00D90924 /* PWRGATE */,
 			);
 		};
 /* End PBXProject section */
@@ -333,7 +333,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2E4128682DAAFE2E00D90924 /* Build configuration list for PBXProject "PWRgate" */ = {
+		2E4128682DAAFE2E00D90924 /* Build configuration list for PBXProject "PWRGATE" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2E41286F2DAAFE2E00D90924 /* Debug */,
@@ -342,7 +342,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2E4128712DAAFE2E00D90924 /* Build configuration list for PBXNativeTarget "PWRgate" */ = {
+		2E4128712DAAFE2E00D90924 /* Build configuration list for PBXNativeTarget "PWRGATE" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2E4128722DAAFE2E00D90924 /* Debug */,

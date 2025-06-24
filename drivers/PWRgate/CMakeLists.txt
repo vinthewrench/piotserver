@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.0)
 #SET (CMAKE_C_COMPILER             "clang")
 #SET (CMAKE_CXX_COMPILER            "clang++")
  
-set(LIB_NAME "PWRgate")
+set(LIB_NAME "PWRGATE")
 project("${LIB_NAME}" VERSION 1.0.1 DESCRIPTION "PWRgate plugin")
 
 
@@ -33,5 +33,5 @@ target_include_directories("${LIB_NAME}" PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../
 target_include_directories("${LIB_NAME}" PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_custom_command(TARGET "${LIB_NAME}" POST_BUILD 
-  COMMAND  mkdir -p ../../plugins && cp libPWRgate.so ../../plugins/PWRgate.so  )
+  COMMAND  mkdir -p ../../plugins && cp libPWRGATE.so ../../plugins/PWRGATE.so  )
   
