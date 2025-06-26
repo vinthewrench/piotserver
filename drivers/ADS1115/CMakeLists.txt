@@ -40,7 +40,7 @@ target_include_directories("${LIB_NAME}" PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 if(APPLE)
  add_custom_command(TARGET "${LIB_NAME}" POST_BUILD
 COMMAND  mkdir -p ../../plugins && cp libADS1115.dylib ../../plugins/ADS1115.dylib  )
- elseif()
+ else()
  add_custom_command(TARGET "${LIB_NAME}" POST_BUILD
 COMMAND  mkdir -p ../../plugins && cp libADS1115.so ../../plugins/ADS1115.so  )
  endif()

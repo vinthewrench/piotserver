@@ -41,7 +41,7 @@ target_include_directories("${LIB_NAME}" PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 if(APPLE)
  add_custom_command(TARGET "${LIB_NAME}" POST_BUILD
 COMMAND  mkdir -p ../../plugins && cp libSHT25.dylib ../../plugins/SHT25.dylib  )
- elseif()
+ else()
  add_custom_command(TARGET "${LIB_NAME}" POST_BUILD
 COMMAND  mkdir -p ../../plugins && cp libSHT25.so ../../plugins/SHT25.so  )
 endif()
