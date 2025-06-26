@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.0)
 
 #SET (CMAKE_C_COMPILER             "clang")
 #SET (CMAKE_CXX_COMPILER            "clang++")
- 
+
 set(LIB_NAME "SHT30")
 project("${LIB_NAME}" VERSION 1.0.1 DESCRIPTION "SHT30 plugin")
 
@@ -35,9 +35,13 @@ set(MODULE_FILES
 add_library("${LIB_NAME}" SHARED ${MODULE_FILES})
 
 target_include_directories("${LIB_NAME}" PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../src)
-target_include_directories("${LIB_NAME}" PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../RESTServer)
 target_include_directories("${LIB_NAME}" PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_custom_command(TARGET "${LIB_NAME}" POST_BUILD 
-  COMMAND  mkdir -p ../../plugins && cp libSHT30.so ../../plugins/SHT30.so  )
-  
+
+if(APPLE)
+ add_custom_command(TARGET "${LIB_NAME}" POST_BUILD
+COMMAND  mkdir -p ../../plugins && cp libSHT30.dylib ../../plugins/libSHT30.dylib  )
+ elseif()
+ add_custom_command(TARGET "${LIB_NAME}" POST_BUILD
+COMMAND  mkdir -p ../../plugins && cp libSHT30.so ../../plugins/libSHT30.so  )
+endif()

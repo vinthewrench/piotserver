@@ -11,7 +11,7 @@
             "data_type": "TEMPERATURE",
             "description": "Plot A Soil DS2482",
             "device_type": "1wire",
-            "interval": 3600,
+            "interval": 60,
             "key": "PLOT1",
             "title": "Soil Temp Plot A",
             "tracking": "track.changes"
@@ -21,7 +21,7 @@
             "data_type": "TEMPERATURE",
             "description": "Greenhouse DS2482",
             "device_type": "1wire",
-            "interval": 3600,
+            "interval": 60,
             "key": "GREENHOUSE",
             "title": "Greenhouse Temperature",
             "tracking": "track.changes"
@@ -80,26 +80,26 @@
             "title": "Garden"
         },
         {
-            "device_type": "MCP23008",
             "address": "0x20",
-            "title": "NCD Relay+I/O",
+            "device_type": "MCP23008",
             "interval": 5,
             "pins": [
                 {
                     "bit": 0,
                     "data_type": "BOOL",
+                    "gpio.mode": "output",
                     "key": "GREENHOUSE_LIGHT",
-                    "title": "Greenhouse Light",
-                    "gpio.mode": "output"
+                    "title": "Greenhouse Light"
                 },
                 {
                     "bit": 7,
                     "data_type": "BOOL",
+                    "gpio.mode": "input",
                     "key": "RAIN_SENSOR",
-                    "title": "Orbit Rain Sensor",
-                    "gpio.mode": "input"
+                    "title": "Orbit Rain Sensor"
                 }
-            ]
+            ],
+            "title": "NCD Relay+I/O"
         },
         {
             "device_type": "GPIO",
@@ -167,80 +167,78 @@
             "device_type": "SPRINKLER",
             "pins": [
                 {
-                    "key": "SPRK_BOOSTER",
                     "data_type": "BOOSTER",
+                    "key": "SPRK_BOOSTER",
                     "other.props": {
-                        "proxy_key": "RELAY_8",
-                        "duration": 5
+                        "duration": 5,
+                        "proxy_key": "RELAY_8"
                     }
                 },
                 {
                     "data_type": "BOOL",
                     "key": "SPRK_1",
-                    "title": "plot A",
                     "other.props": {
                         "proxy_key": "RELAY_1"
-                    }
+                    },
+                    "title": "Cucumbers"
                 },
                 {
                     "data_type": "BOOL",
                     "key": "SPRK_2",
-                    "title": "plot B",
                     "other.props": {
                         "proxy_key": "RELAY_2"
-                    }
+                    },
+                    "title": "Chard/Kale"
                 },
                 {
                     "data_type": "BOOL",
                     "key": "SPRK_3",
-                    "title": "plot C",
                     "other.props": {
                         "proxy_key": "RELAY_3"
-                    }
+                    },
+                    "title": "Zucchini"
                 },
                 {
                     "data_type": "BOOL",
                     "key": "SPRK_4",
-                    "title": "plot D",
                     "other.props": {
                         "proxy_key": "RELAY_4"
-                    }
+                    },
+                    "title": "Beats"
                 },
                 {
                     "data_type": "BOOL",
                     "key": "SPRK_5",
-                    "title": "relay 5",
                     "other.props": {
                         "proxy_key": "RELAY_5"
-                    }
+                    },
+                    "title": "Tomatoes"
                 },
                 {
                     "data_type": "BOOL",
                     "key": "SPRK_6",
-                    "title": "relay 6",
                     "other.props": {
                         "proxy_key": "RELAY_6"
-                    }
+                    },
+                    "title": "Perennials"
                 },
                 {
                     "data_type": "BOOL",
                     "key": "SPRK_7",
-                    "title": "relay 7",
                     "other.props": {
                         "proxy_key": "RELAY_7"
-                    }
+                    },
+                    "title": "Extra"
                 }
- 
             ]
         },
         {
             "device_type": "PWRGate",
-            "params" : {
-                "tty" : "/dev/ttyACM0",
-                "speed": 9600
+            "params": {
+                "speed": 9600,
+                "tty": "/dev/ttyACM0"
             },
-
-             "pins": [
+            "pins": [
                 {
                     "bit": 1,
                     "data_type": "STRING",
@@ -271,43 +269,19 @@
                     "key": "SOLAR_VOLTS",
                     "title": "Solar Volts"
                 }
-
             ]
         }
     ],
-    "values": [],
+    "prop.file.version": {
+        "file.etag": 2,
+        "last_write": 1750953732
+    },
     "sequence": [
         {
-            "enable": true,
-            "sequenceID": "1001",
-            "name": "Greenhouse light on",
-            "trigger": {
-                "timeBase": "sunset"
-            },
-            "steps": [
-                {
-                    "duration": 120,
-                    "action": [
-                        {
-                            "cmd": "SET",
-                            "key": "GREENHOUSE_LIGHT",
-                            "value": "on"
-                        }
-                    ]
-                }
-            ]
-          },
-        
-        {
-            "enable": true,
-            "sequenceID": "1000",
-            "name": "sprinkler control",
+            "condition": "RAIN_SENSOR == 0",
             "description": "day to day sprinkler sequence",
-            "condition" : "RAIN_SENSOR == 0",
-            "trigger": {
-                "timeBase": "civil sunrise",
-                "offset": 10
-            },
+            "enable": true,
+            "name": "sprinkler control",
             "on_abort": {
                 "action": [
                     {
@@ -347,19 +321,19 @@
                     }
                 ]
             },
+            "sequenceID": "1000",
             "steps": [
                 {
-                    "duration": 10,
                     "action": [
                         {
                             "cmd": "SET",
                             "key": "SPRK_1",
                             "value": "on"
                         }
-                    ]
+                    ],
+                    "duration": 10
                 },
                 {
-                    "duration": 10,
                     "action": [
                         {
                             "cmd": "SET",
@@ -371,10 +345,10 @@
                             "key": "SPRK_2",
                             "value": "on"
                         }
-                    ]
+                    ],
+                    "duration": 10
                 },
                 {
-                    "duration": 10,
                     "action": [
                         {
                             "cmd": "SET",
@@ -386,10 +360,10 @@
                             "key": "SPRK_3",
                             "value": "on"
                         }
-                    ]
+                    ],
+                    "duration": 10
                 },
                 {
-                    "duration": 10,
                     "action": [
                         {
                             "cmd": "SET",
@@ -401,11 +375,10 @@
                             "key": "SPRK_4",
                             "value": "on"
                         }
-                    ]
+                    ],
+                    "duration": 10
                 },
-
                 {
-                    "duration": 10,
                     "action": [
                         {
                             "cmd": "SET",
@@ -417,11 +390,10 @@
                             "key": "SPRK_5",
                             "value": "on"
                         }
-                    ]
+                    ],
+                    "duration": 10
                 },
-
                 {
-                    "duration": 10,
                     "action": [
                         {
                             "cmd": "SET",
@@ -433,11 +405,10 @@
                             "key": "SPRK_6",
                             "value": "on"
                         }
-                    ]
+                    ],
+                    "duration": 10
                 },
-
                 {
-                    "duration": 10,
                     "action": [
                         {
                             "cmd": "SET",
@@ -449,20 +420,45 @@
                             "key": "SPRK_7",
                             "value": "on"
                         }
-                    ]
+                    ],
+                    "duration": 10
                 },
                 {
-                    "duration": 10,
                     "action": [
                         {
                             "cmd": "SET",
                             "key": "SPRK_7",
                             "value": "off"
                         }
-                    ]
+                    ],
+                    "duration": 10
                 }
-
-            ]
+            ],
+            "trigger": {
+                "offset": 10,
+                "timeBase": "civil sunrise"
+            }
+        },
+        {
+            "enable": true,
+            "name": "Greenhouse light on",
+            "sequenceID": "1001",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GREENHOUSE_LIGHT",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 120
+                }
+            ],
+            "trigger": {
+                "timeBase": "sunset"
+            }
         }
-    ]
+    ],
+    "values": []
 }

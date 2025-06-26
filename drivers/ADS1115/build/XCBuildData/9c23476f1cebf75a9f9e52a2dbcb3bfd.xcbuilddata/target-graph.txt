@@ -1,2 +1,0 @@
-Target dependency graph (1 target)
-Target 'ADS1115' in project 'ADS1115' (no dependencies)

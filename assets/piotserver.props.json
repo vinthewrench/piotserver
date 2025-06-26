@@ -24,29 +24,26 @@
             "title": "Temperature 49",
             "tracking": "track.range"
         },
-        
         {
             "address": "/mnt/1wire/28.793434000000/",
             "data_type": "TEMPERATURE",
             "description": "Plot A Soil Temperature",
-             "device_type": "1wire",
+            "device_type": "1wire",
             "interval": 3600,
             "key": "PLOT1",
             "title": "Soil Temp Plot A",
             "tracking": "track.changes"
         },
-
         {
-        "address": "/mnt/1wire/28.B9F533000000/",
-        "data_type": "TEMPERATURE",
-        "description": "Plot B Soil Temperature",
-        "device_type": "1wire",
-        "interval": 3600,
-        "key": "PLOT2",
-        "title": "Soil Temp Plot B",
-        "tracking": "track.changes"
+            "address": "/mnt/1wire/28.B9F533000000/",
+            "data_type": "TEMPERATURE",
+            "description": "Plot B Soil Temperature",
+            "device_type": "1wire",
+            "interval": 3600,
+            "key": "PLOT2",
+            "title": "Soil Temp Plot B",
+            "tracking": "track.changes"
         },
-
         {
             "address": "0x44",
             "description": "Outside Environment Sensor",
@@ -71,7 +68,7 @@
                     "title": "Garden Sensor Serial No",
                     "tracking": "dont.record"
                 }
-             ],
+            ],
             "title": "Garden"
         },
         {
@@ -101,70 +98,68 @@
             ]
         },
         {
-            "device_type": "MCP23008",
             "address": "0x20",
-            "title": "NCD Relay+I/O",
+            "device_type": "MCP23008",
             "interval": 5,
             "pins": [
                 {
                     "bit": 0,
                     "data_type": "BOOL",
+                    "gpio.mode": "output",
                     "key": "BIG_RELAY",
-                    "title": "Big Relay",
-                    "gpio.mode": "output"
+                    "title": "Big Relay"
                 },
                 {
                     "bit": 1,
                     "data_type": "BOOL",
+                    "gpio.mode": "output",
                     "key": "BIG_RELAY2",
-                    "title": "Big Relay2",
-                    "gpio.mode": "output"
+                    "title": "Big Relay2"
                 },
-   
                 {
                     "bit": 7,
                     "data_type": "BOOL",
+                    "gpio.mode": "input",
                     "key": "RAIN_SENSOR",
-                    "title": "Orbit Rain Sensor",
-                    "gpio.mode": "input"
+                    "title": "Orbit Rain Sensor"
+                }
+            ],
+            "title": "NCD Relay+I/O"
+        },
+        {
+            "address": "0x41",
+            "device_type": "PCA9536",
+            "enable": true,
+            "pins": [
+                {
+                    "bit": 0,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RLY41_CH1",
+                    "title": "Relay 41 CH1"
+                },
+                {
+                    "bit": 1,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RLY41_CH2",
+                    "title": "Relay 41 CH2"
                 }
             ]
         },
-   
-       {
-           "address": "0x41",
-           "device_type": "PCA9536",
-           "enable": true,
-           "pins": [
-               {
-                   "bit": 0,
-                   "data_type": "BOOL",
-                   "key": "RLY41_CH1",
-                   "title": "Relay 41 CH1",
-                   "gpio.mode": "output"
-               },
-               {
-                   "bit": 1,
-                   "data_type": "BOOL",
-                   "key": "RLY41_CH2",
-                   "title": "Relay 41 CH2",
-                   "gpio.mode": "output"
-               }
-           ]
-       },
         {
             "address": "0x49",
             "data_type": "PERCENT",
             "device_type": "TANK_DEPTH",
             "interval": 10,
             "key": "TANK_DEPTH",
+            "other.props": {
+                "tank.empty": 7800,
+                "tank.full": 15000,
+                "tank.gals": 2000
+            },
             "title": "Amount of Water in Tank",
-            "tracking": "track.range",
-            "other.props"     : {
-                "tank.empty" : 7800,
-                "tank.full"  : 15000,
-                "tank.gals" : 2000
-            }
+            "tracking": "track.range"
         },
         {
             "device_type": "GPIO",
@@ -240,166 +235,164 @@
             "device_type": "SPRINKLER",
             "pins": [
                 {
-                    "key": "SPRK_BOOSTER",
                     "data_type": "BOOSTER",
-                    "other.props"     : {
-                        "proxy_key": "RELAY_1",
-                         "duration":   5
-                     }
+                    "key": "SPRK_BOOSTER",
+                    "other.props": {
+                        "duration": 5,
+                        "proxy_key": "RELAY_1"
+                    }
                 },
-
                 {
-                    "key": "SPRK_MASTER",
                     "data_type": "MASTER_RELAY",
-                    "other.props"     : {
-                        "proxy_key": "BIG_RELAY",
-                        "duration":   4
-                     }
+                    "key": "SPRK_MASTER",
+                    "other.props": {
+                        "duration": 4,
+                        "proxy_key": "BIG_RELAY"
+                    }
                 },
                 {
                     "data_type": "BOOL",
                     "key": "SPRK_1",
-                    "title": "plot A",
-                    "other.props"     : {
+                    "other.props": {
                         "proxy_key": "RELAY_2"
-                     }
-                 },
+                    },
+                    "title": "plot A"
+                },
                 {
                     "data_type": "BOOL",
                     "key": "SPRK_2",
-                    "title": "plot B",
-                    "other.props"     : {
+                    "other.props": {
                         "proxy_key": "RELAY_3"
-                    }
+                    },
+                    "title": "plot B"
                 },
                 {
                     "data_type": "BOOL",
                     "key": "SPRK_3",
-                    "title": "plot C",
-                    "other.props"     : {
+                    "other.props": {
                         "proxy_key": "RELAY_4"
-                    }
+                    },
+                    "title": "plot C"
                 },
                 {
                     "data_type": "BOOL",
                     "key": "SPRK_4",
-                    "title": "plot D",
-                    "other.props"     : {
+                    "other.props": {
                         "proxy_key": "RELAY_5"
-                    }
+                    },
+                    "title": "plot D"
                 },
                 {
                     "data_type": "BOOL",
                     "key": "SPRK_5",
-                    "title": "relay 5",
-                    "other.props"     : {
+                    "other.props": {
                         "proxy_key": "RELAY_6"
-                    }
-                    
+                    },
+                    "title": "relay 5"
                 },
                 {
                     "data_type": "BOOL",
                     "key": "SPRK_6",
-                    "title": "relay 6",
-                    "other.props"     : {
+                    "other.props": {
                         "proxy_key": "RELAY_7"
-                    }
+                    },
+                    "title": "relay 6"
                 }
             ]
         }
-      ],
-    "values": [
-        {
-            
-          "data_type": "INT",
-          "key": "TANK_DEPTH_RAW",
-          "initial.value": 0
-       },
-        {
-          "data_type": "FLOAT",
-          "key": "TANK_DEPTH_GALS",
-          "initial.value": 0
-       }
-
-
-            ],
+    ],
+    "prop.file.version": {
+        "file.etag": 1,
+        "last_write": 1750951465
+    },
     "sequence": [
         {
-                   "enable": true,
-                   "sequenceID": "1000",
-                   "name": "sprinkler control",
-                   "description": "day to day sprinkler sequence",
-                   "trigger": {
-                       "timeBase": "civil sunrise",
-                       "offset": 10
-                  },
-                   "on_abort":  {
-                       "action": [
-                          {
-                              "cmd": "SET",
-                              "key": "SPRK_1",
-                              "value": "off"
-                          },
-                          {
-                              "cmd": "SET",
-                              "key": "SPRK_2",
-                              "value": "off"
-                          }
-                          ]
-                   },
-                   "steps": [
-                       {
-                           "duration": 10,
-                           "action": [
-                               {
-                                   "cmd": "SET",
-                                   "key": "SPRK_1",
-                                   "value": "on"
-                               }
-                           ]
-                       },
-                       {
-                           "duration": 10,
-                           "action": [
-                               {
-                                   "cmd": "SET",
-                                   "key": "SPRK_1",
-                                   "value": "off"
-                               },
-                               {
-                                   "cmd": "SET",
-                                   "key": "SPRK_2",
-                                   "value": "on"
-                               }
-                           ]
-                       },
-                       {
-                           "duration": 10,
-                           "action": [
-                               {
-                                   "cmd": "SET",
-                                   "key": "SPRK_2",
-                                   "value": "off"
-                               },
-                               {
-                                   "cmd": "SET",
-                                   "key": "SPRK_3",
-                                   "value": "on"
-                               }
-                           ]
-                       },
-                       {
-                           "duration": 10,
-                           "action": [
-                               {
-                                   "cmd": "SET",
-                                   "key": "SPRK_3",
-                                   "value": "off"
-                               }
-                           ]
-                       }
-                      
-                   ]
-               }
+            "description": "day to day sprinkler sequence",
+            "enable": true,
+            "name": "sprinkler control",
+            "on_abort": {
+                "action": [
+                    {
+                        "cmd": "SET",
+                        "key": "SPRK_1",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "SPRK_2",
+                        "value": "off"
+                    }
+                ]
+            },
+            "sequenceID": "1000",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_1",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_1",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_2",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_2",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_3",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_3",
+                            "value": "off"
+                        }
+                    ],
+                    "duration": 10
+                }
+            ],
+            "trigger": {
+                "offset": 10,
+                "timeBase": "civil sunrise"
+            }
+        }
+    ],
+    "values": [
+        {
+            "data_type": "INT",
+            "initial.value": 0,
+            "key": "TANK_DEPTH_RAW"
+        },
+        {
+            "data_type": "FLOAT",
+            "initial.value": 0,
+            "key": "TANK_DEPTH_GALS"
+        }
     ]
 }

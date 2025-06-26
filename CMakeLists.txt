@@ -1,8 +1,14 @@
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(MACOS TRUE)
+endif()
+
 SET (CMAKE_C_COMPILER             "clang")
 SET (CMAKE_CXX_COMPILER            "clang++")
 
 # SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 cmake_minimum_required(VERSION 3.0)
 
@@ -14,8 +20,11 @@ set(CXX_EXTENSIONS ON)
 
 include_directories(
     "${PROJECT_SOURCE_DIR}/src"
-	)
-	
+ if(APPLE)
+   "${PROJECT_SOURCE_DIR}/macstuff/macincludes"
+endif()
+   )
+
 file(
     GLOB
     SOURCES
@@ -59,6 +68,11 @@ file(
     src/sha256.cpp
     src/TimeStamp.cpp
     src/LogMgr.cpp
+
+ if(APPLE)
+   "${PROJECT_SOURCE_DIR}/macstuff/macincludes/macos_gpiod.cpp"
+endif()
+
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -66,13 +80,23 @@ find_package(Threads REQUIRED)
 find_package(SQLite3 REQUIRED)
 #find_package( CURL REQUIRED )
 
-set(
+if(APPLE)
+    set(
+    PROJECT_LINK_LIBS
+    sqlite3
+ #   gpiod
+ #    CURL::libcurl
+    Threads::Threads
+)
+else()
+    set(
     PROJECT_LINK_LIBS
     sqlite3
     gpiod
-#    CURL::libcurl
+ #    CURL::libcurl
     Threads::Threads
 )
+endif()
 
 add_subdirectory("drivers/ADS1115")
 add_subdirectory("drivers/BME280")

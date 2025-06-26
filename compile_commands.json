@@ -1,0 +1,686 @@
+[
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/macstuff/macincludes/macos_gpiod.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes/macos_gpiod.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes/macos_gpiod.cpp",
+  "output": "CMakeFiles/piotserver.dir/macstuff/macincludes/macos_gpiod.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/ADS1115.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/ADS1115.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/ADS1115.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/ADS1115.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/Action.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/Action.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/Action.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/Action.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/Actuator_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/Actuator_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/Actuator_Device.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/Actuator_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/EventTrigger.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/EventTrigger.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/EventTrigger.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/EventTrigger.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/GPIO.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/GPIO.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/GPIO.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/GPIO.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/I2C.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/I2C.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/RESTServerConnection.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/RESTServerConnection.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/RESTServerConnection.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/RESTServerConnection.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/REST_URL.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/REST_URL.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/REST_URL.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/REST_URL.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/RESTutils.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/RESTutils.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/RESTutils.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/RESTutils.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/RPi_RelayBoardDevice.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/RPi_RelayBoardDevice.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/RPi_RelayBoardDevice.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/RPi_RelayBoardDevice.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/Sequence.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/Sequence.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/Sequence.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/Sequence.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/ServerCmdQueue.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/ServerCmdQueue.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/ServerCmdQueue.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/ServerCmdQueue.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/ServerNouns.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/ServerNouns.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/ServerNouns.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/ServerNouns.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/SolarTimeMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/SolarTimeMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/SolarTimeMgr.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/SolarTimeMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/Sprinkler_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/Sprinkler_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/Sprinkler_Device.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/Sprinkler_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/TCPClientInfo.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TCPClientInfo.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TCPClientInfo.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/TCPClientInfo.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/TCPServer.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TCPServer.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TCPServer.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/TCPServer.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/TankDepth_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TankDepth_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TankDepth_Device.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/TankDepth_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/VELM6030.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/VELM6030.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/VELM6030.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/VELM6030.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/VELM6030_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/VELM6030_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/VELM6030_Device.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/VELM6030_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/W1_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/W1_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/W1_Device.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/W1_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/base64.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/base64.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/base64.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/base64.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif  -o CMakeFiles/piotserver.dir/src/http_parser.c.o -c /Users/vinnie/Desktop/projects/piotserver/src/http_parser.c",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/http_parser.c",
+  "output": "CMakeFiles/piotserver.dir/src/http_parser.c.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/lunar.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/lunar.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/lunar.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/lunar.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/main.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/main.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/main.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/main.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/pIoTServerAPISecretMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/pIoTServerAPISecretMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/pIoTServerAPISecretMgr.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/pIoTServerAPISecretMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/pIoTServerDB.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/pIoTServerDB.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/pIoTServerDB.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/pIoTServerDB.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/pIoTServerEvaluator.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/pIoTServerEvaluator.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/pIoTServerEvaluator.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/pIoTServerEvaluator.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/pIoTServerMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/pIoTServerMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/pIoTServerMgr.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/pIoTServerMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/sha256.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/sha256.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/sha256.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/sha256.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang++  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -std=gnu++2b -o CMakeFiles/piotserver.dir/src/sunset.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/sunset.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/sunset.cpp",
+  "output": "CMakeFiles/piotserver.dir/src/sunset.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver",
+  "command": "/usr/bin/clang  -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif  -o CMakeFiles/piotserver.dir/src/yuarel.c.o -c /Users/vinnie/Desktop/projects/piotserver/src/yuarel.c",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/yuarel.c",
+  "output": "CMakeFiles/piotserver.dir/src/yuarel.c.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115",
+  "command": "/usr/bin/clang++ -DADS1115_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115 -std=gnu++2b -fPIC -o CMakeFiles/ADS1115.dir/ADS1115_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115/ADS1115_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115/ADS1115_factory.cpp",
+  "output": "drivers/ADS1115/CMakeFiles/ADS1115.dir/ADS1115_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115",
+  "command": "/usr/bin/clang++ -DADS1115_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115 -std=gnu++2b -fPIC -o CMakeFiles/ADS1115.dir/ADS1115_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115/ADS1115_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115/ADS1115_Device.cpp",
+  "output": "drivers/ADS1115/CMakeFiles/ADS1115.dir/ADS1115_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115",
+  "command": "/usr/bin/clang++ -DADS1115_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115 -std=gnu++2b -fPIC -o CMakeFiles/ADS1115.dir/__/__/src/ADS1115.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/ADS1115.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/ADS1115.cpp",
+  "output": "drivers/ADS1115/CMakeFiles/ADS1115.dir/__/__/src/ADS1115.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115",
+  "command": "/usr/bin/clang++ -DADS1115_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115 -std=gnu++2b -fPIC -o CMakeFiles/ADS1115.dir/__/__/src/I2C.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "output": "drivers/ADS1115/CMakeFiles/ADS1115.dir/__/__/src/I2C.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115",
+  "command": "/usr/bin/clang++ -DADS1115_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115 -std=gnu++2b -fPIC -o CMakeFiles/ADS1115.dir/__/__/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "drivers/ADS1115/CMakeFiles/ADS1115.dir/__/__/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115",
+  "command": "/usr/bin/clang++ -DADS1115_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/ADS1115 -std=gnu++2b -fPIC -o CMakeFiles/ADS1115.dir/__/__/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "drivers/ADS1115/CMakeFiles/ADS1115.dir/__/__/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/BME280",
+  "command": "/usr/bin/clang++ -DBME280_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/BME280/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/BME280 -std=gnu++2b -fPIC -o CMakeFiles/BME280.dir/BME280_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/BME280/BME280_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/BME280/BME280_factory.cpp",
+  "output": "drivers/BME280/CMakeFiles/BME280.dir/BME280_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/BME280",
+  "command": "/usr/bin/clang++ -DBME280_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/BME280/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/BME280 -std=gnu++2b -fPIC -o CMakeFiles/BME280.dir/BME280_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/BME280/BME280_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/BME280/BME280_Device.cpp",
+  "output": "drivers/BME280/CMakeFiles/BME280.dir/BME280_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/BME280",
+  "command": "/usr/bin/clang++ -DBME280_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/BME280/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/BME280 -std=gnu++2b -fPIC -o CMakeFiles/BME280.dir/BME280.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/BME280/BME280.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/BME280/BME280.cpp",
+  "output": "drivers/BME280/CMakeFiles/BME280.dir/BME280.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/BME280",
+  "command": "/usr/bin/clang++ -DBME280_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/BME280/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/BME280 -std=gnu++2b -fPIC -o CMakeFiles/BME280.dir/__/__/src/I2C.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "output": "drivers/BME280/CMakeFiles/BME280.dir/__/__/src/I2C.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/BME280",
+  "command": "/usr/bin/clang++ -DBME280_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/BME280/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/BME280 -std=gnu++2b -fPIC -o CMakeFiles/BME280.dir/__/__/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "drivers/BME280/CMakeFiles/BME280.dir/__/__/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/BME280",
+  "command": "/usr/bin/clang++ -DBME280_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/BME280/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/BME280 -std=gnu++2b -fPIC -o CMakeFiles/BME280.dir/__/__/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "drivers/BME280/CMakeFiles/BME280.dir/__/__/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008",
+  "command": "/usr/bin/clang++ -DMCP23008_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008 -std=gnu++2b -fPIC -o CMakeFiles/MCP23008.dir/MCP23008_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008/MCP23008_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008/MCP23008_factory.cpp",
+  "output": "drivers/MCP23008/CMakeFiles/MCP23008.dir/MCP23008_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008",
+  "command": "/usr/bin/clang++ -DMCP23008_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008 -std=gnu++2b -fPIC -o CMakeFiles/MCP23008.dir/MCP23008_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008/MCP23008_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008/MCP23008_Device.cpp",
+  "output": "drivers/MCP23008/CMakeFiles/MCP23008.dir/MCP23008_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008",
+  "command": "/usr/bin/clang++ -DMCP23008_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008 -std=gnu++2b -fPIC -o CMakeFiles/MCP23008.dir/MCP23008.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008/MCP23008.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008/MCP23008.cpp",
+  "output": "drivers/MCP23008/CMakeFiles/MCP23008.dir/MCP23008.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008",
+  "command": "/usr/bin/clang++ -DMCP23008_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008 -std=gnu++2b -fPIC -o CMakeFiles/MCP23008.dir/__/__/src/I2C.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "output": "drivers/MCP23008/CMakeFiles/MCP23008.dir/__/__/src/I2C.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008",
+  "command": "/usr/bin/clang++ -DMCP23008_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008 -std=gnu++2b -fPIC -o CMakeFiles/MCP23008.dir/__/__/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "drivers/MCP23008/CMakeFiles/MCP23008.dir/__/__/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008",
+  "command": "/usr/bin/clang++ -DMCP23008_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP23008 -std=gnu++2b -fPIC -o CMakeFiles/MCP23008.dir/__/__/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "drivers/MCP23008/CMakeFiles/MCP23008.dir/__/__/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427",
+  "command": "/usr/bin/clang++ -DMCP3427_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427 -std=gnu++2b -fPIC -o CMakeFiles/MCP3427.dir/MCP3427_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427/MCP3427_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427/MCP3427_factory.cpp",
+  "output": "drivers/MCP3427/CMakeFiles/MCP3427.dir/MCP3427_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427",
+  "command": "/usr/bin/clang++ -DMCP3427_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427 -std=gnu++2b -fPIC -o CMakeFiles/MCP3427.dir/MCP3427_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427/MCP3427_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427/MCP3427_Device.cpp",
+  "output": "drivers/MCP3427/CMakeFiles/MCP3427.dir/MCP3427_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427",
+  "command": "/usr/bin/clang++ -DMCP3427_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427 -std=gnu++2b -fPIC -o CMakeFiles/MCP3427.dir/MCP3427.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427/MCP3427.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427/MCP3427.cpp",
+  "output": "drivers/MCP3427/CMakeFiles/MCP3427.dir/MCP3427.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427",
+  "command": "/usr/bin/clang++ -DMCP3427_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427 -std=gnu++2b -fPIC -o CMakeFiles/MCP3427.dir/__/__/src/I2C.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "output": "drivers/MCP3427/CMakeFiles/MCP3427.dir/__/__/src/I2C.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427",
+  "command": "/usr/bin/clang++ -DMCP3427_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427 -std=gnu++2b -fPIC -o CMakeFiles/MCP3427.dir/__/__/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "drivers/MCP3427/CMakeFiles/MCP3427.dir/__/__/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427",
+  "command": "/usr/bin/clang++ -DMCP3427_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/MCP3427 -std=gnu++2b -fPIC -o CMakeFiles/MCP3427.dir/__/__/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "drivers/MCP3427/CMakeFiles/MCP3427.dir/__/__/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671",
+  "command": "/usr/bin/clang++ -DPCA9671_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671 -std=gnu++2b -fPIC -o CMakeFiles/PCA9671.dir/PCA9671_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671/PCA9671_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671/PCA9671_factory.cpp",
+  "output": "drivers/PCA9671/CMakeFiles/PCA9671.dir/PCA9671_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671",
+  "command": "/usr/bin/clang++ -DPCA9671_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671 -std=gnu++2b -fPIC -o CMakeFiles/PCA9671.dir/PCA9671_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671/PCA9671_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671/PCA9671_Device.cpp",
+  "output": "drivers/PCA9671/CMakeFiles/PCA9671.dir/PCA9671_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671",
+  "command": "/usr/bin/clang++ -DPCA9671_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671 -std=gnu++2b -fPIC -o CMakeFiles/PCA9671.dir/PCA9671.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671/PCA9671.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671/PCA9671.cpp",
+  "output": "drivers/PCA9671/CMakeFiles/PCA9671.dir/PCA9671.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671",
+  "command": "/usr/bin/clang++ -DPCA9671_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671 -std=gnu++2b -fPIC -o CMakeFiles/PCA9671.dir/__/__/src/I2C.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "output": "drivers/PCA9671/CMakeFiles/PCA9671.dir/__/__/src/I2C.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671",
+  "command": "/usr/bin/clang++ -DPCA9671_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671 -std=gnu++2b -fPIC -o CMakeFiles/PCA9671.dir/__/__/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "drivers/PCA9671/CMakeFiles/PCA9671.dir/__/__/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671",
+  "command": "/usr/bin/clang++ -DPCA9671_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9671 -std=gnu++2b -fPIC -o CMakeFiles/PCA9671.dir/__/__/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "drivers/PCA9671/CMakeFiles/PCA9671.dir/__/__/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536",
+  "command": "/usr/bin/clang++ -DPCA9536_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536 -std=gnu++2b -fPIC -o CMakeFiles/PCA9536.dir/PCA9536_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536/PCA9536_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536/PCA9536_factory.cpp",
+  "output": "drivers/PCA9536/CMakeFiles/PCA9536.dir/PCA9536_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536",
+  "command": "/usr/bin/clang++ -DPCA9536_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536 -std=gnu++2b -fPIC -o CMakeFiles/PCA9536.dir/PCA9536_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536/PCA9536_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536/PCA9536_Device.cpp",
+  "output": "drivers/PCA9536/CMakeFiles/PCA9536.dir/PCA9536_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536",
+  "command": "/usr/bin/clang++ -DPCA9536_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536 -std=gnu++2b -fPIC -o CMakeFiles/PCA9536.dir/PCA9536.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536/PCA9536.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536/PCA9536.cpp",
+  "output": "drivers/PCA9536/CMakeFiles/PCA9536.dir/PCA9536.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536",
+  "command": "/usr/bin/clang++ -DPCA9536_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536 -std=gnu++2b -fPIC -o CMakeFiles/PCA9536.dir/__/__/src/I2C.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "output": "drivers/PCA9536/CMakeFiles/PCA9536.dir/__/__/src/I2C.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536",
+  "command": "/usr/bin/clang++ -DPCA9536_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536 -std=gnu++2b -fPIC -o CMakeFiles/PCA9536.dir/__/__/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "drivers/PCA9536/CMakeFiles/PCA9536.dir/__/__/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536",
+  "command": "/usr/bin/clang++ -DPCA9536_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PCA9536 -std=gnu++2b -fPIC -o CMakeFiles/PCA9536.dir/__/__/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "drivers/PCA9536/CMakeFiles/PCA9536.dir/__/__/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton",
+  "command": "/usr/bin/clang++ -DQwiicButton_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton -std=gnu++2b -fPIC -o CMakeFiles/QwiicButton.dir/QwiicButton_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton/QwiicButton_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton/QwiicButton_factory.cpp",
+  "output": "drivers/QwiicButton/CMakeFiles/QwiicButton.dir/QwiicButton_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton",
+  "command": "/usr/bin/clang++ -DQwiicButton_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton -std=gnu++2b -fPIC -o CMakeFiles/QwiicButton.dir/QwiicButton_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton/QwiicButton_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton/QwiicButton_Device.cpp",
+  "output": "drivers/QwiicButton/CMakeFiles/QwiicButton.dir/QwiicButton_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton",
+  "command": "/usr/bin/clang++ -DQwiicButton_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton -std=gnu++2b -fPIC -o CMakeFiles/QwiicButton.dir/QwiicButton.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton/QwiicButton.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton/QwiicButton.cpp",
+  "output": "drivers/QwiicButton/CMakeFiles/QwiicButton.dir/QwiicButton.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton",
+  "command": "/usr/bin/clang++ -DQwiicButton_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton -std=gnu++2b -fPIC -o CMakeFiles/QwiicButton.dir/__/__/src/I2C.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "output": "drivers/QwiicButton/CMakeFiles/QwiicButton.dir/__/__/src/I2C.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton",
+  "command": "/usr/bin/clang++ -DQwiicButton_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton -std=gnu++2b -fPIC -o CMakeFiles/QwiicButton.dir/__/__/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "drivers/QwiicButton/CMakeFiles/QwiicButton.dir/__/__/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton",
+  "command": "/usr/bin/clang++ -DQwiicButton_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/QwiicButton -std=gnu++2b -fPIC -o CMakeFiles/QwiicButton.dir/__/__/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "drivers/QwiicButton/CMakeFiles/QwiicButton.dir/__/__/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY",
+  "command": "/usr/bin/clang++ -DQWIIC_RELAY_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY -std=gnu++2b -fPIC -o CMakeFiles/QWIIC_RELAY.dir/QWIIC_RELAY_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY/QWIIC_RELAY_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY/QWIIC_RELAY_factory.cpp",
+  "output": "drivers/QWIIC_RELAY/CMakeFiles/QWIIC_RELAY.dir/QWIIC_RELAY_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY",
+  "command": "/usr/bin/clang++ -DQWIIC_RELAY_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY -std=gnu++2b -fPIC -o CMakeFiles/QWIIC_RELAY.dir/QWIIC_RELAY_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY/QWIIC_RELAY_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY/QWIIC_RELAY_Device.cpp",
+  "output": "drivers/QWIIC_RELAY/CMakeFiles/QWIIC_RELAY.dir/QWIIC_RELAY_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY",
+  "command": "/usr/bin/clang++ -DQWIIC_RELAY_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY -std=gnu++2b -fPIC -o CMakeFiles/QWIIC_RELAY.dir/QWIIC_RELAY.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY/QWIIC_RELAY.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY/QWIIC_RELAY.cpp",
+  "output": "drivers/QWIIC_RELAY/CMakeFiles/QWIIC_RELAY.dir/QWIIC_RELAY.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY",
+  "command": "/usr/bin/clang++ -DQWIIC_RELAY_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY -std=gnu++2b -fPIC -o CMakeFiles/QWIIC_RELAY.dir/__/__/src/I2C.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "output": "drivers/QWIIC_RELAY/CMakeFiles/QWIIC_RELAY.dir/__/__/src/I2C.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY",
+  "command": "/usr/bin/clang++ -DQWIIC_RELAY_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY -std=gnu++2b -fPIC -o CMakeFiles/QWIIC_RELAY.dir/__/__/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "drivers/QWIIC_RELAY/CMakeFiles/QWIIC_RELAY.dir/__/__/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY",
+  "command": "/usr/bin/clang++ -DQWIIC_RELAY_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/QWIIC_RELAY -std=gnu++2b -fPIC -o CMakeFiles/QWIIC_RELAY.dir/__/__/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "drivers/QWIIC_RELAY/CMakeFiles/QWIIC_RELAY.dir/__/__/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25",
+  "command": "/usr/bin/clang++ -DSHT25_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25 -std=gnu++2b -fPIC -o CMakeFiles/SHT25.dir/SHT25_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/SHT25/SHT25_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25/SHT25_factory.cpp",
+  "output": "drivers/SHT25/CMakeFiles/SHT25.dir/SHT25_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25",
+  "command": "/usr/bin/clang++ -DSHT25_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25 -std=gnu++2b -fPIC -o CMakeFiles/SHT25.dir/SHT25_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/SHT25/SHT25_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25/SHT25_Device.cpp",
+  "output": "drivers/SHT25/CMakeFiles/SHT25.dir/SHT25_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25",
+  "command": "/usr/bin/clang++ -DSHT25_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25 -std=gnu++2b -fPIC -o CMakeFiles/SHT25.dir/SHT25.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/SHT25/SHT25.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25/SHT25.cpp",
+  "output": "drivers/SHT25/CMakeFiles/SHT25.dir/SHT25.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25",
+  "command": "/usr/bin/clang++ -DSHT25_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25 -std=gnu++2b -fPIC -o CMakeFiles/SHT25.dir/__/__/src/I2C.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "output": "drivers/SHT25/CMakeFiles/SHT25.dir/__/__/src/I2C.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25",
+  "command": "/usr/bin/clang++ -DSHT25_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25 -std=gnu++2b -fPIC -o CMakeFiles/SHT25.dir/__/__/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "drivers/SHT25/CMakeFiles/SHT25.dir/__/__/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25",
+  "command": "/usr/bin/clang++ -DSHT25_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT25 -std=gnu++2b -fPIC -o CMakeFiles/SHT25.dir/__/__/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "drivers/SHT25/CMakeFiles/SHT25.dir/__/__/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30",
+  "command": "/usr/bin/clang++ -DSHT30_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30 -std=gnu++2b -fPIC -o CMakeFiles/SHT30.dir/SHT30_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/SHT30/SHT30_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30/SHT30_factory.cpp",
+  "output": "drivers/SHT30/CMakeFiles/SHT30.dir/SHT30_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30",
+  "command": "/usr/bin/clang++ -DSHT30_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30 -std=gnu++2b -fPIC -o CMakeFiles/SHT30.dir/SHT30_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/SHT30/SHT30_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30/SHT30_Device.cpp",
+  "output": "drivers/SHT30/CMakeFiles/SHT30.dir/SHT30_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30",
+  "command": "/usr/bin/clang++ -DSHT30_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30 -std=gnu++2b -fPIC -o CMakeFiles/SHT30.dir/SHT30.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/SHT30/SHT30.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30/SHT30.cpp",
+  "output": "drivers/SHT30/CMakeFiles/SHT30.dir/SHT30.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30",
+  "command": "/usr/bin/clang++ -DSHT30_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30 -std=gnu++2b -fPIC -o CMakeFiles/SHT30.dir/__/__/src/I2C.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "output": "drivers/SHT30/CMakeFiles/SHT30.dir/__/__/src/I2C.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30",
+  "command": "/usr/bin/clang++ -DSHT30_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30 -std=gnu++2b -fPIC -o CMakeFiles/SHT30.dir/__/__/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "drivers/SHT30/CMakeFiles/SHT30.dir/__/__/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30",
+  "command": "/usr/bin/clang++ -DSHT30_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SHT30 -std=gnu++2b -fPIC -o CMakeFiles/SHT30.dir/__/__/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "drivers/SHT30/CMakeFiles/SHT30.dir/__/__/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534",
+  "command": "/usr/bin/clang++ -DTCA9534_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534 -std=gnu++2b -fPIC -o CMakeFiles/TCA9534.dir/TCA9534_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534/TCA9534_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534/TCA9534_factory.cpp",
+  "output": "drivers/TCA9534/CMakeFiles/TCA9534.dir/TCA9534_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534",
+  "command": "/usr/bin/clang++ -DTCA9534_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534 -std=gnu++2b -fPIC -o CMakeFiles/TCA9534.dir/TCA9534_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534/TCA9534_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534/TCA9534_Device.cpp",
+  "output": "drivers/TCA9534/CMakeFiles/TCA9534.dir/TCA9534_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534",
+  "command": "/usr/bin/clang++ -DTCA9534_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534 -std=gnu++2b -fPIC -o CMakeFiles/TCA9534.dir/TCA9534.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534/TCA9534.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534/TCA9534.cpp",
+  "output": "drivers/TCA9534/CMakeFiles/TCA9534.dir/TCA9534.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534",
+  "command": "/usr/bin/clang++ -DTCA9534_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534 -std=gnu++2b -fPIC -o CMakeFiles/TCA9534.dir/__/__/src/I2C.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "output": "drivers/TCA9534/CMakeFiles/TCA9534.dir/__/__/src/I2C.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534",
+  "command": "/usr/bin/clang++ -DTCA9534_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534 -std=gnu++2b -fPIC -o CMakeFiles/TCA9534.dir/__/__/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "drivers/TCA9534/CMakeFiles/TCA9534.dir/__/__/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534",
+  "command": "/usr/bin/clang++ -DTCA9534_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/TCA9534 -std=gnu++2b -fPIC -o CMakeFiles/TCA9534.dir/__/__/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "drivers/TCA9534/CMakeFiles/TCA9534.dir/__/__/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X",
+  "command": "/usr/bin/clang++ -DTMP10X_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X -std=gnu++2b -fPIC -o CMakeFiles/TMP10X.dir/TMP10X_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X/TMP10X_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X/TMP10X_factory.cpp",
+  "output": "drivers/TMP10X/CMakeFiles/TMP10X.dir/TMP10X_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X",
+  "command": "/usr/bin/clang++ -DTMP10X_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X -std=gnu++2b -fPIC -o CMakeFiles/TMP10X.dir/TMP10X_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X/TMP10X_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X/TMP10X_Device.cpp",
+  "output": "drivers/TMP10X/CMakeFiles/TMP10X.dir/TMP10X_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X",
+  "command": "/usr/bin/clang++ -DTMP10X_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X -std=gnu++2b -fPIC -o CMakeFiles/TMP10X.dir/TMP10X.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X/TMP10X.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X/TMP10X.cpp",
+  "output": "drivers/TMP10X/CMakeFiles/TMP10X.dir/TMP10X.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X",
+  "command": "/usr/bin/clang++ -DTMP10X_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X -std=gnu++2b -fPIC -o CMakeFiles/TMP10X.dir/__/__/src/I2C.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/I2C.cpp",
+  "output": "drivers/TMP10X/CMakeFiles/TMP10X.dir/__/__/src/I2C.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X",
+  "command": "/usr/bin/clang++ -DTMP10X_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X -std=gnu++2b -fPIC -o CMakeFiles/TMP10X.dir/__/__/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "drivers/TMP10X/CMakeFiles/TMP10X.dir/__/__/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X",
+  "command": "/usr/bin/clang++ -DTMP10X_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/TMP10X -std=gnu++2b -fPIC -o CMakeFiles/TMP10X.dir/__/__/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "drivers/TMP10X/CMakeFiles/TMP10X.dir/__/__/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE",
+  "command": "/usr/bin/clang++ -DPWRGATE_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE -std=gnu++2b -fPIC -o CMakeFiles/PWRGATE.dir/PWRgate_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE/PWRgate_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE/PWRgate_factory.cpp",
+  "output": "drivers/PWRGATE/CMakeFiles/PWRGATE.dir/PWRgate_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE",
+  "command": "/usr/bin/clang++ -DPWRGATE_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE -std=gnu++2b -fPIC -o CMakeFiles/PWRGATE.dir/PWRgate_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE/PWRgate_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE/PWRgate_Device.cpp",
+  "output": "drivers/PWRGATE/CMakeFiles/PWRGATE.dir/PWRgate_Device.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE",
+  "command": "/usr/bin/clang++ -DPWRGATE_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE -std=gnu++2b -fPIC -o CMakeFiles/PWRGATE.dir/__/__/src/dbuf.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/dbuf.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/dbuf.cpp",
+  "output": "drivers/PWRGATE/CMakeFiles/PWRGATE.dir/__/__/src/dbuf.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE",
+  "command": "/usr/bin/clang++ -DPWRGATE_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE -std=gnu++2b -fPIC -o CMakeFiles/PWRGATE.dir/__/__/src/TimeStamp.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/TimeStamp.cpp",
+  "output": "drivers/PWRGATE/CMakeFiles/PWRGATE.dir/__/__/src/TimeStamp.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE",
+  "command": "/usr/bin/clang++ -DPWRGATE_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/PWRGATE -std=gnu++2b -fPIC -o CMakeFiles/PWRGATE.dir/__/__/src/LogMgr.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/src/LogMgr.cpp",
+  "output": "drivers/PWRGATE/CMakeFiles/PWRGATE.dir/__/__/src/LogMgr.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SAMPLE",
+  "command": "/usr/bin/clang++ -DSAMPLE_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SAMPLE/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SAMPLE -std=gnu++2b -fPIC -o CMakeFiles/SAMPLE.dir/SAMPLE_factory.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/SAMPLE/SAMPLE_factory.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/SAMPLE/SAMPLE_factory.cpp",
+  "output": "drivers/SAMPLE/CMakeFiles/SAMPLE.dir/SAMPLE_factory.cpp.o"
+},
+{
+  "directory": "/Users/vinnie/Desktop/projects/piotserver/drivers/SAMPLE",
+  "command": "/usr/bin/clang++ -DSAMPLE_EXPORTS -I/Users/vinnie/Desktop/projects/piotserver/src -I/Users/vinnie/Desktop/projects/piotserver/if -I\"/Users/vinnie/Desktop/projects/piotserver/(\" -I/Users/vinnie/Desktop/projects/piotserver/APPLE -I\"/Users/vinnie/Desktop/projects/piotserver/)\" -I/Users/vinnie/Desktop/projects/piotserver/macstuff/macincludes -I/Users/vinnie/Desktop/projects/piotserver/endif -I/Users/vinnie/Desktop/projects/piotserver/drivers/SAMPLE/../../src -I/Users/vinnie/Desktop/projects/piotserver/drivers/SAMPLE -std=gnu++2b -fPIC -o CMakeFiles/SAMPLE.dir/SAMPLE_Device.cpp.o -c /Users/vinnie/Desktop/projects/piotserver/drivers/SAMPLE/SAMPLE_Device.cpp",
+  "file": "/Users/vinnie/Desktop/projects/piotserver/drivers/SAMPLE/SAMPLE_Device.cpp",
+  "output": "drivers/SAMPLE/CMakeFiles/SAMPLE.dir/SAMPLE_Device.cpp.o"
+}
+]

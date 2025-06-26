@@ -1,21 +1,18 @@
 {
     "devices": [
         {
-            "device_type": "SAMPLE",
             "data_type": "SECONDS",
-            "key":      "RUN_TIME",
-            "title":    "Run Time"
+            "device_type": "SAMPLE",
+            "key": "RUN_TIME",
+            "title": "Run Time"
         },
-        
         {
             "device_type": "PWRGate",
-            "params" : {
-                "tty" : "/dev/tty.usbmodem14201",
-                "tty" : "/dev/tty.Bluetooth-Incoming-Port",
-                "speed": 9600
+            "params": {
+                "speed": 9600,
+                "tty": "/dev/tty.Bluetooth-Incoming-Port"
             },
-
-             "pins": [
+            "pins": [
                 {
                     "bit": 1,
                     "data_type": "STRING",
@@ -46,8 +43,12 @@
                     "key": "SOLAR_VOLTS",
                     "title": "Solar Volts"
                 }
-
             ]
         }
-    ]
+    ],
+    "prop.file.version": {
+        "file.etag": 5,
+        "last_write": 1750973619
+    },
+    "sequence": null
 }

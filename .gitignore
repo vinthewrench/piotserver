@@ -36,6 +36,7 @@ Temporary Items
 ### Xcode ###
 ## User settings
 xcuserdata/
+XCBuildData
 
 ## Xcode 8 and earlier
 *.xcscmblueprint
@@ -49,4 +50,19 @@ xcuserdata/
 /*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
 *.xcworkspacedata
+
+## CMAKE CRAP
+cmake_install.cmake
+CMakeCache.txt
+CMakeFiles
+Makefile
+build.db
+.zed
+*.so
+*.dylib
+.cache/
+assets/logfile.txt
+assets/piotserver.db
+
+
 
