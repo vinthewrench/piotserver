@@ -40,8 +40,8 @@ target_include_directories("${LIB_NAME}" PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(APPLE)
  add_custom_command(TARGET "${LIB_NAME}" POST_BUILD
-COMMAND  mkdir -p ../../plugins && cp libSHT30.dylib ../../plugins/libSHT30.dylib  )
+COMMAND  mkdir -p ../../plugins && cp libSHT30.dylib ../../plugins/SHT30.dylib  )
  else()
  add_custom_command(TARGET "${LIB_NAME}" POST_BUILD
-COMMAND  mkdir -p ../../plugins && cp libSHT30.so ../../plugins/libSHT30.so  )
+COMMAND  mkdir -p ../../plugins && cp libSHT30.so ../../plugins/SHT30.so  )
 endif()
