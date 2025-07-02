@@ -58,6 +58,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = " -f sample.props.json"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = " -f garden.props.json"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

@@ -1,17 +1,17 @@
 
 #setup pi
- 
+
 sudo nano /etc/hostname
 
-sudo apt update  
-sudo apt-get upgrade  
+sudo apt update
+sudo apt-get upgrade
 sudo raspi-config
- 
-mkdir ~/.ssh 
-cd .ssh  
+
+mkdir ~/.ssh
+cd .ssh
 cat > ~/.ssh/id_ed25519.pub
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL+njR6G/woViJprLyxjXZyEaF37ZyYwIxs4IBzkRWyO
-mv ~/.ssh/id_ed25519.pub ~/.ssh/authorized_keys  
+mv ~/.ssh/id_ed25519.pub ~/.ssh/authorized_keys
 
 cd ~ && chmod 600 ~/.ssh/* && chmod 700 ~/.ssh && chmod 644 ~/.ssh/*.pub
 logout
@@ -31,18 +31,18 @@ clang++ --version
 
 sudo apt install -y cmake
 sudo apt install -y htop
-sudo apt-get install -y i2c-tools  
+sudo apt-get install -y i2c-tools
 sudo apt-get install -y  git-core
-sudo apt-get install -y  sqlite3  
+sudo apt-get install -y  sqlite3
 sudo apt-get install -y  libsqlite3-dev
- 
+
 
 
  sudo apt install rpi-connect
- 
+
 ------------------------------
  #docker
- 
+
  sudo apt-get install ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
@@ -62,10 +62,10 @@ sudo docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/do
 ------------------------------------------------------------------------------
 
   raspberry pi connect
- 
+
  https://connect.raspberrypi.com/devices
  rpi-connect on
- 
+
 
 
 -------------
@@ -88,9 +88,9 @@ scp -r /Users/vinnie/Desktop/projects/pIoTServer vinnie@royal2:
 docker build -f Dockerfile_cpp -t cpp-build-base:0.1.0 .
 docker build --no-cache . -t piotserver:1.0.0
 docker run -d --name=pIoTServer --rm -p 8081:8081 --device /dev/i2c-1  -it pIoTServer:1.0.0
- 
+
 // devices:
-//  - "/dev/i2c-1:/dev/i2c-1"  
+//  - "/dev/i2c-1:/dev/i2c-1"
 
 
 
@@ -123,14 +123,14 @@ docker run -d -it -p 1880:1880 -v node_red_data:/data --name mynodered nodered/n
 
 ---
 
- 
+
 FROM dtcooper/raspberrypi-os:bookworm
 
 
 GPIO PINS used
 
  4   -  dtoverlay=w1-gpio,gpiopin=4
- 
+
  5
  6
 13
@@ -189,11 +189,11 @@ make
 
 nohup ./piotserver  -d  -p -f assets  &
 
- 
+
 -----------
 
  rsync -av --exclude='.git' --exclude='*.xcodeproj' --exclude='*.DS_Store'  /Users/vinnie/Desktop/projects/piotserver  vinnie@royal2:
- 
+
 docker build -f Dockerfile_cpp -t cpp-build-base:0.1.0 .
 
 docker build --no-cache . -t piotserver:1.1.0
@@ -239,11 +239,54 @@ ln -s /usr/bin/clang-19 /usr/bin/clang
 ln -s /usr/bin/clang++-19 /usr/bin/clang++
 
 
+copy this into  /etc/init.d/piotserver
 
-sudo service piotserver start # start the service
-sudo service piotserver stop # stop the service
-sudo service piotserver restart # restart the service
-sudo service piotserver status # check service status
+ ```bash
+#!/bin/bash
+# /etc/init.d/fan
+
+### BEGIN INIT INFO
+
+# Provides:piotserver
+# Required-Start:$remote_fs $syslog
+# Required-Stop:$remote_fs $syslog
+# Default-Start:2 3 4 5
+# Default-Stop:0 1 6
+# Short-Description: piotserver
+# Description: piotserver auto start after boot
+### END INIT INFO
+
+
+case "$1" in
+    start)
+        echo "Starting piotserver"
+        cd /home/vinnie/piotserver/
+        nohup /home/vinnie/piotserver/piotserver -d -p --assets /home/vinnie/piotserver/garden -f garden.props.json &
+         ;;
+    stop)
+        echo "Stopping piotserver"
+         killall -9 piotserver
+         ;;
+    *)
+        echo "Usage: service piotserver start|stop"
+        exit 1
+        ;;
+esac
+exit 0
+
+ ```
+
+ ```bash
+sudo chmod +x /etc/init.d/piotserver
+sudo update-rc.d piotserver defaults
+
+# to remove it
+#sudo update-rc.d  -f piotserver remove
+ ```
+`sudo service piotserver start # start the service`
+`sudo service piotserver stop # stop the service`
+`sudo service piotserver restart # restart the service`
+`sudo service piotserver status # check service status`
 
 
 read gpio state

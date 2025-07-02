@@ -51,26 +51,26 @@ static int safe_fd_clr(int fd, fd_set* fds, int* max_fd) {
 
 
 bool PWRgate_Device::openSerialPort(int &error){
-    
+
     std::lock_guard<std::mutex> lock(_mutex);
-    
+
     if(_ttyPath.empty()  || _ttySpeed == B0) {
         error = EINVAL;
         return false;
     }
-    
+
     struct termios options;
     int fd ;
-    
+
     if((fd = ::open( _ttyPath.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK | O_NDELAY  )) <0) {
-        
+
         printf("OPEN %s Error: %d %s\n", _ttyPath.c_str(), errno, strerror(errno) );
         error = errno;
         return false;
     }
-    
+
     fcntl(fd, F_SETFL, 0);      // Clear the file status flags
-    
+
     // Back up current TTY settings
     if( tcgetattr(fd, &_tty_opts_backup)<0) {
         LOGT_ERROR("tcgetattr() %s Error %d, %s",  _ttyPath.c_str(),
@@ -78,7 +78,7 @@ bool PWRgate_Device::openSerialPort(int &error){
         error = errno;
         return false;
     }
-    
+
     cfmakeraw(&options);
     options.c_cflag &= ~PARENB; // Clear parity bit, disabling parity (most common)
     options.c_cflag &= ~CSTOPB; // Clear stop field, only one stop bit used in communication (most common)
@@ -86,7 +86,7 @@ bool PWRgate_Device::openSerialPort(int &error){
     options.c_cflag |= CS8; // 8 bits per byte (most common)
     options.c_cflag &= ~CRTSCTS;            // Disable hardware flow control
     options.c_cflag |= (CREAD | CLOCAL); // Turn on READ & ignore ctrl lines (CLOCAL = 1)
-    
+
     options.c_lflag &= ~ICANON;
     options.c_lflag &= ~ECHO; // Disable echo
     options.c_lflag &= ~ECHOE; // Disable erasure
@@ -94,29 +94,29 @@ bool PWRgate_Device::openSerialPort(int &error){
     options.c_lflag &= ~ISIG; // Disable interpretation of INTR, QUIT and SUSP
     options.c_iflag &= ~(IXON | IXOFF | IXANY); // Turn off s/w flow ctrl
     options.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL); // Disable any special handling of received bytes
-    
+
     options.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
     options.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
-    
+
     cfsetospeed (&options, _ttySpeed);
     cfsetispeed (&options, _ttySpeed);
-    
+
     if (tcsetattr(fd, TCSANOW, &options) < 0){
         LOGT_ERROR("tcsetattr() %s Error %d, %s",  _ttyPath.c_str(),
                    errno, strerror(errno));
         error = errno;
         return false;
     }
-    
+
     _fd = fd;
     // add to read set
     safe_fd_set(_fd, &_master_fds, &_max_fds);
-    
+
     return true;
 }
 
 void PWRgate_Device::closeSerialPort(){
-  
+
    if(isConnected()){
        std::lock_guard<std::mutex> lock(_mutex);
 
@@ -125,7 +125,7 @@ void PWRgate_Device::closeSerialPort(){
        close(_fd);
        safe_fd_clr(_fd, &_master_fds, &_max_fds);
        _fd = -1;
- 
+
        _chargeState        = "INVALID";
        _ps_volts           = 0;
        _bat_volts          = 0;
@@ -148,7 +148,7 @@ bool PWRgate_Device::getVersion(string &str){
 PWRgate_Device::PWRgate_Device(string devID, string driverName){
 
     setDeviceID(devID, driverName);
- 
+
     _deviceState = DEVICE_STATE_UNKNOWN;
     _isSetup = false;
     _max_fds = 0;
@@ -162,12 +162,12 @@ PWRgate_Device::PWRgate_Device(string devID, string driverName){
     _charge_current     = 0;
     _sol_volts          = 0;
     _dataDidChange      = false;
-    
+
        json j = {
             { PROP_DEVICE_MFG_URL, "https://powerwerx.com/west-mountain-radio-epic-pwrgate"},
             { PROP_DEVICE_MFG_PART, "West Mountain Radio Epic PWRgate 12V Backup Power System"},
        };
-    
+
     setProperties(j);
 }
 
@@ -204,15 +204,15 @@ PWRgate_Device::~PWRgate_Device(){
  "key": "SOLAR_VOLTS",
  "title": "Solar Volts"
 }
- 
-  
- 
+
+
+
  */
 bool PWRgate_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
     bool found = false;
-    
+
     for(const auto& [key, entry] : deviceSchema) {
-        
+
         switch(entry.pinNo){
             case 1:
                 //   PWRGate Status String
@@ -221,7 +221,7 @@ bool PWRgate_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
                     found = true;
                 }
                 break;
-                
+
             case 2:
                 //   Power Supply Volts
                 if(entry.units == VOLTS ){
@@ -229,7 +229,7 @@ bool PWRgate_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
                     found = true;
                 }
                 break;
-                
+
             case 3:
                 //   Battery Volts
                 if(entry.units == VOLTS ){
@@ -237,7 +237,7 @@ bool PWRgate_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
                     found = true;
                 }
                 break;
-                
+
             case 4:
                 //   Charge Current
                 if(entry.units == AMPS ){
@@ -245,7 +245,7 @@ bool PWRgate_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
                     found = true;
                 }
                 break;
-                
+
             case 5:
                 //   Solar Volts
                 if(entry.units == VOLTS ){
@@ -253,7 +253,7 @@ bool PWRgate_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
                     found = true;
                 }
                 break;
-                
+
             default:
                 break;
         }
@@ -262,8 +262,8 @@ bool PWRgate_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
         _isSetup = true;
         return true;
     }
-    
-    
+
+
     _deviceState = DEVICE_STATE_DISCONNECTED;
     return false;
 }
@@ -271,17 +271,17 @@ bool PWRgate_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
 
 
 bool PWRgate_Device::start(){
-    
+
     _ttySpeed = B9600;
- 
+
     if( _deviceProperties.contains(PROP_DEVICE_PARAMS)
        && _deviceProperties[PROP_DEVICE_PARAMS].is_object()){
         json params = _deviceProperties[PROP_DEVICE_PARAMS];
-        
+
         if(params.contains("tty")
            && params["tty"].is_string())
             _ttyPath = params["tty"];
-        
+
         unsigned long speed = 0;
         if( params.contains("speed")){
             if(JSON_value_toUnsigned(params["speed"], speed)){
@@ -300,10 +300,10 @@ bool PWRgate_Device::start(){
 #endif
 
     LOGT_DEBUG("PowerGate ready") ;
-    
+
     _running = true;
     _thread = std::thread(&PWRgate_Device::actionThread, this);
-  
+
     _deviceState = DEVICE_STATE_CONNECTED;
     return true;
 }
@@ -312,12 +312,12 @@ bool PWRgate_Device::start(){
 
 
 void PWRgate_Device::stop(){
-    
+
     LOGT_DEBUG("PowerGate stop");
 
     _deviceState = DEVICE_STATE_DISCONNECTED;
     _running = false;
-   
+
     // wait for action thread to complete
     while(!_thread.joinable()){
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -326,21 +326,21 @@ void PWRgate_Device::stop(){
 }
 
 bool PWRgate_Device::setEnabled(bool enable){
-    
+
     if(enable){
         _isEnabled = true;
-        
+
         if( _deviceState == DEVICE_STATE_CONNECTED){
             return true;
         }
-        
+
         // force restart
         stop();
-        
+
         bool success = start();
         return success;
     }
-    
+
     _isEnabled = false;
     if(_deviceState == DEVICE_STATE_CONNECTED){
         stop();
@@ -356,26 +356,26 @@ bool PWRgate_Device::isConnected(){
         std::lock_guard<std::mutex> lock(_mutex);
         val = _fd != -1;
       }
-   
+
     return val;
 }
 
 
 bool PWRgate_Device::hasUpdates(){
     std::lock_guard<std::mutex> lock(_mutex);
-   
+
     return _dataDidChange;
 }
 
 
 bool PWRgate_Device::getValues (keyValueMap_t &results){
-    
+
     if(!isConnected())
         return false;
      {
         // COPY DATA WITH MUTEX
         std::lock_guard<std::mutex> lock(_mutex);
- 
+
         results[_resultKey_status] = _chargeState;
         results[_resultKey_PWR_volts] = to_string(_ps_volts);
         results[_resultKey_BAT_volts] = to_string(_bat_volts);
@@ -383,8 +383,8 @@ bool PWRgate_Device::getValues (keyValueMap_t &results){
         results[_resultKey_SOLAR_volts] = to_string(_sol_volts);
         _dataDidChange = false;
     }
- 
-    
+
+
      return true;
 }
 
@@ -396,7 +396,7 @@ static bool processPGString(uint8_t *data, size_t len,
                                 double &charge_current,
                                 double &sol_volts
                                 ){
-  
+
     /*
      Charging  PS=14.09V Bat=13.18V,  0.65A  Sol= 0.08V   Min=0
      Trickle   PS=14.09V Bat=13.57V,  0.05A  Sol= 0.08V   Min=38
@@ -427,23 +427,23 @@ static bool processPGString(uint8_t *data, size_t len,
 
      Min=xx is the number of minutes in the current state
      Min=xx/yy adds the number of minutes since the last full recharge
- 
+
      ... Diagnostic data might appear at the end of the line if a P G or B key was pressed.
          Also any line that starts with "Target" does not follow the above format and is diagnostic data
-  
+
    Trickle   PS=14.11V Bat=13.61V,  0.00A  Sol= 0.08V   Min=5  P=399 adc=1
    TargetV=13.55V  TargetI= 1.00A   Stop= 0.25A  Temp=90  PSS=0
 
      */
-    
+
     char state[10];
     double ps, bat, batA, sol;
-    
+
     // if the line begins with Target, It's diag data.. reject it
-    
+
     if(strncmp((char*)data, "Target", 6) == 0)
         return false;
-    
+
     int n = sscanf((char*)data,
                    "%9c PS=%lfV Bat=%lfV,%lfA Sol=%lfV",
                    state, &ps, &bat, &batA, &sol);
@@ -456,12 +456,12 @@ static bool processPGString(uint8_t *data, size_t len,
         sol_volts = sol;
         return true;
     }
-   
+
      return false;
 }
 
 void PWRgate_Device::actionThread(){
-    
+
     typedef enum  {
         STATE_INIT = 0,
         STATE_SYNCING,      // looking for first non whitespace
@@ -469,21 +469,21 @@ void PWRgate_Device::actionThread(){
         STATE_DATA,
         STATE_ERROR
     }pg_state_t;
-    
+
     dbuf   buff;
     pg_state_t pg_state = STATE_INIT;
     buff.reset();
-    
+
     while(_running){
-        
+
         // if not setup // check back later
         if(!_isSetup){
             std::this_thread::sleep_for(std::chrono::seconds(2));
             continue;
         }
-        
+
         int lastError = 0;
-        
+
         // is the port setup yet?
         if (! isConnected() && _running){
             if(!openSerialPort(lastError)){
@@ -492,16 +492,16 @@ void PWRgate_Device::actionThread(){
             }
             buff.reset();
         }
-   
+
         /* wait for something to happen on the socket */
         // we use a timeout so we can end this thread when _running is false
         struct timeval selTimeout;
         selTimeout.tv_sec = 2;       /* timeout (secs.) */
         selTimeout.tv_usec = 0;            /* 200000 microseconds */
-        
+
         /* back up master */
         fd_set dup = _master_fds;
-        
+
         int numReady = select(_max_fds+1, &dup, NULL, NULL, &selTimeout);
         if( numReady == -1 ) {
 //            LOGT_ERROR("Serial port %s select() Error: %d %s", _ttyPath.c_str(),
@@ -511,29 +511,27 @@ void PWRgate_Device::actionThread(){
         }
         else if(numReady == 0){
             // get it out of interactive mode
-            for(int i = 0; i < 12; i++) {
-                write(_fd, "\r",1);
+               write(_fd, "\r\r\r\r\r\r\r\r\r\r\r\r", 12);
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
              continue;
         }
         else if ((_fd != -1)  && FD_ISSET(_fd, &dup)) {
-            
+
             u_int8_t c;
             size_t nbytes =  (size_t)::read( _fd, &c, 1 );
-            
+
             if(nbytes == 1){
 
     //            printf("%02x %c \n", c,c);
                 switch (pg_state) {
-                        
+
                     case  STATE_INIT:
                         if(c == '\n'){
                             buff.reset();
                             pg_state = STATE_SYNCING;
                         }
                         break;
-                        
+
                     case STATE_SYNCING:
                         if(!isspace(c))
                         {
@@ -542,7 +540,7 @@ void PWRgate_Device::actionThread(){
                             buff.append_char(c);
                         }
                         break;
-                        
+
                     case STATE_READING:
                     {
                         string  chargeState;
@@ -550,33 +548,33 @@ void PWRgate_Device::actionThread(){
                         double  bat_volts;
                         double  charge_current;
                         double  sol_volts;
-                        
+
                         if(c ==  '\r') {
                             buff.append_char(0);
-                            
+
                             if(  processPGString(buff.data(), buff.size(),
                                                  chargeState,
                                                  ps_volts,
                                                  bat_volts,
                                                  charge_current,
                                                  sol_volts)) {
-                                
+
                                 std::lock_guard<std::mutex> lock(_mutex);
                                 // COPY DATA WITH MUTEX
-     
-                                
+
+
                                 if(_chargeState         != chargeState
                                    || _ps_volts         != ps_volts
                                    || _bat_volts        != bat_volts
                                    || _charge_current   != charge_current
                                    || _sol_volts        != sol_volts){
-                                    
+
                                     _chargeState        = chargeState;
                                     _ps_volts           = ps_volts;
                                     _bat_volts          = bat_volts;
                                     _charge_current     = charge_current;
                                     _sol_volts          = sol_volts ;
-    
+
 //                                   cout << "state: " << chargeState
 //                                   << " PS: " << ps_volts << "V"
 //                                   << " BAT: " <<  bat_volts << "V"
@@ -586,9 +584,9 @@ void PWRgate_Device::actionThread(){
 
                                     _dataDidChange = true;
                                 }
-              
+
                               }
-                             
+
                             buff.reset();
                             pg_state = STATE_INIT;
                         }
@@ -598,7 +596,7 @@ void PWRgate_Device::actionThread(){
                         }
                     }
                         break;
-                        
+
                     default:
                         break;
                 }
@@ -608,11 +606,11 @@ void PWRgate_Device::actionThread(){
             }
             else if( nbytes == -1) {
                 int lastError = errno;
-                
+
                 // no data try later
                 if(lastError == EAGAIN)
                     continue;
-                
+
                 if(lastError == ENXIO){  // device disconnected..
                     pg_state = STATE_ERROR;
                     LOGT_ERROR("Serial port %s  disconnected", _ttyPath.c_str());
@@ -626,10 +624,6 @@ void PWRgate_Device::actionThread(){
             }
         }
     }
-    
+
     closeSerialPort();
 }
-
-
-
-
