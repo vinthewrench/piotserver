@@ -2759,6 +2759,21 @@ bool pIoTServerDB::sequenceisEnable(sequenceID_t sid){
       return false;
 }
 
+
+bool pIoTServerDB::sequenceShouldIgnoreManualMode(sequenceID_t sid){
+    {
+        std::lock_guard<std::mutex> lock(_mutex);
+        
+        if(_sequences.count(sid) == 0)
+            return false;
+        
+        Sequence* seq =  &_sequences[sid];
+        return (seq->_overrideManualMode);
+    }
+      return false;
+}
+
+
 bool pIoTServerDB::sequenceShouldIgnoreLog(sequenceID_t sid){
     {
         std::lock_guard<std::mutex> lock(_mutex);

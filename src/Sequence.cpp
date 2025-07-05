@@ -270,6 +270,7 @@ void Sequence::commonInit(){
      _nextStepToRun = 0;
     _lastStepRunTime = 0;
     _dontLog = true;
+    _overrideManualMode = false;
 }
 
 Sequence::Sequence(){
@@ -310,6 +311,11 @@ void Sequence::initWithJSON(nlohmann::json j){
     }
     else _enable = true;
 
+    if( j.contains(JSON_ARG_OVERIDE_MANUAL) && j.at(JSON_ARG_OVERIDE_MANUAL).is_boolean()){
+        _overrideManualMode = j.at(JSON_ARG_OVERIDE_MANUAL);
+    }
+    else _overrideManualMode = false;
+    
     if( j.contains(JSON_ARG_TRIGGER)
         && j.at(string(JSON_ARG_TRIGGER)).is_object()) {
         auto jT = j.at(string(JSON_ARG_TRIGGER));
@@ -401,7 +407,8 @@ nlohmann::json Sequence::JSON(){
    }
   
     j[JSON_ARG_ENABLE] = _enable;
-
+    j[JSON_ARG_OVERIDE_MANUAL] = _overrideManualMode;
+  
     return j;
 }
 
@@ -429,6 +436,7 @@ void Sequence::copy(const Sequence &seq1, Sequence *seq2){
     seq2->_nextStepToRun    = seq1._nextStepToRun;
     seq2->_lastStepRunTime  = seq1._lastStepRunTime;
     seq2->_dontLog           = seq1._dontLog;
+    seq2->_overrideManualMode = seq1._overrideManualMode;
   }
 
 

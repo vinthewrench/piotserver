@@ -260,6 +260,7 @@ class pIoTServerDB  {
     bool sequenceSetEnable(sequenceID_t sid, bool enable);
     bool sequenceisEnable(sequenceID_t sid);
     bool sequenceShouldIgnoreLog(sequenceID_t sid);
+    bool sequenceShouldIgnoreManualMode(sequenceID_t sid);
 
     bool triggerSequence(sequenceID_t sid);
     string sequenceGetCondition(sequenceID_t sid);

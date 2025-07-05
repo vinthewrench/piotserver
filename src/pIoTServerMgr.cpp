@@ -1641,6 +1641,8 @@ void pIoTServerMgr::executeSequenceAppEvent(sequenceID_t sid, boolCallback_t cb)
 bool pIoTServerMgr::runAbortActions(sequenceID_t sid){
     bool success = true;
     
+    bool ignoreManualMode = _db.sequenceShouldIgnoreManualMode(sid);
+ 
     vector<Action> actions;
     
     if(!_db.sequenceGetAbortActions(sid, actions)){
@@ -1654,7 +1656,7 @@ bool pIoTServerMgr::runAbortActions(sequenceID_t sid){
             string key = action.key();
             string value = action.value();
             
-            if(_db.isKeyInManualMode(key)){
+            if(!ignoreManualMode && _db.isKeyInManualMode(key)){
                 LOGT_ERROR("Sequence (%s) abort action ould not set key \"%s\" to %s. Manual mode only",
                            SequenceID_to_string(sid).c_str(),
                            key.c_str(), value.c_str());
@@ -1711,6 +1713,7 @@ bool pIoTServerMgr::runSequenceStep(sequenceID_t sid, uint stepNo,
     
     bool success = true;
     bool dontLog = _db.sequenceShouldIgnoreLog(sid);
+    bool ignoreManualMode = _db.sequenceShouldIgnoreManualMode(sid);
     Step step;
     
     if(!_db.sequenceGetStep(sid, stepNo, step))
@@ -1727,7 +1730,7 @@ bool pIoTServerMgr::runSequenceStep(sequenceID_t sid, uint stepNo,
             string key = action.key();
             string value = action.value();
             
-            if(_db.isKeyInManualMode(key)){
+            if(!ignoreManualMode && _db.isKeyInManualMode(key)){
                 LOGT_ERROR("Sequence: (%s, %d) Could not set key \"%s\" to %s. Manual mode only",
                            SequenceID_to_string(sid).c_str(), stepNo,
                            key.c_str(), value.c_str());

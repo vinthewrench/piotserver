@@ -103,9 +103,8 @@ constexpr string_view JSON_TIME_CRON            = "cron";
 constexpr string_view JSON_EVENT_TRIGGER_STRING   = "trigger.string";
 
 constexpr string_view JSON_EVENT_STARTUP        = "startup";
-constexpr string_view JSON_EVENT_SHUTDOWN        = "shutdown";
+constexpr string_view JSON_EVENT_SHUTDOWN       = "shutdown";
 constexpr string_view JSON_EVENT_MANUAL         = "manual";
-
 
 constexpr string_view JSON_ARG_ENABLE            = "enable";
 
@@ -169,9 +168,10 @@ constexpr static string_view PROP_DEVICE_ID         = "deviceID";
 constexpr static string_view PROP_DEVICE_PARAMS     = "params";
 
 constexpr static string_view PROP_SEQUENCE         = "sequence";
+constexpr static string_view JSON_ARG_OVERIDE_MANUAL     = "override_manualmode";
 
 constexpr static string_view PROP_SENSOR_QUERY_INTERVAL  = "interval";
-constexpr static string_view PROP_TRACKING        = "tracking";
+constexpr static string_view PROP_TRACKING                 = "tracking";
 
 constexpr static string_view JSON_ARG_IGNORE                = "ignore";
 constexpr static string_view JSON_ARG_DONT_RECORD           = "dont.record";

@@ -221,6 +221,7 @@ protected:
     
     bool            _enable;
     bool            _wasManuallyTriggered;
+    bool            _overrideManualMode;    // doesnt require keys to be in manual mode
     
     uint            _nextStepToRun;
     time_t          _lastStepRunTime;  // in localNow units

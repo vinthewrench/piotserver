@@ -281,16 +281,12 @@
       ]
     }
   ],
-  "keys.manual": ["GREENHOUSE_LIGHT", "SPRK_1", "SPRK_2", "SPRK_3", "SPRK_4"],
-  "prop.file.version": {
-    "file.etag": 24,
-    "last_write": 1751309302
-  },
   "sequence": [
     {
       "condition": "RAIN_SENSOR == 0",
       "description": "day to day sprinkler sequence",
       "enable": true,
+      "override_manualmode" : true,
       "name": "sprinkler control",
       "on_abort": {
         "action": [
@@ -453,6 +449,7 @@
       "enable": true,
       "name": "Greenhouse light on",
       "sequenceID": "1001",
+      "override_manualmode" : true,
       "steps": [
         {
           "action": [
