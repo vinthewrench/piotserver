@@ -5,50 +5,35 @@
             "device_type": "SAMPLE",
             "key": "RUN_TIME",
             "title": "Run Time"
-        },
+        }
+        
+    ],
+    "values": [
         {
-            "device_type": "PWRGate",
-            "params": {
-                "speed": 9600,
-                "tty": "/dev/tty.Bluetooth-Incoming-Port"
-            },
-            "pins": [
-                {
-                    "bit": 1,
-                    "data_type": "STRING",
-                    "key": "PWR STATUS",
-                    "title": "PWRGate STATUS"
-                },
-                {
-                    "bit": 2,
-                    "data_type": "VOLTS",
-                    "key": "POWER_SUPPLY",
-                    "title": "Power Supply"
-                },
-                {
-                    "bit": 3,
-                    "data_type": "VOLTS",
-                    "key": "BATTERY_VOLTS",
-                    "title": "Battery Volts"
-                },
-                {
-                    "bit": 4,
-                    "data_type": "AMPS",
-                    "key": "CHARGE_AMPS",
-                    "title": "Charge Current"
-                },
-                {
-                    "bit": 5,
-                    "data_type": "VOLTS",
-                    "key": "SOLAR_VOLTS",
-                    "title": "Solar Volts"
-                }
-            ]
+            "data_type": "INT",
+            "description": "A counter bumped each startup",
+            "initial.value": 0,
+            "key": "START_COUNT",
+            "title": "times restarted running",
+            "tracking": "track.latest"
         }
     ],
-    "prop.file.version": {
-        "file.etag": 5,
-        "last_write": 1750973619
-    },
-    "sequence": null
+    "sequence": [
+        {
+            "enable": true,
+            "name": "other startup task",
+            "description": "fool with device on startup",
+            "trigger": {
+                "event": "startup"
+            },
+            "steps": {
+                "action": [
+                    {
+                        "cmd": "EVAL",
+                        "expression": "START_COUNT := START_COUNT + 1"
+                    }
+                ]
+            }
+        }
+    ]
 }

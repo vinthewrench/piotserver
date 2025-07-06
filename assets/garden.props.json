@@ -105,7 +105,8 @@
           "data_type": "BOOL",
           "gpio.mode": "input",
           "key": "RAIN_SENSOR",
-          "title": "Orbit Rain Sensor"
+          "title": "Orbit Rain Sensor",
+          "tracking": "track.changes"
         }
       ],
       "title": "NCD Relay+I/O"
