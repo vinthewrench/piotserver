@@ -2092,74 +2092,122 @@ bool pIoTServerDB::restoreValuesFromDB(){
 bool pIoTServerDB::insertValueToDB(string key, string value, time_t time ){
     
     std::lock_guard<std::mutex> lock(_mutex);
-  
-    string sql = string("INSERT INTO DEVICE_DATA (NAME,DATE,VALUE) ")
-    + "VALUES  ('" + key + "', '" + to_string(time) + "', '" + value + "' );";
+    bool success = false;
     
-    // printf("%s\n", sql.c_str());
+    string sql = string("INSERT INTO DEVICE_DATA (NAME,DATE,VALUE) VALUES (?,?,?);");
     
-    char *zErrMsg = 0;
-    if(sqlite3_exec(_sdb,sql.c_str(),NULL, 0, &zErrMsg  ) != SQLITE_OK){
-        LOGT_ERROR("sqlite3_exec FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb    ) );
-        sqlite3_free(zErrMsg);
-        return false;
+    sqlite3_stmt* stmt = NULL;
+    sqlite3_prepare_v2(_sdb, sql.c_str(), -1,  &stmt, NULL);
+    sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_double(stmt, 2,  time);
+    sqlite3_bind_text(stmt, 3, value.c_str(), -1, SQLITE_STATIC);
+    
+    if(sqlite3_step(stmt) == SQLITE_DONE) {
+        success = true;
     }
-    
-    return true;
+    else
+    {
+        LOGT_ERROR("sqlite3_step FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb    ) );
+    }
+    sqlite3_finalize(stmt);
+    return success;
 }
 
 
 bool pIoTServerDB::insertRangeToDB(string key, double minVal, double maxVal, time_t time ){
-  
-    std::lock_guard<std::mutex> lock(_mutex);
-  
-    string sql = string("INSERT INTO DEVICE_RANGE (NAME,DATE,MIN,MAX) ")
-    + "VALUES  ('" + key + "', '" + to_string(time)
-    +  "', '" + to_string(minVal)
-    +  "', '" + to_string(maxVal) + "' );";
-
- //   printf("%s\n", sql.c_str());
     
-    char *zErrMsg = 0;
-    if(sqlite3_exec(_sdb,sql.c_str(),NULL, 0, &zErrMsg  ) != SQLITE_OK){
-        LOGT_ERROR("sqlite3_exec FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb    ) );
-        sqlite3_free(zErrMsg);
-        return false;
+    std::lock_guard<std::mutex> lock(_mutex);
+    bool success = false;
+    
+    sqlite3_stmt* stmt = NULL;
+    
+    try {
+        if( sqlite3_prepare_v2(_sdb, "INSERT INTO DEVICE_RANGE (NAME,DATE,MIN,MAX)  VALUES (?,?,?,?)", -1,  &stmt, NULL)  != SQLITE_OK)
+            throw std::runtime_error("prepare INSERT failed ");
+    
+        if( sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_STATIC)   != SQLITE_OK)
+            throw std::runtime_error("bind key failed ");
+    
+        if( sqlite3_bind_double(stmt, 2,  time) != SQLITE_OK)
+            throw std::runtime_error("bind time failed ");
+    
+        if( sqlite3_bind_double(stmt, 3,  minVal)   != SQLITE_OK)
+            throw std::runtime_error("bind Min failed ");
+    
+        if( sqlite3_bind_double(stmt, 4,  maxVal)   != SQLITE_OK)
+            throw std::runtime_error("bind max failed ");
+    
+        if( sqlite3_step(stmt)  != SQLITE_DONE)
+            throw std::runtime_error("step failed ");
+        
+        sqlite3_finalize(stmt); stmt = NULL;
+   
+        success = true;
+        
+    } catch (const std::runtime_error& e) {
+        
+        std::cerr << "Caught runtime error: " << e.what() << std::endl;
     }
     
-    return true;
+    if(stmt) sqlite3_finalize(stmt);
+    
+    return success;
 }
 
 
 
 bool pIoTServerDB::saveUniqueValueToDB(string key, string value, time_t time ){
-    
+  
     std::lock_guard<std::mutex> lock(_mutex);
+    bool success = false;
+    
+    sqlite3_stmt* stmt = NULL;
  
-    string sql =
-    string("BEGIN;")
-    + string("DELETE FROM DEVICE_DATA WHERE NAME = '") + key + "';"
-    + string("INSERT INTO DEVICE_DATA (NAME,DATE,VALUE) ")
-    + "VALUES  ('" + key + "', '" + to_string(time) + "', '" + value + "' );"
-    + string("COMMIT;");
-    
-    /*
-     BEGIN;
-     DELETE FROM DEVICE_DATA  WHERE NAME = 'TANK_RAW';
-     INSERT INTO DEVICE_DATA (NAME,DATE,VALUE) VALUES  ('TANK_RAW', '2021-09-19 00:52:06 GMT', '1' );
-     COMMIT;
-     
-     */
-    //    printf("%s\n", sql.c_str());
-    
-    char *zErrMsg = 0;
-    if(sqlite3_exec(_sdb,sql.c_str(),NULL, 0, &zErrMsg  ) != SQLITE_OK){
-        LOGT_ERROR("sqlite3_exec FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb    ) );
-        sqlite3_free(zErrMsg);
-        return false;
+    try {
+        if( sqlite3_exec(_sdb, "BEGIN;", NULL, NULL, NULL) != SQLITE_OK)
+            throw std::runtime_error("BEGIN statement failed ");
+        
+        if( sqlite3_prepare_v2(_sdb, "DELETE FROM DEVICE_DATA WHERE NAME = ?;", -1,  &stmt, NULL)  != SQLITE_OK)
+            throw std::runtime_error("prepare DELETE failed ");
+        
+        if( sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_STATIC)  != SQLITE_OK)
+            throw std::runtime_error("bind failed ");
+        
+        if( sqlite3_step(stmt)  != SQLITE_DONE)
+            throw std::runtime_error("step failed ");
+        
+        sqlite3_finalize(stmt); stmt = NULL;
+        
+        if( sqlite3_prepare_v2(_sdb, "INSERT INTO DEVICE_DATA (NAME,DATE,VALUE) VALUES(?,?,?);", -1,  &stmt, NULL)  != SQLITE_OK)
+            throw std::runtime_error("prepare INSERT failed ");
+        
+        if( sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_STATIC)  != SQLITE_OK)
+            throw std::runtime_error("bind key failed ");
+        
+        if( sqlite3_bind_double(stmt, 2, time)  != SQLITE_OK)
+            throw std::runtime_error("bind time failed ");
+        
+        if( sqlite3_bind_text(stmt, 3, value.c_str(), -1, SQLITE_STATIC)  != SQLITE_OK)
+            throw std::runtime_error("bind value failed ");
+        
+        if( sqlite3_step(stmt)  != SQLITE_DONE)
+            throw std::runtime_error("step failed ");
+        
+        sqlite3_finalize(stmt); stmt = NULL;
+        
+        if( sqlite3_exec(_sdb, "COMMIT;", NULL, NULL, NULL) != SQLITE_OK)
+            throw std::runtime_error("COMMIT statement failed ");
+        
+        success = true;
+        
+    } catch (const std::runtime_error& e) {
+      
+        std::cerr << "Caught runtime error: " << e.what() << std::endl;
     }
-    
-    return true;
+
+    if(stmt) sqlite3_finalize(stmt);
+ 
+    return success;
 }
 
 bool pIoTServerDB::getMinMaxForValues(stringvector keys, double hours, vector<minMaxEntry_t> &entries){
@@ -2214,98 +2262,82 @@ bool pIoTServerDB::removeHistoryForKey(string key, float days){
     std::lock_guard<std::mutex> lock(_mutex);
     bool success = false;
     
-    string sql = string("DELETE FROM DEVICE_DATA ");
-    
-    if(key.size() > 0) {
-        sql += "WHERE NAME ='" + key + "' ";
-    }
-    
-    if(days > 0) {
-        
-        if(key.size() > 0) {
-            sql += "AND ";
-        }
-        else {
-            sql += "WHERE ";
-        }
-        
-        sql += " AND datetime(DATE, 'auto') > datetime('now' , '-" + to_string(days) + " days', 'localtime')";
-    }
-    else {
-        sql += ";";
-    }
     sqlite3_stmt* stmt = NULL;
+    string sql;
     
-    if(sqlite3_prepare_v2(_sdb, sql.c_str(), -1,  &stmt, NULL)  == SQLITE_OK){
+    try {
+        sql = string("DELETE FROM DEVICE_DATA ");
         
-        if(sqlite3_step(stmt) == SQLITE_DONE) {
+        if(!key.empty()) {
+            sql += "WHERE NAME = ? ";
+        }
+        
+        if(days > 0) {
             
-            int count =  sqlite3_changes(_sdb);
-            LOGT_DEBUG("sqlite %s\n %d rows affected", sql.c_str(), count );
-            success = true;
+            if(key.size() > 0) {
+                sql += "AND ";
+            }
+            else {
+                sql += "WHERE ";
+            }
+            sql += "datetime(DATE, 'auto') > datetime('now' , '-" + to_string(days) + " days', 'localtime')";
         }
-        else
-        {
-            LOGT_ERROR("sqlite3_step FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb    ) );
-        }
-        sqlite3_finalize(stmt);
         
-    }
-    else {
-        LOGT_ERROR("sqlite3_prepare_v2 FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb    ) );
-        sqlite3_errmsg(_sdb);
-    }
-    
-    return success;
-}
- 
-bool pIoTServerDB::countHistoryForRange(string key, int &countOut){
-    std::lock_guard<std::mutex> lock(_mutex);
-    bool success = false;
-    
-    int count = 0;
-    
-    sqlite3_stmt* stmt = NULL;
-    
-    string sql = string("SELECT COUNT(*) FROM DEVICE_RANGE WHERE NAME = '")
-    + key + "'";
-    
-    sqlite3_prepare_v2(_sdb, sql.c_str(), -1,  &stmt, NULL);
-    
-    if(sqlite3_step(stmt) == SQLITE_ROW) {
-        count = sqlite3_column_int(stmt, 0);
+        sql += ";";
+        
+        if( sqlite3_prepare_v2(_sdb, sql.c_str(), -1,  &stmt, NULL)  != SQLITE_OK)
+            throw std::runtime_error("prepare INSERT failed ");
+        
+        if(!key.empty()) {
+            if( sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_STATIC)   != SQLITE_OK)
+                throw std::runtime_error("bind key failed ");
+        }
+        
+        if( sqlite3_step(stmt)  != SQLITE_DONE)
+            throw std::runtime_error("step failed ");
+        
+        int count =  sqlite3_changes(_sdb);
+        LOGT_DEBUG("removeHistoryForKey: %d rows affected", count );
+        
+        sqlite3_finalize(stmt); stmt = NULL;
+        
         success = true;
+        
+    } catch (const std::runtime_error& e) {
+        
+        std::cerr << "Caught runtime error: " << e.what() << std::endl;
     }
     
-    sqlite3_finalize(stmt);
-    
-    if(success){
-        countOut = count;
-    }
-    
+    if(stmt) sqlite3_finalize(stmt);
     return success;
+    
 }
 
 bool pIoTServerDB::countHistoryForKey(string key, int &countOut){
     std::lock_guard<std::mutex> lock(_mutex);
     bool success = false;
-    
     int count = 0;
-    
     sqlite3_stmt* stmt = NULL;
     
-    string sql = string("SELECT COUNT(*) FROM DEVICE_DATA WHERE NAME = '")
-    + key + "'";
-    
-    sqlite3_prepare_v2(_sdb, sql.c_str(), -1,  &stmt, NULL);
-    
-    if(sqlite3_step(stmt) == SQLITE_ROW) {
+    try {
+        if( sqlite3_prepare_v2(_sdb, "SELECT COUNT(*) FROM DEVICE_DATA WHERE NAME = ?;", -1,  &stmt, NULL)  != SQLITE_OK)
+            throw std::runtime_error("prepare INSERT failed ");
+        
+        if( sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_STATIC)   != SQLITE_OK)
+            throw std::runtime_error("bind key failed ");
+        
+        if( sqlite3_step(stmt)  != SQLITE_ROW)
+            throw std::runtime_error("step failed ");
+        
         count = sqlite3_column_int(stmt, 0);
+        
+        sqlite3_finalize(stmt); stmt = NULL;
         success = true;
+        
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Caught runtime error: " << e.what() << std::endl;
     }
-    
-    sqlite3_finalize(stmt);
-    
+ 
     if(success){
         countOut = count;
     }
@@ -2319,165 +2351,239 @@ bool pIoTServerDB::historyForKey(string key, historicValues_t &valuesOut,
     std::lock_guard<std::mutex> lock(_mutex);
     bool success = false;
     
+    sqlite3_stmt* stmt = NULL;
+    string sql;
+    
     historicValues_t values;
     values.clear();
     
-    string sql = string("SELECT  DATE, VALUE FROM DEVICE_DATA WHERE NAME = '")
-    + key + "'";
-    
-    if(limit){
-        sql += " ORDER BY DATE DESC LIMIT " + to_string(limit);
+    try {
+        sql = string("SELECT DATE, VALUE FROM DEVICE_DATA WHERE NAME = ? ");
         
-        if(offset)
-            sql += " OFFSET " + to_string(offset);
-     }
-     else if(days > 0) {
-         sql += " AND datetime(DATE, 'auto') > datetime('now' , '-" + to_string(days) + " days', 'localtime')";
+        if(limit){
+            sql += " ORDER BY DATE DESC LIMIT " + to_string(limit);
+            
+            if(offset)
+                sql += " OFFSET " + to_string(offset);
+        }
+        else if(days > 0) {
+            sql += " AND datetime(DATE, 'auto') > datetime('now' , '-" + to_string(days) + " days', 'localtime')";
+        }
+        sql += ";" ;
+        
+        if( sqlite3_prepare_v2(_sdb, sql.c_str(), -1,  &stmt, NULL)  != SQLITE_OK)
+            throw std::runtime_error("prepare INSERT failed ");
+        
+        if( sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_STATIC)   != SQLITE_OK)
+            throw std::runtime_error("bind key failed ");
+        
+        while ( (sqlite3_step(stmt)) == SQLITE_ROW) {
+            time_t  when =  sqlite3_column_int64(stmt, 0);
+            string  value = string((char*) sqlite3_column_text(stmt, 1));
+            values.push_back(make_pair(when, value)) ;
+        }
+        
+        sqlite3_finalize(stmt); stmt = NULL;
+        
+        success = values.size() > 0;
+        
+    } catch (const std::runtime_error& e) {
+        
+        std::cerr << "Caught runtime error: " << e.what() << std::endl;
     }
-   
-    sql += ";" ;
-    
-    sqlite3_stmt* stmt = NULL;
-    
-    sqlite3_prepare_v2(_sdb, sql.c_str(), -1,  &stmt, NULL);
-    
-    while ( (sqlite3_step(stmt)) == SQLITE_ROW) {
-        time_t  when =  sqlite3_column_int64(stmt, 0);
-        string  value = string((char*) sqlite3_column_text(stmt, 1));
-        values.push_back(make_pair(when, value)) ;
-    }
-    sqlite3_finalize(stmt);
-    
-    success = values.size() > 0;
     
     if(success){
         valuesOut = values;
     }
-     
+    
+    if(stmt) sqlite3_finalize(stmt);
     return success;
 }
 
 
-bool     pIoTServerDB::historyForRange(string key, historicRanges_t &historyOut,
-                                       int days, int limit, int offset){
+
+
+bool pIoTServerDB::removeHistoryForRange(string key, float days){
+    
     std::lock_guard<std::mutex> lock(_mutex);
     bool success = false;
- 
-    historicRanges_t ranges;
-    ranges.clear();
-    
-    string sql = string("SELECT DATE, MIN, MAX FROM DEVICE_RANGE WHERE NAME = '")
-    + key + "'";
-    
-    if(limit){
-        sql += " ORDER BY DATE DESC LIMIT " + to_string(limit);
-        
-        if(offset)
-            sql += " OFFSET " + to_string(offset);
-     }
-     else if(days > 0) {
-        sql += " AND datetime(DATE, 'auto') > datetime('now' , '-" + to_string(days) + " days', 'localtime')";
-    }
-   
-    sql += ";" ;
- 
     
     sqlite3_stmt* stmt = NULL;
+    string sql;
     
-    sqlite3_prepare_v2(_sdb, sql.c_str(), -1,  &stmt, NULL);
-    
-    while ( (sqlite3_step(stmt)) == SQLITE_ROW) {
-        time_t  when =  sqlite3_column_int64(stmt, 0);
-        double  min =   sqlite3_column_double(stmt, 1);
-        double  max =   sqlite3_column_double(stmt, 2);
-        ranges.push_back( make_tuple(when, min, max) ) ;
+    try {
+        sql = string("DELETE FROM DEVICE_RANGE ");
+        
+        if(!key.empty()) {
+            sql += "WHERE NAME = ? ";
+        }
+        
+        if(days > 0) {
+            
+            if(key.size() > 0) {
+                sql += "AND ";
+            }
+            else {
+                sql += "WHERE ";
+            }
+            sql += "datetime(DATE, 'auto') > datetime('now' , '-" + to_string(days) + " days', 'localtime')";
+        }
+        
+        sql += ";";
+        
+        if( sqlite3_prepare_v2(_sdb, sql.c_str(), -1,  &stmt, NULL)  != SQLITE_OK)
+            throw std::runtime_error("prepare INSERT failed ");
+        
+        if(!key.empty()) {
+            if( sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_STATIC)   != SQLITE_OK)
+                throw std::runtime_error("bind key failed ");
+        }
+        
+        if( sqlite3_step(stmt)  != SQLITE_DONE)
+            throw std::runtime_error("step failed ");
+        
+        int count =  sqlite3_changes(_sdb);
+        LOGT_DEBUG("removeHistoryForKey: %d rows affected", count );
+        
+        sqlite3_finalize(stmt); stmt = NULL;
+        
+        success = true;
+        
+    } catch (const std::runtime_error& e) {
+        
+        std::cerr << "Caught runtime error: " << e.what() << std::endl;
     }
-    sqlite3_finalize(stmt);
     
-    success = ranges.size() > 0;
+    if(stmt) sqlite3_finalize(stmt);
+    return success;
+}
+
+
+bool pIoTServerDB::countHistoryForRange(string key, int &countOut){
+  
+    std::lock_guard<std::mutex> lock(_mutex);
+    bool success = false;
+    int count = 0;
+    sqlite3_stmt* stmt = NULL;
+    
+    try {
+        if( sqlite3_prepare_v2(_sdb, "SELECT COUNT(*) FROM DEVICE_RANGE WHERE NAME = ?;", -1,  &stmt, NULL)  != SQLITE_OK)
+            throw std::runtime_error("prepare INSERT failed ");
+        
+        if( sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_STATIC)   != SQLITE_OK)
+            throw std::runtime_error("bind key failed ");
+        
+        if( sqlite3_step(stmt)  != SQLITE_ROW)
+            throw std::runtime_error("step failed ");
+        
+        count = sqlite3_column_int(stmt, 0);
+        
+        sqlite3_finalize(stmt); stmt = NULL;
+        success = true;
+        
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Caught runtime error: " << e.what() << std::endl;
+    }
+ 
+    if(success){
+        countOut = count;
+    }
+    
+    return success;
+}
+
+bool pIoTServerDB::historyForRange(string key, historicRanges_t &historyOut,
+                                   int days, int limit, int offset){
+    
+    std::lock_guard<std::mutex> lock(_mutex);
+    bool success = false;
+    
+    sqlite3_stmt* stmt = NULL;
+    string sql;
+    
+    historicRanges_t ranges;
+    ranges.clear();
+ 
+    try {
+        sql = string("SELECT DATE, MIN, MAX FROM DEVICE_RANGE WHERE NAME = ? ");
+        
+        if(limit){
+            sql += " ORDER BY DATE DESC LIMIT " + to_string(limit);
+            
+            if(offset)
+                sql += " OFFSET " + to_string(offset);
+        }
+        else if(days > 0) {
+            sql += " AND datetime(DATE, 'auto') > datetime('now' , '-" + to_string(days) + " days', 'localtime')";
+        }
+        sql += ";" ;
+        
+        if( sqlite3_prepare_v2(_sdb, sql.c_str(), -1,  &stmt, NULL)  != SQLITE_OK)
+            throw std::runtime_error("prepare INSERT failed ");
+        
+        if( sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_STATIC)   != SQLITE_OK)
+            throw std::runtime_error("bind key failed ");
+        
+        while ( (sqlite3_step(stmt)) == SQLITE_ROW) {
+            time_t  when =  sqlite3_column_int64(stmt, 0);
+            double  min =   sqlite3_column_double(stmt, 1);
+            double  max =   sqlite3_column_double(stmt, 2);
+            ranges.push_back( make_tuple(when, min, max) ) ;
+       }
+        
+        sqlite3_finalize(stmt); stmt = NULL;
+        
+        success = ranges.size() > 0;
+     
+    } catch (const std::runtime_error& e) {
+        
+        std::cerr << "Caught runtime error: " << e.what() << std::endl;
+    }
     
     if(success){
         historyOut = ranges;
     }
+    
+    if(stmt) sqlite3_finalize(stmt);
     return success;
 }
-
-bool pIoTServerDB::removeHistoryForRange(string key, float days){
-
-    std::lock_guard<std::mutex> lock(_mutex);
-    bool success = false;
-    
-    string sql = string("DELETE FROM DEVICE_RANGE ");
-    
-    if(key.size() > 0) {
-        sql += "WHERE NAME ='" + key + "' ";
-    }
-    
-    if(days > 0) {
-        
-        if(key.size() > 0) {
-            sql += "AND ";
-        }
-        else {
-            sql += "WHERE ";
-        }
-        
-        sql += " AND datetime(DATE, 'auto') > datetime('now' , '-" + to_string(days) + " days', 'localtime')";
-    }
-    else {
-        sql += ";";
-    }
-    sqlite3_stmt* stmt = NULL;
-    
-    if(sqlite3_prepare_v2(_sdb, sql.c_str(), -1,  &stmt, NULL)  == SQLITE_OK){
-        
-        if(sqlite3_step(stmt) == SQLITE_DONE) {
-            
-            int count =  sqlite3_changes(_sdb);
-            LOGT_DEBUG("sqlite %s\n %d rows affected", sql.c_str(), count );
-            success = true;
-        }
-        else
-        {
-            LOGT_ERROR("sqlite3_step FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb    ) );
-        }
-        sqlite3_finalize(stmt);
-        
-    }
-    else {
-        LOGT_ERROR("sqlite3_prepare_v2 FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb    ) );
-        sqlite3_errmsg(_sdb);
-    }
-    
-    return success;
-}
-
 
 // MARK: -   SQL DATABASE Alerts
 
 bool pIoTServerDB::logAlert(alert_t evt, string details, time_t when ){
     
+    bool success = false;
+    
     if(when == 0)
         when = time(NULL);
-     
-    bool hasDetails = details.size();
     
-    //printf("%s \t EVT: %s\n", ts.ISO8601String().c_str(), displayStringForAlert(evt).c_str());
-    
-    string sql = string("INSERT INTO ALERT_LOG (ALERT,DATE") ;
-    sql += hasDetails?",DETAILS": "";
-    sql +=  ") VALUES  (" + to_string(evt)
-    + ", '" + to_string(when) + "' ";
-    sql += hasDetails? (", '" + details + "');") :");";
-  
-    char *zErrMsg = 0;
-    if(sqlite3_exec(_sdb,sql.c_str(),NULL, 0, &zErrMsg  ) != SQLITE_OK){
-        LOGT_ERROR("sqlite3_exec FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb    ) );
-        sqlite3_free(zErrMsg);
-        return false;
+    string sql;
+    sqlite3_stmt* stmt = NULL;
+
+    if(details.empty()){
+        sql = string("INSERT INTO ALERT_LOG (ALERT,DATE) VALUES (?,?);");
+        sqlite3_prepare_v2(_sdb, sql.c_str(), -1,  &stmt, NULL);
+        sqlite3_bind_int(stmt,      1,  evt);
+        sqlite3_bind_double(stmt,   2,  when);
     }
+    else {
+        sql = string("INSERT INTO ALERT_LOG (ALERT,DATE,DETAILS) VALUES (?,?,?);");
+        sqlite3_prepare_v2(_sdb, sql.c_str(), -1,  &stmt, NULL);
+        sqlite3_bind_int(stmt,      1,   evt);
+        sqlite3_bind_double(stmt,   2,  when);
+        sqlite3_bind_text(stmt,     3, details.c_str(), -1, SQLITE_STATIC);
+   }
+ 
+    if(sqlite3_step(stmt) == SQLITE_DONE) {
+        success = true;
+    }
+    else
+    {
+        LOGT_ERROR("sqlite3_step FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb    ) );
+    }
+    sqlite3_finalize(stmt);
     
-    return true;
+    return success;
 }
 
 string pIoTServerDB::displayStringForAlert(alert_t evt){

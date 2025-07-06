@@ -136,8 +136,9 @@ static bool History_NounHandler_GET(ServerCmdQueue* cmdQueue,
         
         pIoTServerDB::valueSchema_t schema =  db->schemaForKey(key);
         
-        if(schema.tracking == TR_TRACK_CHANGES) {
-            
+        if(schema.tracking == TR_TRACK_CHANGES
+           || schema.tracking == TR_TRACK_LATEST_VALUE) {
+  
             pIoTServerDB::historicValues_t history;
             
             reply[PROP_KEY] = key;
@@ -206,12 +207,13 @@ static bool History_NounHandler_GET(ServerCmdQueue* cmdQueue,
             
             pIoTServerDB::valueSchema_t schema =  db->schemaForKey(key);
             
-            
-            if(schema.tracking == TR_TRACK_CHANGES) {
+            if(schema.tracking == TR_TRACK_CHANGES
+               || schema.tracking == TR_TRACK_LATEST_VALUE) {
+                
                 if(db->countHistoryForKey(key,  count)){
                     reply[JSON_ARG_COUNT] = count;
                 }
-             }
+            }
             else if(schema.tracking == TR_TRACK_RANGE){
                 if(db->countHistoryForRange(key,  count)){
                     reply[JSON_ARG_COUNT] = count;
@@ -220,10 +222,10 @@ static bool History_NounHandler_GET(ServerCmdQueue* cmdQueue,
         }
         
         if(reply.empty()){
-             makeStatusJSON(reply, STATUS_BAD_REQUEST, "URL Invalid", "The value key provided was malformed or null");
+            makeStatusJSON(reply, STATUS_BAD_REQUEST, "URL Invalid", "The value key provided was malformed or null");
             (completion) (reply, STATUS_BAD_REQUEST);
             return true;
-         }
+        }
     }
     
     makeStatusJSON(reply,STATUS_OK);
@@ -274,7 +276,8 @@ static bool History_NounHandler_DELETE(ServerCmdQueue* cmdQueue,
         std::transform(key.begin(), key.end(), key.begin(), ::toupper);
         
         pIoTServerDB::valueSchema_t schema =  db->schemaForKey(key);
-        if(schema.tracking == TR_TRACK_CHANGES) {
+        if(schema.tracking == TR_TRACK_CHANGES
+           || schema.tracking == TR_TRACK_LATEST_VALUE) {
             if(db->removeHistoryForKey(key, days)){
                 makeStatusJSON(reply,STATUS_NO_CONTENT);
                 (completion) (reply, STATUS_NO_CONTENT);
@@ -431,6 +434,33 @@ static bool Alerts_NounHandler_GET(ServerCmdQueue* cmdQueue,
     return true;
 }
 
+static bool Alerts_NounHandler_PATCH(ServerCmdQueue* cmdQueue,
+                                   REST_URL url,
+                                   TCPClientInfo cInfo,
+                                   ServerCmdQueue::cmdCallback_t completion) {
+    using namespace rest;
+    json reply;
+    ServerCmdArgValidator v1;
+    auto path = url.path();
+    
+    auto pIoTServer = pIoTServerMgr::shared();
+    auto db = pIoTServer->getDB();
+   
+    string str;
+    
+    if(v1.getStringFromJSON(JSON_ARG_MESSAGE, url.body(), str)){
+        
+        db->logAlert(ALERT_MESSAGE, str);
+   
+        makeStatusJSON(reply,STATUS_OK);
+        (completion) (reply, STATUS_OK);
+        return true;
+    }
+ 
+    return false;
+}
+
+
 static bool Alerts_NounHandler_DELETE(ServerCmdQueue* cmdQueue,
                                       REST_URL url,
                                       TCPClientInfo cInfo,
@@ -493,17 +523,17 @@ static void Alerts_NounHandler(ServerCmdQueue* cmdQueue,
             break;
             
             //        case HTTP_PUT:
-            //            isValidURL = History_NounHandler_PUT(cmdQueue,url,cInfo, completion);
+            //            isValidURL = Alerts_NounHandler_PUT(cmdQueue,url,cInfo, completion);
             //            break;
             
-            //        case HTTP_PATCH:
-            //            isValidURL = History_NounHandler_PATCH(cmdQueue,url,cInfo, completion);
-            //            break;
+                    case HTTP_PATCH:
+                        isValidURL = Alerts_NounHandler_PATCH(cmdQueue,url,cInfo, completion);
+                        break;
             
-            //        case HTTP_POST:
-            //            isValidURL = History_NounHandler_POST(cmdQueue,url,cInfo, completion);
-            //            break;
-            //
+    //                    case HTTP_POST:
+    //                        isValidURL = Alerts_NounHandler_POST(cmdQueue,url,cInfo, completion);
+    //                        break;
+            
         case HTTP_DELETE:
             isValidURL = Alerts_NounHandler_DELETE(cmdQueue,url,cInfo, completion);
             break;
