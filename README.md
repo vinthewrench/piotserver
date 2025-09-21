@@ -128,6 +128,7 @@ dtoverlay=w1-gpio,gpiopin=4
 sudo apt-get install -y i2c-tools  
 sudo apt-get install -y  git-core
 sudo apt-get install -y  sqlite3  libsqlite3-dev
+sudo apt-get install gpiod libgpiod-dev
 ```
 
 ##### The piotserver App
