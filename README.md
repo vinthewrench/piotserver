@@ -2,7 +2,11 @@
 
 # Articles
 
+Start with these two
+* [Off-Grid Farm Automation with Raspberry Pi](https://www.vinthewrench.com/p/off-grid-farm-automation-raspberry-pi) 
 * [Farm automation made easy as Pi](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part)
+
+And these are the details
 * [Controlling the Irrigation valves.](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-23c)
 * [Reading the Temperature with 1-wire Sensors](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-a4c)
 * [Using the I2C protocol to communicate to sensors.](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-688)
@@ -16,6 +20,9 @@
 * [How to make things happen on time](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-eb8)
 * [There are always conditions to evaluate](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-3aa)
 * [Rolling my own I²C and 1-Wire interface card](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-2a8)
+* [PWM, a better way to control sprinkler valves](https://www.vinthewrench.com/p/raspberry-pi-internet-of-things-part-0d5)
+* [Not Another Sprinkler Valve Article; TLDR](https://www.vinthewrench.com/p/not-another-sprinkler-valve-article)
+
  
  
 ######  I2C Hardware Devices
@@ -131,10 +138,171 @@ sudo apt-get install -y  sqlite3  libsqlite3-dev
 sudo apt-get install gpiod libgpiod-dev
 ```
 
+##### this is what my  /boot/firmware/config.txt  looks like
+
+``` 
+## For more options and information see
+# http://rptl.io/configtxt
+# Some settings may impact device functionality. See link above for details
+
+# Uncomment some or all of these to enable the optional hardware interfaces
+dtparam=i2c_arm=on
+
+dtparam=audio=off
+dtoverlay=disable-bt
+camera_auto_detect=0
+display_auto_detect=0
+hdmi_ignore_hotplug=1
+hdmi_blanking=2
+
+;POWER_DOWN - OUTPUT
+dtoverlay=gpio-poweroff,gpiopin=25
+
+;BAT_LOW - INPUT
+dtoverlay=gpio-shutdown,gpio_pin=23,active_low=1,gpio_pull=up
+
+# Automatically load initramfs files, if found
+auto_initramfs=1
+
+# Run in 64-bit mode
+arm_64bit=1
+
+# Run as fast as firmware / board allows
+arm_boost=1
+
+enable_uart=1
 ##### The piotserver App
+```
 
-All this is why we came here.
+be sure to reboot after making these changes.
 
+#### check power supply / battery 
+
+* **POWER_DOWN** - gpiopin=25 is connected to the relay that shuts off the board.
+you can test this by doing a shutdown and seeing if the board shuts off.
+  
+ ```bash
+sudo shutdown now
+ ```
+ 
+ * **BAT_LOW**  - ,gpio_pin=23 is connected to the DRC battery low signal and 
+ will initiate a shutdown on the Raspberry pi
+ 
+
+* GPIO pin 24 is connected to AC OK on the DRC power supply, you can check this by
+ ```bash
+sudo pinctrl  set 24 ip pu
+
+# with AC applied this should return 0
+# When AC is unplugged, it will return 1
+ pinctrl lev 24 
+ ```
+
+#### The Hardware UART
+**Note: ** I added the **enable_uart** as a backup for when wifi is dead and I cant ssh 
+
+If you pan to use this, you might need to setup a login password.
+ ```bash
+ #change or setup your password
+ $passwd
+ 
+ you can check it by looking at the password file
+ $cat /etc/passwd
+ 
+ #also note the console speed should be 115200 -- 
+ 
+$cat  /boot/firmware/cmdline.txt
+console=serial0,115200 console=tty1   .....
+##### WIFI power saving
+
+ I am disabling WIFI power saving, maybe Raspberry Pi fixed this by now
+ ```bash
+ sudo nano /etc/NetworkManager/conf.d/wifi-powersave-off.conf
+ 
+ # add in this line
+[connection]
+wifi.powersave = 2
+
+#after reboot , check it
+
+$ iw dev wlan0 get power_save
+Power save: off
+ ```
+ 
+#### Setting up the 1-Wire ds2482 OWFS  driver
+
+Check if your hardware is working.  you should at the very least see the DS2482 at address 0x18
+ ```bash
+sudo i2cdetect -y 1
+
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- --
+10: -- -- -- -- -- -- -- -- 18 -- -- -- -- -- -- --
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+70: -- -- -- -- -- -- -- --
+ ```
+ 
+Install OWFS
+```bash
+sudo apt-get update
+sudo apt-get install owfs ow-shell
+```
+Edit owfs.conf to enable the I2C 1 Wire interface
+```bash
+sudo nano /etc/owfs.conf
+
+#comment out everything but make sure it reads like
+# you dont need the http or ftp ports  
+#although the http might be useful for debugging your 1 wire devices
+
+server: device = /dev/i2c-1
+mountpoint = /mnt/1wire
+allow_other
+server: port = localhost:4304
+```
+ Create the folder where the 1 Wire devices will be mounted.
+```bash
+sudo mkdir /mnt/1wire
+
+#and reboot it
+sudo reboot
+```
+ Enable the owserver service
+```bash
+sudo systemctl enable owserver.service
+```
+
+Your 1 Wire devices can be found in the directory /mnt/1wire
+```bash
+$ls  /mnt/1wire
+28.793434000000  alarm  settings      statistics  system
+28.B9F533000000  bus.0  simultaneous  structure   uncached
+
+#cat /mnt/1wire/28.793434000000/temperature
+24.6875
+```
+
+if you see duplicate devices on the /mnt/1wire directory -- 
+you need to edit the **/lib/systemd/system/owfs.service** file.
+
+```bash
+sudo nano /lib/systemd/system/owfs.service
+
+#edit the line with ExecStart=/usr/bin/owfs -c /etc/owfs.conf --allow_other %t/owfs
+# so it looks like
+ExecStart=/usr/bin/owfs --allow_other %t/owfs
+
+#save and reboot
+```
+
+## Install  piotserver
+
+start by cloning the repository
+ 
  ```bash
 cd
 #clone the repository
