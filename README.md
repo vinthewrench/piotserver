@@ -54,8 +54,6 @@ And these are the details
  * [Waveshare](https://www.waveshare.com/product/raspberry-pi/hats.htm)
  
 
-## Status
-
 ## Build system and hardware
 
 Runs on Raspberry Pi (Bookworm)
@@ -73,8 +71,8 @@ Why is there an Xcode file?
 ##### Always run the upgrade
 
 ```bash
-$sudo apt update
-$sudo apt-get upgrade
+sudo apt update
+sudo apt-get upgrade
 ```
 ##### Install the LLVM toolchain
 
@@ -117,28 +115,17 @@ sudo apt-get install git-core
  run the raspi-config and select  Advanced Options / Expand the Filesystem
  then it's a good time to reboot
 
-##### Update the configuration file 
 
-here is a copy of what I am using in my  /boot/firmware/config.txt   file:
-``` 
-# For more options and information see
-# http://rpf.io/configtxt
-
-dtparam=i2c_arm=on
-
-dtoverlay=w1-gpio,gpiopin=4
-
-```
 
 ##### A few more libraries 
 ```bash
 sudo apt-get install -y i2c-tools  
-sudo apt-get install -y  git-core
 sudo apt-get install -y  sqlite3  libsqlite3-dev
 sudo apt-get install gpiod libgpiod-dev
 ```
 
-##### this is what my  /boot/firmware/config.txt  looks like
+##### Update the configuration file 
+ this is what my  /boot/firmware/config.txt  looks like
 
 ``` 
 ## For more options and information see
@@ -191,12 +178,30 @@ sudo shutdown now
 
 * GPIO pin 24 is connected to AC OK on the DRC power supply, you can check this by
  ```bash
-sudo pinctrl  set 24 ip pu
+ #check the level with 
+  gpioget --bias=pull-up GPIO24
+  
+ #monitor it with 
+ gpiomon --bias=pull-up GPIO24
 
-# with AC applied this should return 0
-# When AC is unplugged, it will return 1
- pinctrl lev 24 
+# with AC applied this should return 0  (falling)
+# When AC is unplugged, it will return 1 (rising)
  ```
+
+#### check daughter board FAULT signal
+ 
+ * **FAULT** - gpiopin=22 is connected to the the daughter board FAULT signal. 
+you can check it by grounding pin 3 of the daughter board connector or shorting 
+a drv103 output while it is running.  The Red LED will illuminate and the GPIO 22 will go low.
+ 
+```bash
+ #check the level with 
+ gpioget --bias=pull-up GPIO22
+ 
+ #monitor it with 
+ gpiomon --bias=pull-up GPIO22
+ ```
+
 
 #### The Hardware UART
 **Note: ** I added the **enable_uart** as a backup for when wifi is dead and I cant ssh 
@@ -213,7 +218,31 @@ If you pan to use this, you might need to setup a login password.
  
 $cat  /boot/firmware/cmdline.txt
 console=serial0,115200 console=tty1   .....
-##### WIFI power saving
+
+ ```
+ 
+ You can check login with screen
+ 
+  ```bash
+  ls /dev/tty.*
+  
+    /dev/tty.usbserial-1410
+ 
+ screen /dev/tty.usbserial-1410 115200   
+    
+
+Debian GNU/Linux 13 xxxxxx ttyAMA0
+
+My IP address is .....
+
+xxxx login:
+ ```
+ 
+Exit screen:
+Press Ctrl-A then K, then confirm with y.
+(Alternatively, Ctrl-A then \ quits all sessions.)
+
+ ##### WIFI power saving
 
  I am disabling WIFI power saving, maybe Raspberry Pi fixed this by now
  ```bash
@@ -259,9 +288,17 @@ sudo nano /etc/owfs.conf
 # you dont need the http or ftp ports  
 #although the http might be useful for debugging your 1 wire devices
 
+######################## SOURCES ########################
+#
+# With this setup, any client (but owserver) uses owserver on the
+# local machine...
+! server: server = localhost:4304
 server: device = /dev/i2c-1
+######################### OWFS ##########################
+#
 mountpoint = /mnt/1wire
 allow_other
+#
 server: port = localhost:4304
 ```
  Create the folder where the 1 Wire devices will be mounted.

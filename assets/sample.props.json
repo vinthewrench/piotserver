@@ -6,7 +6,21 @@
             "key": "RUN_TIME",
             "title": "Run Time"
         }
-        
+        ,
+        {
+            "device_type": "GPIO",
+            "pins": [
+                {
+                    "BCM": 24,
+                    "data_type": "BOOL",
+                    "gpio.mode": "input",
+                    "key": "POWER_FAIL",
+                    "title": "AC Power Fail Bit",
+                    "gpio.flags": 512
+                }
+            ]
+        }
+
     ],
     "values": [
         {

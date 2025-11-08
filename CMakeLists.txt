@@ -84,7 +84,6 @@ if(APPLE)
     set(
     PROJECT_LINK_LIBS
     sqlite3
- #   gpiod
  #    CURL::libcurl
     Threads::Threads
 )
@@ -92,7 +91,6 @@ else()
     set(
     PROJECT_LINK_LIBS
     sqlite3
-    gpiod
  #    CURL::libcurl
     Threads::Threads
 )

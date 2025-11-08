@@ -7,23 +7,13 @@
     },
     "devices": [
         {
-            "address": "/mnt/1wire/28.793434000000/",
+            "address": "/mnt/1wire/28.B61436000000/",
             "data_type": "TEMPERATURE",
             "description": "Plot A Soil DS2482",
             "device_type": "1wire",
             "interval": 3600,
             "key": "PLOT1",
             "title": "Soil Temp Plot A",
-            "tracking": "track.changes"
-        },
-        {
-            "address": "/mnt/1wire/28.B9F533000000/",
-            "data_type": "TEMPERATURE",
-            "description": "extra DS2482",
-            "device_type": "1wire",
-            "interval": 60,
-            "key": "EXTRA",
-            "title": "extra DS2482",
             "tracking": "track.changes"
         },
         {
@@ -93,60 +83,60 @@
             "device_type": "MCP23008",
             "pins": [
                 {
-                    "bit": 2,
+                    "bit": 7,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "RELAY_1",
-                    "title": "Blue1"
+                    "title": "BLUE"
                 },
                 {
-                    "bit": 1,
+                    "bit": 6,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "RELAY_2",
                     "title": "YELLOW"
                 },
                 {
-                    "bit": 0,
+                    "bit": 5,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "RELAY_3",
                     "title": "WHITE"
                 },
                 {
-                    "bit": 3,
+                    "bit": 4,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "RELAY_4",
                     "title": "ORANGE"
                 },
                 {
-                    "bit": 4,
+                    "bit": 3,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "RELAY_5",
                     "title": "BROWN"
                 },
                 {
-                    "bit": 5,
+                    "bit": 0,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "RELAY_6",
                     "title": "GREEN"
                 },
                 {
-                    "bit": 6,
+                    "bit": 1,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "RELAY_7",
-                    "title": "UNUSED"
+                    "title": "GREY"
                 },
                 {
-                    "bit": 7,
+                    "bit": 2,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "RELAY_8",
-                    "title": "UNUSED"
+                    "title": "PURPLE"
                 }
             ],
             "title": "GI2 plugin 2.0"
@@ -173,7 +163,7 @@
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "GREENHOUSE_LIGHT",
-                    "title": "Greenhouse Light"
+                    "title": "​Greenhouse Light"
                 },
                 {
                     "bit": 7,
@@ -227,7 +217,7 @@
                     "other.props": {
                         "proxy_key": "RELAY_5"
                     },
-                    "title": "E. Not Used"
+                    "title": "E. Perennials"
                 },
                 {
                     "data_type": "BOOL",
@@ -243,7 +233,15 @@
                     "other.props": {
                         "proxy_key": "RELAY_7"
                     },
-                    "title": "relay 7"
+                    "title": "G. spare"
+                },
+                {
+                    "data_type": "BOOL",
+                    "key": "SPRK_8",
+                    "other.props": {
+                        "proxy_key": "RELAY_8"
+                    },
+                    "title": "H. spare"
                 }
             ]
         }
@@ -254,11 +252,14 @@
         "SPRK_2",
         "SPRK_3",
         "SPRK_4",
-        "SPRK_6"
+        "SPRK_5",
+        "SPRK_6",
+        "SPRK_7",
+        "SPRK_8"
     ],
     "prop.file.version": {
-        "file.etag": 107,
-        "last_write": 1758484345
+        "file.etag": 477,
+        "last_write": 1761516411
     },
     "sequence": [
         {
@@ -301,6 +302,11 @@
                     {
                         "cmd": "SET",
                         "key": "SPRK_7",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "SPRK_8",
                         "value": "off"
                     }
                 ]
@@ -413,6 +419,21 @@
                         {
                             "cmd": "SET",
                             "key": "SPRK_7",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_8",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_8",
                             "value": "off"
                         }
                     ],

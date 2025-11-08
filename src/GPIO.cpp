@@ -1,168 +1,157 @@
 //
-//  GPIO.cpp
-//  pumphouse
-//
-//  Created by Vincent Moscaritolo on 12/21/21.
+// GPIO.cpp
+// Implementation for Raspberry Pi (Linux GPIO v2)
 //
 
 #include "GPIO.hpp"
-#include <algorithm>
+#include <iostream>
+#include <errno.h>
+#include <cstring>
 
 #include "LogMgr.hpp"
 
-GPIO::GPIO(){
-	_isSetup = false;
-	_chip = NULL;
- }
+ 
+GPIO::GPIO() : _isSetup(false), _chipFd(-1) {}
+GPIO::~GPIO() { stop(); }
 
+bool GPIO::begin(std::vector<gpio_pin_t> pinsIn, int &error) {
+    error = 0;
 
-GPIO::~GPIO(){
-	stop();
-	
-}
-
-bool GPIO::begin(vector<gpio_pin_t> pinsIn, int  &error){
-    
-    int err = 0;
-    
-    static const char *consumer = "pIoTServer";
-    
-    // open the device
-    _chip = gpiod_chip_open_by_name("gpiochip4");
-    
-    if(_chip == NULL)
-        _chip = gpiod_chip_open_by_name("gpiochip0");
-    
-    if(!_chip) {
-        LOGT_ERROR("Error open GPIO chip: %s",strerror(errno));
-        goto cleanup;
+    _chipFd = open("/dev/gpiochip0", O_RDWR);
+    if (_chipFd < 0) {
+        error = errno;
+        LOGT_ERROR("Error opening GPIO chip: %s", strerror(errno));
+        return false;
     }
+
+    // --- Check for GPIO v2 API support ---
+    struct gpiochip_info cinfo = {};
+    if (ioctl(_chipFd, GPIO_GET_CHIPINFO_IOCTL, &cinfo) < 0) {
+        error = errno;
+        LOGT_ERROR("Failed to query GPIO chip info: %s", strerror(errno));
+        close(_chipFd);
+        _chipFd = -1;
+        return false;
+    }
+
+#ifndef GPIO_V2_GET_LINE_IOCTL
+    LOGT_ERROR("Kernel headers do not define GPIO v2 API — rebuild required");
+    close(_chipFd);
+    _chipFd = -1;
+    return false;
+#endif
     
-    for(auto &p :pinsIn){
-        auto line = gpiod_chip_get_line(_chip, p.lineNo);
-        if(line){
-              if(p.direction == GPIO_DIRECTION_OUTPUT){
-                
-                err = gpiod_line_request_output_flags(line, consumer, GPIOD_LINE_REQUEST_FLAG_ACTIVE_LOW, 0);
-                if(err < 0){
-                    LOGT_ERROR("gpiod_line_request_output(%d) failed : %s",p.lineNo, strerror(err));
-                    gpiod_line_release(line);
-                    goto cleanup;
-                };
-//                printf("gpiod_line_request_output(%d)\n", p.lineNo);
-            }
-            
-            else if(p.direction == GPIO_DIRECTION_INPUT){
-                err = gpiod_line_request_input_flags(line, consumer, GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP);
-                if(err < 0){
-                    LOGT_ERROR("gpiod_line_request_input_flags(%d) failed : %s",p.lineNo, strerror(err));
-                    gpiod_line_release(line);
-                    goto cleanup;
-                };
- //               printf("gpiod_line_request_input_flags(%d)\n", p.lineNo);
-      
-            }
-            else {
-                LOGT_ERROR("gpiod direction(%d) invalid = %d",p.lineNo, p.direction);
-                gpiod_line_release(line);
-                goto cleanup;
-            };
-            _lines.push_back({
-                .lineNo = p.lineNo,
-                .direction = p.direction,
-                .line = line
-            });
+    for (auto &p : pinsIn) {
+        struct gpio_v2_line_request req = {};
+        struct gpio_v2_line_config config = {};
+        struct gpio_v2_line_config_attribute attr = {};
+
+        config.num_attrs = 0;
+
+        // Apply direction flag
+        if (p.direction == GPIO_DIRECTION_INPUT)
+            config.flags |= GPIO_V2_LINE_FLAG_INPUT;
+        else if (p.direction == GPIO_DIRECTION_OUTPUT)
+            config.flags |= GPIO_V2_LINE_FLAG_OUTPUT;
+
+        // Apply user-specified flags (bias, active-low, etc.)
+        config.flags |= p.flags;
+
+        // Set consumer label
+        strncpy((char *)req.consumer, "GPIO_Class", sizeof(req.consumer) - 1);
+
+        // Target line
+        req.offsets[0] = p.lineNo;
+        req.num_lines = 1;
+        req.config = config;
+
+        // Request the line
+        if (ioctl(_chipFd, GPIO_V2_GET_LINE_IOCTL, &req) < 0) {
+            error = errno;
+            LOGT_ERROR("Failed to request GPIO line %d: %s",  p.lineNo, strerror(errno));
+            continue;
         }
+
+        _lines.push_back({
+            .lineNo = static_cast<int>(p.lineNo),
+            .direction = p.direction,
+            .flags = p.flags,
+            .fd = req.fd
+        });
     }
-    
+
+    if (_lines.empty()) {
+        close(_chipFd);
+        _chipFd = -1;
+        return false;
+    }
+
     _isSetup = true;
     return true;
-    
-    
-cleanup:
-    if(_chip){
-        for(auto &p :_lines){
-            if(p.line) gpiod_line_release(p.line);
-        }
-        _lines.clear();
-        gpiod_chip_close(_chip);
+}
+
+void GPIO::stop() {
+    if (!_isSetup)
+        return;
+
+    for (auto &l : _lines) {
+        if (l.fd >= 0)
+            close(l.fd);
     }
+    _lines.clear();
+
+    if (_chipFd >= 0)
+        close(_chipFd);
+
+    _chipFd = -1;
     _isSetup = false;
-    
-    
-    return false;
 }
 
-void GPIO::stop(){
-
-	if(_isSetup){
-        for( auto &p :_lines){
-            if(p.line)
-                gpiod_line_release(p.line);
-        }
-        _lines.clear();
- 
-        gpiod_chip_close(_chip);
-		_chip = NULL;
-	}
-	
-	_isSetup = false;
+bool GPIO::isAvailable() {
+    return _isSetup;
 }
 
-
-bool GPIO::isAvailable(){
- 
-	return _isSetup;
-}
-
-
-bool GPIO::set(gpioStates_t states){
-    
-    if(!_isSetup)
+bool GPIO::get(gpioStates_t &statesOut) {
+    if (!_isSetup)
         return false;
-    
-    int  error = 0;
-    
-    for(auto &s :states){
-        for(auto &l : _lines){
-            if(s.first == l.lineNo){
-                error = gpiod_line_set_value(l.line, s.second);
-                
-  //              printf("gpiod_line_set_value(%p, %d)\n",  (void*) l.line, s.second);
 
-                if(error) {
-                    LOGT_ERROR("Failed set line values GPIO line %d %s ", l.lineNo,strerror(error));
-                    return false;
-                }
-                break;
-            }
+    for (auto &l : _lines) {
+        if (l.direction != GPIO_DIRECTION_INPUT)
+            continue;
+
+        struct gpio_v2_line_values vals = {};
+        vals.mask = 0x1;
+
+        if (ioctl(l.fd, GPIO_V2_LINE_GET_VALUES_IOCTL, &vals) < 0) {
+            LOGT_ERROR("Failed to read GPIO line %d: %s",  l.lineNo, strerror(errno));
+             continue;
         }
+
+        bool value = (vals.bits & 0x1);
+        statesOut.push_back({l.lineNo, value});
     }
-    
+
     return true;
 }
 
-bool GPIO::get(gpioStates_t &statesOut){
-    
-    gpioStates_t states;
-    
-    if(!_isSetup)
+bool GPIO::set(gpioStates_t states) {
+    if (!_isSetup)
         return false;
-    
-// get the current state of lines
-    for(auto &p :_lines){
-        int val = gpiod_line_get_value(p.line);
-        
-//        printf("gpiod_line_get_value(%p,  %d) = %d\n",  (void*) p.line,p.lineNo,  val);
 
-        if(val < 0){
-            LOGT_ERROR("Failed get line values GPIO line %d %s ", p.lineNo,strerror(val));
-         }
-        else{
-            states.push_back(make_pair(p.lineNo, val?true:false));
+    for (auto &s : states) {
+        for (auto &l : _lines) {
+            if (l.lineNo == s.first && l.direction == GPIO_DIRECTION_OUTPUT) {
+                struct gpio_v2_line_values vals = {};
+                vals.mask = 0x1;
+                vals.bits = s.second ? 0x1 : 0x0;
+
+                if (ioctl(l.fd, GPIO_V2_LINE_SET_VALUES_IOCTL, &vals) < 0) {
+                    LOGT_ERROR("Failed to set GPIO line %d: %s",  l.lineNo, strerror(errno));
+                    return false;
+                }
+            }
         }
-     }
-    
-    statesOut = states;
+    }
+
     return true;
 }
