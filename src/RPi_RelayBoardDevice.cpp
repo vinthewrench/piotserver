@@ -48,7 +48,7 @@ bool RPi_RelayBoardDevice::initWithSchema(deviceSchemaMap_t deviceSchema){
             .direction = entry.readOnly
                         ?GPIO::GPIO_DIRECTION_INPUT
                         :GPIO::GPIO_DIRECTION_OUTPUT,
-            .flags = (int) entry.flags
+                  .flags = static_cast<unsigned int>(entry.flags)
          };
       }
 
