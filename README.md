@@ -492,8 +492,7 @@ You do not have to use my ValveNode hardware to use pIoTServer. pIoTServer can w
 
 If you decide to use my ValveNode hardware, the related firmware and board files live here:
 
-- [ValveNode repository](https://github.com/vinthewrench/valvenode)
--
+[https://github.com/vinthewrench/valvenode](https://github.com/vinthewrench/valvenode)
 
 The `valvenode.props.json` file is the pIoTServer configuration that maps server keys such as `SPRK_5` to ValveNode RS-485 node/channel pairs through the `VALVEMASTER` plugin.
 
