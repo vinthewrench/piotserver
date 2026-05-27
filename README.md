@@ -490,11 +490,10 @@ For real ValveNode irrigation hardware, use the ValveNode property file.
 
 You do not have to use my ValveNode hardware to use pIoTServer. pIoTServer can work with other devices and plugins. ValveNode is one supported hardware path for irrigation control.
 
-If you decide to use my ValveNode hardware, the related firmware and board files live in the separate ValveNode repository:
+If you decide to use my ValveNode hardware, the related firmware and board files live here:
 
-```text
-https://github.com/vinthewrench/valvenode
-```
+- [ValveNode repository](https://github.com/vinthewrench/valvenode)
+-
 
 The `valvenode.props.json` file is the pIoTServer configuration that maps server keys such as `SPRK_5` to ValveNode RS-485 node/channel pairs through the `VALVEMASTER` plugin.
 
