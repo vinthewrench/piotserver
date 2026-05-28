@@ -10,8 +10,9 @@
 
 #include "LogMgr.hpp"
 
- 
-GPIO::GPIO() : _isSetup(false), _chipFd(-1) {}
+
+GPIO::GPIO() : _chipFd(-1), _isSetup(false) {}
+
 GPIO::~GPIO() { stop(); }
 
 bool GPIO::begin(std::vector<gpio_pin_t> pinsIn, int &error) {
@@ -40,11 +41,10 @@ bool GPIO::begin(std::vector<gpio_pin_t> pinsIn, int &error) {
     _chipFd = -1;
     return false;
 #endif
-    
+
     for (auto &p : pinsIn) {
         struct gpio_v2_line_request req = {};
         struct gpio_v2_line_config config = {};
-        struct gpio_v2_line_config_attribute attr = {};
 
         config.num_attrs = 0;
 

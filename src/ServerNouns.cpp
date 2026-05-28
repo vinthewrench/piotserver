@@ -40,9 +40,9 @@
 
 // MARK: -  SCHEMA NOUN HANDLERS
 
-static void Schema_NounHandler(ServerCmdQueue* cmdQueue,
+static void Schema_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                REST_URL url,
-                               TCPClientInfo cInfo,
+                               [[maybe_unused]] TCPClientInfo cInfo,
                                ServerCmdQueue::cmdCallback_t completion) {
     
     using namespace rest;
@@ -92,9 +92,9 @@ static void Schema_NounHandler(ServerCmdQueue* cmdQueue,
 
 // MARK: - HISTORY NOUN HANDLER
 
-static bool History_NounHandler_GET(ServerCmdQueue* cmdQueue,
+static bool History_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                     REST_URL url,
-                                    TCPClientInfo cInfo,
+                                    [[maybe_unused]] TCPClientInfo cInfo,
                                     ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -233,9 +233,9 @@ static bool History_NounHandler_GET(ServerCmdQueue* cmdQueue,
     return true;
 }
 
-static bool History_NounHandler_DELETE(ServerCmdQueue* cmdQueue,
+static bool History_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                        REST_URL url,
-                                       TCPClientInfo cInfo,
+                                       [[maybe_unused]] TCPClientInfo cInfo,
                                        ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -295,9 +295,9 @@ static bool History_NounHandler_DELETE(ServerCmdQueue* cmdQueue,
     return false;
 }
 
-static void History_NounHandler(ServerCmdQueue* cmdQueue,
+static void History_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                 REST_URL url,
-                                TCPClientInfo cInfo,
+                                [[maybe_unused]] TCPClientInfo cInfo,
                                 ServerCmdQueue::cmdCallback_t completion) {
     
     using namespace rest;
@@ -347,9 +347,9 @@ static void History_NounHandler(ServerCmdQueue* cmdQueue,
 
 // MARK: -  ALERTS NOUN HANDLER
 
-static bool Alerts_NounHandler_GET(ServerCmdQueue* cmdQueue,
+static bool Alerts_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                    REST_URL url,
-                                   TCPClientInfo cInfo,
+                                   [[maybe_unused]] TCPClientInfo cInfo,
                                    ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -434,9 +434,9 @@ static bool Alerts_NounHandler_GET(ServerCmdQueue* cmdQueue,
     return true;
 }
 
-static bool Alerts_NounHandler_PATCH(ServerCmdQueue* cmdQueue,
+static bool Alerts_NounHandler_PATCH([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                    REST_URL url,
-                                   TCPClientInfo cInfo,
+                                   [[maybe_unused]] TCPClientInfo cInfo,
                                    ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -461,9 +461,9 @@ static bool Alerts_NounHandler_PATCH(ServerCmdQueue* cmdQueue,
 }
 
 
-static bool Alerts_NounHandler_DELETE(ServerCmdQueue* cmdQueue,
+static bool Alerts_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                       REST_URL url,
-                                      TCPClientInfo cInfo,
+                                      [[maybe_unused]] TCPClientInfo cInfo,
                                       ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -498,9 +498,9 @@ static bool Alerts_NounHandler_DELETE(ServerCmdQueue* cmdQueue,
     return false;
 }
 
-static void Alerts_NounHandler(ServerCmdQueue* cmdQueue,
+static void Alerts_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                REST_URL url,
-                               TCPClientInfo cInfo,
+                               [[maybe_unused]] TCPClientInfo cInfo,
                                ServerCmdQueue::cmdCallback_t completion) {
     
     using namespace rest;
@@ -551,9 +551,9 @@ static void Alerts_NounHandler(ServerCmdQueue* cmdQueue,
 
 // MARK: -  PROPERTIES NOUN HANDLER
 
-static bool Properties_NounHandler_GET(ServerCmdQueue* cmdQueue,
+static bool Properties_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                        REST_URL url,
-                                       TCPClientInfo cInfo,
+                                       [[maybe_unused]] TCPClientInfo cInfo,
                                        ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -599,9 +599,9 @@ static bool Properties_NounHandler_GET(ServerCmdQueue* cmdQueue,
 }
 
 
-static bool Properties_NounHandler_PUT(ServerCmdQueue* cmdQueue,
+static bool Properties_NounHandler_PUT([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                        REST_URL url,
-                                       TCPClientInfo cInfo,
+                                       [[maybe_unused]] TCPClientInfo cInfo,
                                        ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     auto path = url.path();
@@ -702,9 +702,9 @@ static bool Properties_NounHandler_PUT(ServerCmdQueue* cmdQueue,
 }
 
 
-static bool Properties_NounHandler_DELETE(ServerCmdQueue* cmdQueue,
+static bool Properties_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                           REST_URL url,
-                                          TCPClientInfo cInfo,
+                                          [[maybe_unused]] TCPClientInfo cInfo,
                                           ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -754,9 +754,9 @@ static bool Properties_NounHandler_DELETE(ServerCmdQueue* cmdQueue,
 
 
 
-static void Properties_NounHandler(ServerCmdQueue* cmdQueue,
+static void Properties_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                    REST_URL url,
-                                   TCPClientInfo cInfo,
+                                   [[maybe_unused]] TCPClientInfo cInfo,
                                    ServerCmdQueue::cmdCallback_t completion) {
     
     using namespace rest;
@@ -803,9 +803,9 @@ static void Properties_NounHandler(ServerCmdQueue* cmdQueue,
 
 // MARK: - LOG - NOUN HANDLER
 
-static bool Log_NounHandler_PATCH(ServerCmdQueue* cmdQueue,
+static bool Log_NounHandler_PATCH([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                   REST_URL url,
-                                  TCPClientInfo cInfo,
+                                  [[maybe_unused]] TCPClientInfo cInfo,
                                   ServerCmdQueue::cmdCallback_t completion) {
     
     using namespace rest;
@@ -830,9 +830,9 @@ static bool Log_NounHandler_PATCH(ServerCmdQueue* cmdQueue,
     return false;
 }
 
-static void Log_NounHandler(ServerCmdQueue* cmdQueue,
+static void Log_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                             REST_URL url,  // entire request
-                            TCPClientInfo cInfo,
+                            [[maybe_unused]] TCPClientInfo cInfo,
                             ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -883,9 +883,9 @@ static void Log_NounHandler(ServerCmdQueue* cmdQueue,
 
 // MARK: -  STATE NOUN HANDLERS
 
-static bool State_NounHandler_GET(ServerCmdQueue* cmdQueue,
+static bool State_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                   REST_URL url,
-                                  TCPClientInfo cInfo,
+                                  [[maybe_unused]] TCPClientInfo cInfo,
                                   ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     using namespace timestamp;
@@ -922,9 +922,9 @@ static bool State_NounHandler_GET(ServerCmdQueue* cmdQueue,
 }
 
 
-static bool State_NounHandler_PUT(ServerCmdQueue* cmdQueue,
+static bool State_NounHandler_PUT([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                   REST_URL url,
-                                  TCPClientInfo cInfo,
+                                  [[maybe_unused]] TCPClientInfo cInfo,
                                   ServerCmdQueue::cmdCallback_t completion) {
     
     using namespace rest;
@@ -1011,9 +1011,9 @@ static bool State_NounHandler_PUT(ServerCmdQueue* cmdQueue,
 }
 
 
-static void State_NounHandler(ServerCmdQueue* cmdQueue,
+static void State_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                               REST_URL url,
-                              TCPClientInfo cInfo,
+                              [[maybe_unused]] TCPClientInfo cInfo,
                               ServerCmdQueue::cmdCallback_t completion) {
     
     using namespace rest;
@@ -1063,9 +1063,9 @@ static void State_NounHandler(ServerCmdQueue* cmdQueue,
 
 // MARK: -  VALUES NOUN HANDLERS
 
-static bool Values_NounHandler_GET(ServerCmdQueue* cmdQueue,
+static bool Values_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                    REST_URL url,
-                                   TCPClientInfo cInfo,
+                                   [[maybe_unused]] TCPClientInfo cInfo,
                                    ServerCmdQueue::cmdCallback_t completion) {
     
     using namespace rest;
@@ -1148,9 +1148,9 @@ static bool Values_NounHandler_GET(ServerCmdQueue* cmdQueue,
     return true;
 };
 
-static bool Values_NounHandler_PUT(ServerCmdQueue* cmdQueue,
+static bool Values_NounHandler_PUT([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                    REST_URL url,
-                                   TCPClientInfo cInfo,
+                                   [[maybe_unused]] TCPClientInfo cInfo,
                                    ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     auto path = url.path();
@@ -1243,9 +1243,9 @@ static bool Values_NounHandler_PUT(ServerCmdQueue* cmdQueue,
     return true;
 }
 
-static void Values_NounHandler(ServerCmdQueue* cmdQueue,
+static void Values_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                REST_URL url,  // entire request
-                               TCPClientInfo cInfo,
+                               [[maybe_unused]] TCPClientInfo cInfo,
                                ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -1281,9 +1281,9 @@ static void Values_NounHandler(ServerCmdQueue* cmdQueue,
 }
 // MARK: -  VALUES RANGE NOUN HANDLERS
 
-static bool ValuesRange_NounHandler_GET(ServerCmdQueue* cmdQueue,
+static bool ValuesRange_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                    REST_URL url,
-                                   TCPClientInfo cInfo,
+                                   [[maybe_unused]] TCPClientInfo cInfo,
                                         ServerCmdQueue::cmdCallback_t completion) {
     
     using namespace rest;
@@ -1349,9 +1349,9 @@ static bool ValuesRange_NounHandler_GET(ServerCmdQueue* cmdQueue,
 
 
 
-static void ValuesRange_NounHandler(ServerCmdQueue* cmdQueue,
+static void ValuesRange_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                REST_URL url,  // entire request
-                               TCPClientInfo cInfo,
+                               [[maybe_unused]] TCPClientInfo cInfo,
                                ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -1384,9 +1384,9 @@ static void ValuesRange_NounHandler(ServerCmdQueue* cmdQueue,
 
 // MARK: - Date - NOUN HANDLER
 
-static void Date_NounHandler(ServerCmdQueue* cmdQueue,
+static void Date_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                              REST_URL url,
-                             TCPClientInfo cInfo,
+                             [[maybe_unused]] TCPClientInfo cInfo,
                              ServerCmdQueue::cmdCallback_t completion) {
     
     using namespace rest;
@@ -1478,9 +1478,9 @@ static bool getCPUinfo(map<string,string> &info){
 }
 
 
-static void Version_NounHandler(ServerCmdQueue* cmdQueue,
+static void Version_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                 REST_URL url,
-                                TCPClientInfo cInfo,
+                                [[maybe_unused]] TCPClientInfo cInfo,
                                 ServerCmdQueue::cmdCallback_t completion) {
     
     using namespace rest;
@@ -1554,9 +1554,9 @@ static void Version_NounHandler(ServerCmdQueue* cmdQueue,
 
 
 
-static bool Device_NounHandler_GET(ServerCmdQueue* cmdQueue,
+static bool Device_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                    REST_URL url,
-                                   TCPClientInfo cInfo,
+                                   [[maybe_unused]] TCPClientInfo cInfo,
                                    ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -1631,9 +1631,9 @@ static bool Device_NounHandler_GET(ServerCmdQueue* cmdQueue,
 }
 
 
-static bool Device_NounHandler_PUT(ServerCmdQueue* cmdQueue,
+static bool Device_NounHandler_PUT([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                    REST_URL url,
-                                   TCPClientInfo cInfo,
+                                   [[maybe_unused]] TCPClientInfo cInfo,
                                    ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     auto path = url.path();
@@ -1670,9 +1670,9 @@ static bool Device_NounHandler_PUT(ServerCmdQueue* cmdQueue,
     (completion) (reply, STATUS_OK);
     return true;
 }
-static void Device_NounHandler(ServerCmdQueue* cmdQueue,
+static void Device_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                REST_URL url,  // entire request
-                               TCPClientInfo cInfo,
+                               [[maybe_unused]] TCPClientInfo cInfo,
                                ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -1713,9 +1713,9 @@ static void Device_NounHandler(ServerCmdQueue* cmdQueue,
 
 
 
-static bool Sequence_NounHandler_GET(ServerCmdQueue* cmdQueue,
+static bool Sequence_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                      REST_URL url,
-                                     TCPClientInfo cInfo,
+                                     [[maybe_unused]] TCPClientInfo cInfo,
                                      ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     
@@ -1798,9 +1798,9 @@ static bool Sequence_NounHandler_GET(ServerCmdQueue* cmdQueue,
 }
 
 
-static bool Sequence_NounHandler_DELETE(ServerCmdQueue* cmdQueue,
+static bool Sequence_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                         REST_URL url,
-                                        TCPClientInfo cInfo,
+                                        [[maybe_unused]] TCPClientInfo cInfo,
                                         ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     auto path = url.path();
@@ -1835,9 +1835,9 @@ static bool Sequence_NounHandler_DELETE(ServerCmdQueue* cmdQueue,
 }
 
 
-static bool Sequence_NounHandler_POST(ServerCmdQueue* cmdQueue,
+static bool Sequence_NounHandler_POST([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                       REST_URL url,
-                                      TCPClientInfo cInfo,
+                                      [[maybe_unused]] TCPClientInfo cInfo,
                                       ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     auto path = url.path();
@@ -1875,9 +1875,9 @@ static bool Sequence_NounHandler_POST(ServerCmdQueue* cmdQueue,
 }
 
 
-static bool Sequence_NounHandler_PATCH(ServerCmdQueue* cmdQueue,
+static bool Sequence_NounHandler_PATCH([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                        REST_URL url,
-                                       TCPClientInfo cInfo,
+                                       [[maybe_unused]] TCPClientInfo cInfo,
                                        ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     
@@ -1982,9 +1982,9 @@ static bool Sequence_NounHandler_PATCH(ServerCmdQueue* cmdQueue,
 }
 
 
-static bool Sequence_NounHandler_PUT(ServerCmdQueue* cmdQueue,
+static bool Sequence_NounHandler_PUT([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                      REST_URL url,
-                                     TCPClientInfo cInfo,
+                                     [[maybe_unused]] TCPClientInfo cInfo,
                                      ServerCmdQueue::cmdCallback_t completion) {
     
     using namespace rest;
@@ -2036,9 +2036,9 @@ static bool Sequence_NounHandler_PUT(ServerCmdQueue* cmdQueue,
     
 }
 
-static void Sequences_NounHandler(ServerCmdQueue* cmdQueue,
+static void Sequences_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                   REST_URL url,
-                                  TCPClientInfo cInfo,
+                                  [[maybe_unused]] TCPClientInfo cInfo,
                                   ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -2089,9 +2089,9 @@ static void Sequences_NounHandler(ServerCmdQueue* cmdQueue,
 
 // MARK: -  SEQUENCE GROUPS NOUN HANDLERS
 
-static bool SequenceGroup_NounHandler_NounHandler_GET(ServerCmdQueue* cmdQueue,
+static bool SequenceGroup_NounHandler_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                                       REST_URL url,
-                                                      TCPClientInfo cInfo,
+                                                      [[maybe_unused]] TCPClientInfo cInfo,
                                                       ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     
@@ -2163,9 +2163,9 @@ static bool SequenceGroup_NounHandler_NounHandler_GET(ServerCmdQueue* cmdQueue,
     return false;
 }
 
-static bool SequenceGroup_NounHandler_POST(ServerCmdQueue* cmdQueue,
+static bool SequenceGroup_NounHandler_POST([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                            REST_URL url,
-                                           TCPClientInfo cInfo,
+                                           [[maybe_unused]] TCPClientInfo cInfo,
                                            ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     auto path = url.path();
@@ -2209,9 +2209,9 @@ static bool SequenceGroup_NounHandler_POST(ServerCmdQueue* cmdQueue,
 }
 
 
-static bool SequenceGroup_NounHandler_DELETE(ServerCmdQueue* cmdQueue,
+static bool SequenceGroup_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                              REST_URL url,
-                                             TCPClientInfo cInfo,
+                                             [[maybe_unused]] TCPClientInfo cInfo,
                                              ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     auto path = url.path();
@@ -2268,9 +2268,9 @@ static bool SequenceGroup_NounHandler_DELETE(ServerCmdQueue* cmdQueue,
     return false;
 }
 
-static bool SequenceGroup_NounHandler_PATCH(ServerCmdQueue* cmdQueue,
+static bool SequenceGroup_NounHandler_PATCH([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                             REST_URL url,
-                                            TCPClientInfo cInfo,
+                                            [[maybe_unused]] TCPClientInfo cInfo,
                                             ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     
@@ -2317,9 +2317,9 @@ static bool SequenceGroup_NounHandler_PATCH(ServerCmdQueue* cmdQueue,
     
 }
 
-static bool SequenceGroup_NounHandler_PUT(ServerCmdQueue* cmdQueue,
+static bool SequenceGroup_NounHandler_PUT([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                           REST_URL url,
-                                          TCPClientInfo cInfo,
+                                          [[maybe_unused]] TCPClientInfo cInfo,
                                           ServerCmdQueue::cmdCallback_t completion) {
     
     using namespace rest;
@@ -2371,9 +2371,9 @@ static bool SequenceGroup_NounHandler_PUT(ServerCmdQueue* cmdQueue,
     return false;
 }
 
-static void SequenceGroups_NounHandler(ServerCmdQueue* cmdQueue,
+static void SequenceGroups_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                        REST_URL url,
-                                       TCPClientInfo cInfo,
+                                       [[maybe_unused]] TCPClientInfo cInfo,
                                        ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;
@@ -2431,9 +2431,9 @@ static void SequenceGroups_NounHandler(ServerCmdQueue* cmdQueue,
 
 // MARK: -  TEST NOUN HANDLERS
 
-static void Test_NounHandler(ServerCmdQueue* cmdQueue,
+static void Test_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                              REST_URL url,
-                             TCPClientInfo cInfo,
+                             [[maybe_unused]] TCPClientInfo cInfo,
                              ServerCmdQueue::cmdCallback_t completion) {
     using namespace rest;
     json reply;

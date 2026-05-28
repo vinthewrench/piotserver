@@ -15,7 +15,7 @@
 #include "EventAction.hpp"
 
 using namespace nlohmann;
- 
+
 constexpr string_view dayOfWeekStrings[] =
                 {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday","All"};
 constexpr string_view dayOfWeekShortStrings[] =
@@ -23,9 +23,9 @@ constexpr string_view dayOfWeekShortStrings[] =
 
 
 string_view preprocess_cronstring(string_view expr){
-   
+
     map<CRONCPP_STRING_VIEW, CRONCPP_STRING_VIEW>  macros = {
-        
+
         { "@30sec" ,   "*/30 * * * * ?" },
         { "@minute" ,   "0 * * * * ?" },
         { "@10minute" , "0 */10 * * * ?" },
@@ -37,7 +37,7 @@ string_view preprocess_cronstring(string_view expr){
         { "@yearly" ,   "0 0 0 1 1 *" },
         { "@annually" , "0 0 0 1 1 *" },
        };
-    
+
     if(macros.count(expr))
         return macros.at(expr);
     else
@@ -51,7 +51,7 @@ EventTrigger::EventTrigger(cron_event_t cronEvent){
     _eventType          = EVENT_TYPE_CRON;
     _cronEvent          = cronEvent;
  }
- 
+
 EventTrigger::EventTrigger(app_event_t appEvent){
     _eventType          = EVENT_TYPE_APP;
     _appEvent        = appEvent;
@@ -82,13 +82,13 @@ EventTrigger::EventTrigger(time_t time) { // Ephmeral event
     _ephmeralTime               = time;
 }
 
- 
+
 void EventTrigger::copy(const EventTrigger &evt1, EventTrigger *evt2){
-        
+
     evt2->_eventType         = evt1._eventType;
-    
+
     switch (evt1._eventType) {
-        
+
         case EVENT_TYPE_TIME:
             evt2->_timeEvent = evt1._timeEvent;
                 break;
@@ -116,7 +116,7 @@ EventTrigger::EventTrigger(nlohmann::json j){
 
 EventTrigger::EventTrigger(std::string str){
     _eventType = EVENT_TYPE_UNKNOWN;
- 
+
     json j;
     j  = json::parse(str);
     initWithJSON(j);
@@ -124,7 +124,7 @@ EventTrigger::EventTrigger(std::string str){
 
 static bool dayOfWeekFromFromString(string str, EventTrigger::dayOfWeek_t &dowOut){
     bool success = false;
-    
+
     for(int i = 0; i < 7; i++){
         if(caseInSensStringCompare(str, string( dayOfWeekStrings[i]))
            || caseInSensStringCompare(str,string( dayOfWeekShortStrings[i]))){
@@ -146,13 +146,13 @@ static bool dayOfWeekFromFromString(string str, EventTrigger::dayOfWeek_t &dowOu
 }
 
 static bool dayOfWeekFromJSON(json j, EventTrigger::dayOfWeek_t &dowOut){
-    
+
     bool success = false;
     EventTrigger::dayOfWeek_t dow = {0};
-    
+
     if(j.is_string()){
         string str = j;
-        
+
         if(dayOfWeekFromFromString(str, dow)){
             dowOut = dow;
             success = true;
@@ -167,7 +167,7 @@ static bool dayOfWeekFromJSON(json j, EventTrigger::dayOfWeek_t &dowOut){
         dowOut = dow;
         success = true;
     }
-    
+
     return success;
 }
 
@@ -175,7 +175,7 @@ static string timeStringFromMinutesFromMidnight(int16_t mins){
     struct tm tm{};
     tm.tm_hour =  mins /60;
     tm.tm_min =  mins % 60;
-    
+
     char buffer[16];
     strftime(buffer,sizeof(buffer),"%I:%M %p",&tm);
     return string(buffer);;
@@ -183,7 +183,7 @@ static string timeStringFromMinutesFromMidnight(int16_t mins){
 
 static bool getMinutesFromMidnightFromJSON(nlohmann::json j, int16_t &mins){
     bool success = false;
-    
+
     if(j.is_number_unsigned()) {
         mins = j;
         success = true;
@@ -192,7 +192,7 @@ static bool getMinutesFromMidnightFromJSON(nlohmann::json j, int16_t &mins){
         string timsStr = j;
         struct tm time;
         memset(&time, 0, sizeof(struct tm));
-        
+
         if(strptime(timsStr.c_str(), "%I:%M %p", &time)){
             mins =  (time.tm_hour * 60) + time.tm_min;
             success = true;
@@ -202,14 +202,14 @@ static bool getMinutesFromMidnightFromJSON(nlohmann::json j, int16_t &mins){
             success = true;
         }
     }
-    
+
     return success;
 }
 
 void EventTrigger::initWithJSON(nlohmann::json j){
-    
+
     _eventType = EVENT_TYPE_UNKNOWN;
-    
+
     if(j.contains(JSON_TIME_BASE)) {
         _eventType = EVENT_TYPE_TIME;
     }
@@ -234,18 +234,18 @@ void EventTrigger::initWithJSON(nlohmann::json j){
         _timeEvent.lastRun = 0;
     }
     else if(_eventType == EVENT_TYPE_TIME) {
-        
+
         _timeEvent.timeBase = TOD_INVALID;
         _timeEvent.timeBaseOffset = 0;
         _timeEvent.lastRun = 0;
-        
+
         if( j.contains(JSON_TIME_BASE)){
             if(j.at(JSON_TIME_BASE).is_number()) {
                 _timeEvent.timeBase = j.at(JSON_TIME_BASE);
             }
             else if (j.at(JSON_TIME_BASE).is_string()){
                 string str = Utils::trim(j.at(JSON_TIME_BASE));
-                
+
                 if(caseInSensStringCompare(str, string(JSON_ARG_SUNSET))) {
                     _timeEvent.timeBase = TOD_SUNSET;
                 }
@@ -260,18 +260,18 @@ void EventTrigger::initWithJSON(nlohmann::json j){
                 }
             }
         }
-        
+
         if( j.contains(string(JSON_TIME_OFFSET))
            && j.at(string(JSON_TIME_OFFSET)).is_number()){
             _timeEvent.timeBaseOffset = j.at(string(JSON_TIME_OFFSET));
         }
     }
     else if(_eventType == EVENT_TYPE_APP) {
-        
+
         if( j.contains(string(JSON_ARG_EVENT))
            && j.at(string(JSON_ARG_EVENT)).is_string()){
             string str = j.at(string(JSON_ARG_EVENT));
-            
+
             if(str == JSON_EVENT_STARTUP ){
                 _appEvent = APP_EVENT_STARTUP;
             }
@@ -286,14 +286,14 @@ void EventTrigger::initWithJSON(nlohmann::json j){
     else if((_eventType == EVENT_TYPE_CRON)
             && j.contains(JSON_TIME_CRON)
            && j.at(JSON_TIME_CRON).is_string()){
-        
+
         string str = j.at(JSON_TIME_CRON);
 
         try
         {
             // validate cron string
             auto cron = cron::make_cron(preprocess_cronstring(str));
-     
+
             _cronEvent.cronString = str;
             scheduleNextCronTime();
 //            printf ("- %s -\n", printString().c_str());
@@ -304,10 +304,10 @@ void EventTrigger::initWithJSON(nlohmann::json j){
             _eventType = EVENT_TYPE_UNKNOWN;
          }
     }
-            
+
     if(_eventType == EVENT_TYPE_TIME) {
         dayOfWeek_t dow;
-        
+
         if( j.contains(JSON_TIME_DOW)
            && dayOfWeekFromJSON(j.at(JSON_TIME_DOW), dow))
             _timeEvent.dayOfWeek = dow;
@@ -317,14 +317,14 @@ void EventTrigger::initWithJSON(nlohmann::json j){
 
 nlohmann::json EventTrigger::JSON(){
     json j;
-    
+
     switch(_eventType){
         case EVENT_TYPE_EPHEMERAL:
         {
             j[JSON_TIME_EPHMERAL] = _ephmeralTime;
         }
          break;
-         
+
         case EVENT_TYPE_CRON:
         {
             j[string(JSON_TIME_CRON)]     =  _cronEvent.cronString;
@@ -333,7 +333,7 @@ nlohmann::json EventTrigger::JSON(){
         case EVENT_TYPE_TIME:
         {
             json j1;
-            
+
             if(_timeEvent.timeBase == TOD_ABSOLUTE){
                 j1[JSON_TIME_TOD] =  timeStringFromMinutesFromMidnight(_timeEvent.timeBaseOffset);
             }
@@ -351,7 +351,7 @@ nlohmann::json EventTrigger::JSON(){
                     case TOD_CIVIL_SUNRISE:
                         j1[JSON_TIME_BASE] = JSON_ARG_CIVIL_SUNRISE;
                         break;
-                        
+
                     default:
                         j1[string(JSON_TIME_BASE)]     =  _timeEvent.timeBase;
                         break;
@@ -359,7 +359,7 @@ nlohmann::json EventTrigger::JSON(){
                 if (_timeEvent.timeBaseOffset != 0) {
                     j1[string(JSON_TIME_OFFSET)] =  _timeEvent.timeBaseOffset;
                 }
-                
+
             }
             if(_timeEvent.dayOfWeek.byte != everyDayOfWeek){
                 stringvector days = {};
@@ -370,34 +370,34 @@ nlohmann::json EventTrigger::JSON(){
                 if(_timeEvent.dayOfWeek.day.Thu) days.push_back(string(dayOfWeekStrings[4]));
                 if(_timeEvent.dayOfWeek.day.Fri) days.push_back(string(dayOfWeekStrings[5]));
                 if(_timeEvent.dayOfWeek.day.Sat) days.push_back(string(dayOfWeekStrings[6]));
-                
+
                 if(days.size() == 1)
                     j1[JSON_TIME_DOW] = days[0];
                 else
                     j1[JSON_TIME_DOW] = days;
             }
-            
+
             j = j1;
         }
             break;
-            
+
         case EVENT_TYPE_APP:
         {
             json j1;
-            
+
             switch (_appEvent) {
                 case APP_EVENT_STARTUP:
                     j1[string(JSON_ARG_EVENT)] =  JSON_EVENT_STARTUP;
                     break;
-                    
+
                 case APP_EVENT_SHUTDOWN:
                     j1[string(JSON_ARG_EVENT)] =  JSON_EVENT_SHUTDOWN;
                     break;
-                    
+
                 case APP_EVENT_MANUAL:
                     j1[string(JSON_ARG_EVENT)] =  JSON_EVENT_MANUAL;
                     break;
-    
+
                 default:
                     break;
             }
@@ -407,7 +407,7 @@ nlohmann::json EventTrigger::JSON(){
 
         default:;
     }
-    
+
     return j;
 }
 
@@ -417,24 +417,24 @@ const std::string EventTrigger::printString(bool fullString){
     using namespace timestamp;
 
     auto j = JSON();
-    
+
     if(_eventType == EVENT_TYPE_TIME){
-        
-        
+
+
         solarTimes_t solar;
         SolarTimeMgr::shared()->getSolarEventTimes(solar);
         int16_t minsFromMidnight = 0;
-        
+
         // when does it need to run today
         calculateTriggerTime(solar,minsFromMidnight);
         time_t schedTime = solar.previousMidnight + (minsFromMidnight * SECS_PER_MIN) ;
-        
+
         string timeString = TimeStamp(schedTime).ClockString();
         string offsetStr;
-        
+
         int16_t minutes = abs(_timeEvent.timeBaseOffset);
         if(minutes == 0 ){
-            
+
         }else if(minutes > 59){
             int hours = minutes / 60;
             minutes = minutes % 60;
@@ -443,12 +443,12 @@ const std::string EventTrigger::printString(bool fullString){
          } else  {
              offsetStr += to_string(minutes) + "m";
         }
-        
+
         if(_timeEvent.timeBaseOffset > 0)
             offsetStr = " + " + offsetStr;
         else if(_timeEvent.timeBaseOffset < 0)
             offsetStr = " - " + offsetStr;
-      
+
         switch(_timeEvent.timeBase){
             case TOD_SUNRISE:
                 if(fullString)
@@ -456,41 +456,41 @@ const std::string EventTrigger::printString(bool fullString){
                 else
                     oss << "Sunrise"  << offsetStr;
                 break;
-                
+
             case TOD_SUNSET:
                 if(fullString)
                     oss  << timeString << " (Sunset"  << offsetStr << ")" ;
                 else
                     oss << "Sunset"  << offsetStr;
                 break;
-                
+
             case TOD_CIVIL_SUNRISE:
                 if(fullString)
                     oss  << timeString << " (Civil Sunrise"  << offsetStr << ")" ;
                 else
                     oss << "Civil Sunrise"  << offsetStr;
                 break;
-                
+
             case TOD_CIVIL_SUNSET:
                 if(fullString)
                     oss  << timeString << " (Civil Sunset"  << offsetStr << ")" ;
                 else
                     oss << "Civil Sunset"  << offsetStr;
                 break;
-                
+
             case TOD_ABSOLUTE:
                 oss << timeString;
                 break;
-                
+
             case TOD_INVALID:
                 oss <<  "Invalid Time:";
                 break;
         }
     }
      else if(_eventType == EVENT_TYPE_CRON){
-        
+
          time_t now = time(0);
-      
+
          auto cron = cron::make_cron(preprocess_cronstring(_cronEvent.cronString));
           time_t next = cron::cron_next(cron, now);
 
@@ -502,7 +502,7 @@ const std::string EventTrigger::printString(bool fullString){
     }
     return  oss.str();
 }
-  
+
 bool EventTrigger::isValid(){
     return (_eventType != EVENT_TYPE_UNKNOWN);
 }
@@ -564,13 +564,13 @@ bool EventTrigger::scheduleNextCronTime(){
 
 
 bool EventTrigger::shouldTriggerInFuture(const solarTimes_t &solar, time_t localNow){
-    
+
     bool result = false;
-    
+
     if(_eventType == EVENT_TYPE_TIME && canTriggerOnDay(localNow)){
-        
+
         int16_t minsFromMidnight = 0;
-        
+
         // when does it need to run today
         if(calculateTriggerTime(solar,minsFromMidnight)) {
             time_t schedTime = solar.previousMidnight + (minsFromMidnight * SECS_PER_MIN) ;
@@ -591,7 +591,7 @@ bool EventTrigger::shouldTriggerInFuture(const solarTimes_t &solar, time_t local
         time_t now = time(NULL);
         result = (_cronEvent.next > now);
     }
- 
+
     return result;
 }
 
@@ -601,25 +601,25 @@ bool EventTrigger::shouldTriggerFromAppEvent(app_event_t a){
     if(_eventType == EVENT_TYPE_APP){
         return (_appEvent == a);
     }
-    
+
     return result;
 }
 
 
 bool EventTrigger::canTriggerOnDay(time_t localNow){
-    
+
     bool result = false;
-    
+
     if(_eventType == EVENT_TYPE_TIME){
-        
+
         if(_timeEvent.dayOfWeek.byte == everyDayOfWeek)
             result = true;
-        
+
         else {
-            struct tm timeinfo = {0};
+            struct tm timeinfo{};
             // localNow is already in local time , use gmtime_r to NOT convert it
             gmtime_r(&localNow, &timeinfo);
-            
+
             switch(timeinfo.tm_wday){
                 case 0: if(_timeEvent.dayOfWeek.day.Sun) result = true;  break;
                 case 1: if(_timeEvent.dayOfWeek.day.Mon) result = true;  break;
@@ -631,19 +631,19 @@ bool EventTrigger::canTriggerOnDay(time_t localNow){
                 default: break;
             }
         }
-        
+
     }
     return result;
 }
 
 bool EventTrigger::shouldTriggerFromTimeEvent(const solarTimes_t &solar, time_t localNow){
-    
+
     bool result = false;
-    
+
     if(_eventType == EVENT_TYPE_TIME && canTriggerOnDay(localNow)){
-             
+
         int16_t minsFromMidnight = 0;
-        
+
         // when does it need to run today
         if(calculateTriggerTime(solar,minsFromMidnight)) {
             time_t schedTime = solar.previousMidnight + (minsFromMidnight * SECS_PER_MIN) ;
@@ -662,59 +662,58 @@ bool EventTrigger::shouldTriggerFromTimeEvent(const solarTimes_t &solar, time_t 
        time_t now = time(NULL);
        result = (_ephmeralTime <= now);
     }
-    
+
    else  if(_eventType == EVENT_TYPE_CRON){
        time_t now = time(NULL);
        if(_cronEvent.next < now){
            result = true;
         }
      }
-  
+
     return result;
 }
 
 
 bool EventTrigger::calculateTriggerTime(const solarTimes_t &solar, int16_t &minsFromMidnight) {
-    
+
     bool result = false;
-    
+
     if(_eventType == EVENT_TYPE_TIME){
         int16_t actualTime  = _timeEvent.timeBaseOffset;
-        
+
         switch(_timeEvent.timeBase){
             case TOD_SUNRISE:
                 actualTime = solar.sunriseMins + actualTime;
                 result = true;
                 break;
-                
+
             case TOD_SUNSET:
                 actualTime = solar.sunSetMins + actualTime;
                 result = true;
                 break;
-                
+
             case TOD_CIVIL_SUNRISE:
                 actualTime = solar.civilSunRiseMins + actualTime;
                 result = true;
                 break;
-                
+
             case TOD_CIVIL_SUNSET:
                 actualTime = solar.civilSunSetMins + actualTime;
                 result = true;
                 break;
-                
+
             case TOD_ABSOLUTE:
-                actualTime = actualTime;
+                // Absolute time already uses _timeEvent.timeBaseOffset.
                 result = true;
                 break;
-                
+
             case TOD_INVALID:
                 break;
         }
-        
+
         if(result)
             minsFromMidnight = actualTime;
     }
- 
+
     return result;
 }
-

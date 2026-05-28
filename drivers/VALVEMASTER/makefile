@@ -27,12 +27,14 @@ CPPFLAGS := \
 	-I$(SRC_DIR) \
 	-I.
 
-CXXFLAGS := \
-	-std=gnu++23 \
+WARNINGS := \
 	-Wall \
 	-Wextra \
-	-Wpedantic \
-	-Wno-unused-const-variable \
+	-Wpedantic
+
+CXXFLAGS := \
+	-std=gnu++23 \
+	$(WARNINGS) \
 	-O2 \
 	-g \
 	-fPIC \

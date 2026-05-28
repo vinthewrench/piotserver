@@ -15,8 +15,8 @@
 #include <deque>
 
 #include <condition_variable>
- 
- 
+
+
 template<typename T, typename Container=std::deque<T> >
 class iterable_queue : public std::queue<T,Container>
 {
@@ -31,9 +31,9 @@ public:
 };
 
 class Sprinkler_Device : public pIoTServerDevice{
- 
+
 public:
-  
+
     Sprinkler_Device(string devID, string driverName);
     Sprinkler_Device(string devID);
     ~Sprinkler_Device();
@@ -44,15 +44,15 @@ public:
     bool start();
     void stop();
     bool preflight();
- 
+
     bool isConnected();
     bool setEnabled(bool enable);
-    
+
     bool getValues( keyValueMap_t &);
     bool setValues(keyValueMap_t kv);
 
 private:
- 
+
     typedef enum  {
         INS_UNKNOWN = 0,
         INS_IDLE ,
@@ -63,13 +63,13 @@ private:
     }in_state_t;
 
     bool doShutDown();
-    
+
     void clearCmdQueue();
-  
+
     void setBoosterValve(bool state);
     void setMasterValve(bool state);
     void setProxyValve(string key, bool state);
- 
+
     bool                _isSetup = false;
     in_state_t          _state = INS_UNKNOWN;
 
@@ -80,7 +80,7 @@ private:
         bool        enabled;
     } valve_t;
 
-    
+
     typedef pair<string, bool> cmd_t;       // valve cmd
      map<string, valve_t>  _proxyMap;
 
@@ -89,15 +89,15 @@ private:
     uint64_t              _boosterDuration;
     uint64_t              _runUpDuration;
     uint64_t              _runDownDuration;
-   
+
     void                    actionThread();
     std::thread             _thread;                //Internal thread
-     
+
     eTag_t                  _stateTag;
     eTag_t                  _lastReportedTag;
- 
+
     bool                    _running;                //Flag for starting and terminating the main loop
-  
+
     mutable std::mutex      _cmdMutex;
 
     mutable std::mutex      _goalMtx;

@@ -83,8 +83,8 @@ static constexpr uint8_t CMD_CLOSE_ALL          = 0x0F;
  */
 
 static constexpr uint8_t STATUS_BUSY     = (1u << 0);
-static constexpr uint8_t STATUS_ERROR    = (1u << 1);
-static constexpr uint8_t STATUS_POWER_ON = (1u << 2);
+[[maybe_unused]] static constexpr uint8_t STATUS_ERROR    = (1u << 1);
+[[maybe_unused]] static constexpr uint8_t STATUS_POWER_ON = (1u << 2);
 
 static constexpr uint8_t RESULT_OK       = 0x00;
 

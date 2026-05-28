@@ -30,19 +30,7 @@ CPPFLAGS := \
 WARNINGS := \
 	-Wall \
 	-Wextra \
-	-Wpedantic \
-	-Wno-misleading-indentation \
-	-Wno-sign-compare \
-	-Wno-unused-parameter \
-	-Wno-ignored-qualifiers \
-	-Wno-reorder-ctor \
-	-Wno-deprecated-copy-with-user-provided-copy \
-	-Wno-unused-label \
-	-Wno-unused-variable \
-	-Wno-unused-but-set-parameter \
-	-Wno-missing-field-initializers \
-	-Wno-self-assign \
-	-Wno-unused-const-variable
+	-Wpedantic
 
 CXXFLAGS := \
 	-std=gnu++23 \

@@ -9,33 +9,33 @@
 #include <time.h>
 
 using namespace std;
- 
+
 namespace timestamp {
 	static const char *kDateFormat = "%a, %d %b %Y %T GMT";
 
 static const char *kISO8601Format = "%F %T";
 
-	static const char *kLogFormat = "%d.%m.%y %T"; 
+	static const char *kLogFormat = "%d.%m.%y %T";
 	static const char *kClockFormat = "%l:%M %p";
 
     TimeStamp::TimeStamp(time_t time, bool isGMT){
         _time = time;
         if(!isGMT){
-            struct tm timeinfo = {0};
+            struct tm timeinfo = {};
             localtime_r(&_time, &timeinfo);
             _time += timeinfo.tm_gmtoff;
         }
    }
 
 	TimeStamp::TimeStamp(bool isGMT){
-		struct tm timeinfo = {0};
+		struct tm timeinfo = {};
 		_time = time(NULL);
 
 		if(!isGMT){
 	 		localtime_r(&_time, &timeinfo);
 			_time += timeinfo.tm_gmtoff;
 		}
- 
+
 	}
 
 	TimeStamp::TimeStamp(const string str){
@@ -72,7 +72,7 @@ std::string TimeStamp::logFileString(){
 
 	std::string TimeStamp::ClockString(bool isGMT){
 		char timeStr[80] = {0};
-		struct tm timeinfo = {0};
+		struct tm timeinfo = {};
 		if(isGMT)
 			gmtime_r(&_time, &timeinfo);
 		else
@@ -87,4 +87,3 @@ std::string TimeStamp::epochString(){
 }
 
 }
- 
