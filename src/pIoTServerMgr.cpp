@@ -1048,7 +1048,7 @@ void pIoTServerMgr::startDevices(){
                             json deviceProps;
 
                             static vector<string_view> filter_table = {
-                                PROP_KEY ,
+                      //          PROP_KEY ,
                                 PROP_READONLY,
                                 PROP_SENSOR_QUERY_INTERVAL,
                                 PROP_TRACKING,
@@ -1238,6 +1238,66 @@ pIoTServerDevice* pIoTServerMgr::deviceForKey(string key){
             }
         }
     }
+    return device;
+}
+
+pIoTServerDevice* pIoTServerMgr::deviceForActionKey(string key)
+{
+    pIoTServerDevice* device = nullptr;
+    stringvector candidates;
+
+    {
+        std::lock_guard<std::mutex> lock(_deviceMutex);
+
+        for(auto& e : _devices){
+
+            candidates.push_back(e.deviceID);
+
+            if(e.deviceID == key){
+                device = e.device;
+                break;
+            }
+
+            json props;
+            e.device->getProperties(props);
+
+            if(props.contains(PROP_KEY) &&
+               props[PROP_KEY].is_string()) {
+
+                string deviceKey = props[PROP_KEY].get<string>();
+
+                candidates.push_back(deviceKey);
+
+                if(deviceKey == key){
+                    device = e.device;
+                    break;
+                }
+            }
+
+            auto found = std::find(e.keys.begin(), e.keys.end(), key);
+            if(found != e.keys.end()){
+                device = e.device;
+                break;
+            }
+        }
+    }
+
+    if(device == nullptr){
+        string candidateStr;
+
+        for(const auto& candidate : candidates){
+            if(!candidateStr.empty()) {
+                candidateStr += ", ";
+            }
+
+            candidateStr += candidate;
+        }
+
+        LOGT_ERROR("deviceForActionKey: no device found for action key \"%s\". Known device targets: %s",
+                   key.c_str(),
+                   candidateStr.empty() ? "(none)" : candidateStr.c_str());
+    }
+
     return device;
 }
 
@@ -1702,15 +1762,26 @@ bool pIoTServerMgr::runAbortActions(sequenceID_t sid){
             _db.sequenceGetTrigger(sid,trig);
             success =  action.invokeCallBack(trig);
         }
-        else if(action.cmd() == Action::JSON_CMD_DEVICE_ACTION) {
+        else if(action.cmd() == Action::JSON_CMD_DEVICE_ACTION){
             string key = action.key();
             string value = action.value();
-            pIoTServerDevice* device = deviceForKey(key);
-           	if(device && device->isEnabled() && device->deviceAction(value)){
-                success =true;
-            }
-          }
 
+            pIoTServerDevice* device = deviceForActionKey(key);
+
+            if(device == nullptr){
+                LOGT_ERROR("DEVICE_ACTION failed: no device found for key \"%s\"",
+                           key.c_str());
+                success = false;
+                continue;
+            }
+
+            if(!device->deviceAction(value)){
+                LOGT_ERROR("DEVICE_ACTION failed: key \"%s\" value \"%s\"",
+                           key.c_str(),
+                           value.c_str());
+                success = false;
+            }
+        }
     }
 
     return success;
@@ -1785,14 +1856,26 @@ bool pIoTServerMgr::runSequenceStep(sequenceID_t sid, uint stepNo,
             _db.sequenceGetTrigger(sid,trig);
             success =  action.invokeCallBack(trig);
         }
-        else if(action.cmd() == Action::JSON_CMD_DEVICE_ACTION) {
+        else if(action.cmd() == Action::JSON_CMD_DEVICE_ACTION){
             string key = action.key();
             string value = action.value();
-            pIoTServerDevice* device = deviceForKey(key);
-           	if(device && device->isEnabled() && device->deviceAction(value)){
-                success =true;
+
+            pIoTServerDevice* device = deviceForActionKey(key);
+
+            if(device == nullptr){
+                LOGT_ERROR("DEVICE_ACTION failed: no device found for key \"%s\"",
+                           key.c_str());
+                success = false;
+                continue;
             }
-          }
+
+            if(!device->deviceAction(value)){
+                LOGT_ERROR("DEVICE_ACTION failed: key \"%s\" value \"%s\"",
+                           key.c_str(),
+                           value.c_str());
+                success = false;
+            }
+        }
 
     }
 
@@ -1845,6 +1928,7 @@ bool pIoTServerMgr::abortSequence(sequenceID_t sid){
             if(stepNo > 0){
                 runAbortActions(sid);
             }
+            success = true;
         }
       }
 

@@ -439,8 +439,8 @@ const char* VALVEMASTER_Device::actionName(action_type_t type) const
     switch(type) {
     case ACTION_SET_VALUES:                return "SET_VALUES";
     case ACTION_CLOSE_ALL:                 return "CLOSE_ALL";
-    case ACTION_POWER_ON_TEST:             return "POWER_ON_TEST";
-    case ACTION_POWER_OFF_TEST:            return "POWER_OFF_TEST";
+    case ACTION_POWER_ON:                  return "POWER_ON";
+    case ACTION_POWER_OFF:                 return "POWER_OFF";
     case ACTION_PROBE_BUS:                 return "PROBE_BUS";
     case ACTION_PING_DISCOVERED:           return "PING_DISCOVERED";
     case ACTION_VERSION_SCAN_DISCOVERED:   return "VERSION_SCAN_DISCOVERED";
@@ -985,7 +985,7 @@ bool VALVEMASTER_Device::executeAction(const action_request_t& request)
         }
         break;
 
-    case ACTION_POWER_ON_TEST:
+    case ACTION_POWER_ON:
         didSucceed = powerOn();
 
         if(didSucceed) {
@@ -993,15 +993,25 @@ bool VALVEMASTER_Device::executeAction(const action_request_t& request)
         }
         break;
 
-    case ACTION_POWER_OFF_TEST:
-        cancelPowerHoldTimer();
-        didSucceed = powerOff();
+        case ACTION_POWER_OFF:
+        {
+            cancelPowerHoldTimer();
 
-        if(didSucceed) {
-            didSucceed = delayWithStopCheck(FIELD_POWER_OFF_SETTLE_MS,
-                                            "field power-off settle");
+            bool wasOn = false;
+            {
+                std::lock_guard<std::mutex> lock(_mutex);
+                wasOn = _fieldPowerOn;
+            }
+
+            didSucceed = powerOff();
+
+            if(didSucceed && wasOn) {
+                didSucceed = delayWithStopCheck(FIELD_POWER_OFF_SETTLE_MS,
+                                                "field power-off settle");
+            }
+
+            break;
         }
-        break;
 
     case ACTION_PROBE_BUS:
         didSucceed = probeBus();
@@ -2373,7 +2383,7 @@ bool VALVEMASTER_Device::getVersion(string& version)
 bool VALVEMASTER_Device::testPowerOn()
 {
     action_request_t request;
-    request.type = ACTION_POWER_ON_TEST;
+    request.type = ACTION_POWER_ON;
 
     return queueAction(request);
 }
@@ -2381,7 +2391,7 @@ bool VALVEMASTER_Device::testPowerOn()
 bool VALVEMASTER_Device::testPowerOff()
 {
     action_request_t request;
-    request.type = ACTION_POWER_OFF_TEST;
+    request.type = ACTION_POWER_OFF;
 
     return queueAction(request, true);
 }
@@ -2413,14 +2423,58 @@ bool VALVEMASTER_Device::testVersionScanDiscoveredNodes()
 /* testWaitForIdle() is implemented near waitForIdle(). */
 
 
+bool VALVEMASTER_Device::deviceAction(string cmd)
+{
+    std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
 
-bool VALVEMASTER_Device::deviceAction(string cmd){
-
-    bool result = false;
-    if(_isEnabled){
-
-       	LOGT_DEBUG("VALVEMASTER devID \"%s\" DEVICE_ACTION : \"%s\" ", _deviceID.c_str() , cmd.c_str() );
-        result = true;
+    if(!_isEnabled){
+        LOGT_ERROR("VALVEMASTER devID \"%s\" DEVICE_ACTION \"%s\" failed: device disabled",
+                   _deviceID.c_str(),
+                   cmd.c_str());
+        return false;
     }
-    return result;
+
+    LOGT_DEBUG("VALVEMASTER devID \"%s\" DEVICE_ACTION : \"%s\"",
+               _deviceID.c_str(),
+               cmd.c_str());
+
+    action_request_t request;
+
+    if(cmd == VALVEMASTER_ACTION_ALL_OFF){
+        request.type = ACTION_CLOSE_ALL;
+
+        /*
+         * Close-all should supersede stale pending valve changes.
+         * Do not allow queued SET_VALUES requests to run after an all-off.
+         */
+        return queueAction(request, true);
+    }
+
+    if(cmd == VALVEMASTER_ACTION_POWER_ON){
+        request.type = ACTION_POWER_ON;
+
+        /*
+         * POWER_ON is a live device action. Queue it through actionThread()
+         * so field-power/I2C work stays serialized with all other hardware
+         * operations.
+         */
+        return queueAction(request, false);
+    }
+
+    if(cmd == VALVEMASTER_ACTION_POWER_OFF){
+        request.type = ACTION_POWER_OFF;
+
+        /*
+         * POWER_OFF should also clear pending valve changes. Once a caller
+         * explicitly asks the field bus to power down, stale SET_VALUES work
+         * must not run afterward.
+         */
+        return queueAction(request, true);
+    }
+
+    LOGT_ERROR("VALVEMASTER devID \"%s\" unknown DEVICE_ACTION \"%s\"",
+               _deviceID.c_str(),
+               cmd.c_str());
+
+    return false;
 }
