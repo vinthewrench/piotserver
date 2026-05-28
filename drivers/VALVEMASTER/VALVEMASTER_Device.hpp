@@ -85,6 +85,7 @@ public:
     bool isConnected();
     bool setEnabled(bool enable);
     bool setValues(keyValueMap_t kv);
+    bool deviceAction(string cmd);
     bool hasUpdates();
     bool getValues(keyValueMap_t& results);
     bool allOff();

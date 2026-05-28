@@ -23,9 +23,9 @@
 // ----------------------------------------------------------------------
 // Basic ioctl macros (no-op stubs)
 // ----------------------------------------------------------------------
-#define _IOWR(type, nr, size) (0)
-#define _IOW(type, nr, size)  (0)
-#define _IOR(type, nr, size)  (0)
+// #define _IOWR(type, nr, size) (0)
+// #define _IOW(type, nr, size)  (0)
+// #define _IOR(type, nr, size)  (0)
 
 // ----------------------------------------------------------------------
 // v2 line flags — mirrors kernel 6.1+ definitions

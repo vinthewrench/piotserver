@@ -1702,6 +1702,15 @@ bool pIoTServerMgr::runAbortActions(sequenceID_t sid){
             _db.sequenceGetTrigger(sid,trig);
             success =  action.invokeCallBack(trig);
         }
+        else if(action.cmd() == Action::JSON_CMD_DEVICE_ACTION) {
+            string key = action.key();
+            string value = action.value();
+            pIoTServerDevice* device = deviceForKey(key);
+           	if(device && device->isEnabled() && device->deviceAction(value)){
+                success =true;
+            }
+          }
+
     }
 
     return success;
@@ -1776,6 +1785,15 @@ bool pIoTServerMgr::runSequenceStep(sequenceID_t sid, uint stepNo,
             _db.sequenceGetTrigger(sid,trig);
             success =  action.invokeCallBack(trig);
         }
+        else if(action.cmd() == Action::JSON_CMD_DEVICE_ACTION) {
+            string key = action.key();
+            string value = action.value();
+            pIoTServerDevice* device = deviceForKey(key);
+           	if(device && device->isEnabled() && device->deviceAction(value)){
+                success =true;
+            }
+          }
+
     }
 
     if(cb) (cb)(success);

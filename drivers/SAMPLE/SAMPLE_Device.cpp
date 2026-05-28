@@ -7,11 +7,13 @@
 
 #include "SAMPLE_Device.hpp"
 #include "PropValKeys.hpp"
+#include "LogMgr.hpp"
+
 
 SAMPLE_Device::SAMPLE_Device(string devID, string driverName){
 
     setDeviceID(devID, driverName);
- 
+
     _deviceState = DEVICE_STATE_UNKNOWN;
     _isSetup = false;
 }
@@ -22,7 +24,7 @@ SAMPLE_Device::~SAMPLE_Device(){
 
 
 bool SAMPLE_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
-    
+
     for(const auto& [key, entry] : deviceSchema) {
         if(entry.units == SECONDS ){
             _resultKey = key;
@@ -30,7 +32,7 @@ bool SAMPLE_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
             return true;
         }
     }
-    
+
     _deviceState = DEVICE_STATE_DISCONNECTED;
     return false;
 }
@@ -44,30 +46,28 @@ bool SAMPLE_Device::start(){
 }
 
 
-
-
 void SAMPLE_Device::stop(){
     _startup_time = 0;
     _deviceState = DEVICE_STATE_DISCONNECTED;
-    
+
 }
 
 bool SAMPLE_Device::setEnabled(bool enable){
-    
+
     if(enable){
         _isEnabled = true;
-        
+
         if( _deviceState == DEVICE_STATE_CONNECTED){
             return true;
         }
-        
+
         // force restart
         stop();
-        
+
         bool success = start();
         return success;
     }
-    
+
     _isEnabled = false;
     if(_deviceState == DEVICE_STATE_CONNECTED){
         stop();
@@ -81,11 +81,23 @@ bool SAMPLE_Device::isConnected(){
 }
 
 bool SAMPLE_Device::getValues (keyValueMap_t &results){
-    
+
     if(!isConnected())
         return false;
-    
+
     time_t now = time(NULL);
     results[_resultKey] = to_string(now - _startup_time);
     return true;
+}
+
+
+bool SAMPLE_Device::deviceAction(string cmd){
+
+    bool result = false;
+    if(_isEnabled){
+
+       	LOGT_DEBUG("SAMPLE_Device devID \"%s\" DEVICE_ACTION : \"%s\" ", _deviceID.c_str() , cmd.c_str() );
+        result = true;
+    }
+    return result;
 }

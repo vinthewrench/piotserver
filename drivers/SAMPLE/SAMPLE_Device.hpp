@@ -15,22 +15,24 @@
 using namespace std;
 
 class SAMPLE_Device : public pIoTServerDevice{
-    
+
 public:
-    
+
     SAMPLE_Device(string devID, string driverName);
     ~SAMPLE_Device();
 
     bool initWithSchema(deviceSchemaMap_t deviceSchema);
-    
+
     bool start();
     void stop();
-    
+
     bool isConnected();
     bool setEnabled(bool enable);
-    
+
     bool getValues( keyValueMap_t &);
-    
+
+    bool deviceAction(string cmd);
+
 private:
     bool               _isSetup = false;
     time_t             _startup_time;

@@ -121,6 +121,11 @@ public:
         return false;
     }
 
+    virtual bool deviceAction([[maybe_unused]] string cmd)  {
+        return false;
+    }
+
+
     virtual void setProperties(json j)
     {
         for(auto& [key, value] : j.items()) {

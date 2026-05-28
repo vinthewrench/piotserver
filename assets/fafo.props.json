@@ -1,0 +1,37 @@
+{
+    "devices": [
+        {
+            "data_type": "SECONDS",
+            "device_type": "SAMPLE",
+            "key": "RUN_TIME",
+            "title": "Run Time"
+        }
+    ],
+    "prop.file.version": {
+        "file.etag": 16,
+        "last_write": 1779996966
+    },
+    "sequence": [
+        {
+            "description": "fool with device on startup",
+            "enable": true,
+            "name": "other startup task",
+            "override_manualmode": false,
+            "sequenceID": "0000",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "DEVICE_ACTION",
+                            "key": "RUN_TIME",
+                            "value": "DO SOMETHING"
+                        }
+                    ]
+                }
+            ],
+            "trigger": {
+                "event": "startup"
+            }
+        }
+    ]
+}

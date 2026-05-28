@@ -2411,3 +2411,16 @@ bool VALVEMASTER_Device::testVersionScanDiscoveredNodes()
 }
 
 /* testWaitForIdle() is implemented near waitForIdle(). */
+
+
+
+bool VALVEMASTER_Device::deviceAction(string cmd){
+
+    bool result = false;
+    if(_isEnabled){
+
+       	LOGT_DEBUG("VALVEMASTER devID \"%s\" DEVICE_ACTION : \"%s\" ", _deviceID.c_str() , cmd.c_str() );
+        result = true;
+    }
+    return result;
+}

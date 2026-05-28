@@ -5,22 +5,46 @@
             "device_type": "SAMPLE",
             "key": "RUN_TIME",
             "title": "Run Time"
-        }
-        ,
+        },
         {
             "device_type": "GPIO",
             "pins": [
                 {
                     "BCM": 24,
                     "data_type": "BOOL",
+                    "gpio.flags": 512,
                     "gpio.mode": "input",
                     "key": "POWER_FAIL",
-                    "title": "AC Power Fail Bit",
-                    "gpio.flags": 512
+                    "title": "AC Power Fail Bit"
                 }
             ]
         }
-
+    ],
+    "prop.file.version": {
+        "file.etag": 1,
+        "last_write": 1779992383
+    },
+    "sequence": [
+        {
+            "description": "fool with device on startup",
+            "enable": true,
+            "name": "other startup task",
+            "override_manualmode": false,
+            "sequenceID": "0000",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "EVAL",
+                            "expression": "START_COUNT := START_COUNT + 1"
+                        }
+                    ]
+                }
+            ],
+            "trigger": {
+                "event": "startup"
+            }
+        }
     ],
     "values": [
         {
@@ -30,24 +54,6 @@
             "key": "START_COUNT",
             "title": "times restarted running",
             "tracking": "track.latest"
-        }
-    ],
-    "sequence": [
-        {
-            "enable": true,
-            "name": "other startup task",
-            "description": "fool with device on startup",
-            "trigger": {
-                "event": "startup"
-            },
-            "steps": {
-                "action": [
-                    {
-                        "cmd": "EVAL",
-                        "expression": "START_COUNT := START_COUNT + 1"
-                    }
-                ]
-            }
         }
     ]
 }
