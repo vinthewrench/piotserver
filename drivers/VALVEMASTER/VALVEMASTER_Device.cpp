@@ -993,25 +993,25 @@ bool VALVEMASTER_Device::executeAction(const action_request_t& request)
         }
         break;
 
-        case ACTION_POWER_OFF:
+    case ACTION_POWER_OFF:
+    {
+        cancelPowerHoldTimer();
+
+        bool wasOn = false;
         {
-            cancelPowerHoldTimer();
-
-            bool wasOn = false;
-            {
-                std::lock_guard<std::mutex> lock(_mutex);
-                wasOn = _fieldPowerOn;
-            }
-
-            didSucceed = powerOff();
-
-            if(didSucceed && wasOn) {
-                didSucceed = delayWithStopCheck(FIELD_POWER_OFF_SETTLE_MS,
-                                                "field power-off settle");
-            }
-
-            break;
+            std::lock_guard<std::mutex> lock(_mutex);
+            wasOn = _fieldPowerOn;
         }
+
+        didSucceed = powerOff();
+
+        if(didSucceed && wasOn) {
+            didSucceed = delayWithStopCheck(FIELD_POWER_OFF_SETTLE_MS,
+                                            "field power-off settle");
+        }
+
+        break;
+    }
 
     case ACTION_PROBE_BUS:
         didSucceed = probeBus();
@@ -1876,19 +1876,20 @@ void VALVEMASTER_Device::stop()
         }
 
         /*
-         * Do not immediately set _stopRequested.
+         * Prevent new public write requests from being accepted while shutdown
+         * is in progress.
          *
-         * The low-level helpers intentionally reject new hardware work after
-         * _stopRequested is true. Shutdown needs one final hardware operation:
+         * This must happen before ACTION_CLOSE_ALL is queued. Otherwise timed
+         * sequence steps can call setValues() during the close-all / power-off
+         * window, enqueue stale SET_VALUES work, and turn field power back on
+         * after the shutdown close-all succeeds.
          *
-         *   1. Close all latching valves.
-         *   2. Confirm the Valve Master completed the command.
-         *   3. Power the RS-485 / 12 V field line off.
-         *
-         * So stop() first injects ACTION_CLOSE_ALL into the normal actionThread
-         * path and waits for it to finish. Only after that do we request thread
-         * shutdown.
+         * Do not set _stopRequested yet. The low-level helpers reject hardware
+         * work when _stopRequested is true, and shutdown still needs one final
+         * hardware operation.
          */
+        _isEnabled = false;
+
         shouldRunShutdownAction = _isConnected && _running && !_stopRequested;
 
         if(shouldRunShutdownAction) {
