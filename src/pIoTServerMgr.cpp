@@ -34,8 +34,11 @@
 
 using namespace nlohmann;
 
-const char*     pIoTServerMgr::pIoTServerMgr_Version = "1.1.0 dev 0";
+#ifndef PIOTSERVER_VERSION
+#define PIOTSERVER_VERSION "1.2.0 dev 0"
+#endif
 
+const char* pIoTServerMgr::pIoTServerMgr_Version = PIOTSERVER_VERSION;
 
 // MARK: - pIoTServerMgrDevice
 

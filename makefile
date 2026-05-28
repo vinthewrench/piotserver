@@ -18,6 +18,9 @@
 #     make distclean        Remove clean products plus generated auxiliary files.
 
 APP_NAME := piotserver
+APP_VERSION := 1.3.0-field
+GIT_HASH := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
+
 
 CXX := clang++
 CC  := clang
@@ -36,6 +39,8 @@ WARNINGS := \
 
 CPPFLAGS := \
 	-I$(SRC_DIR)
+
+CPPFLAGS += -DPIOTSERVER_VERSION='"$(APP_VERSION) ($(GIT_HASH))"'
 
 CXXFLAGS := \
 	$(CXXSTD) \
