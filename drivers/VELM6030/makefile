@@ -1,7 +1,7 @@
-# Makefile for ADS1115 pIoTServer plugin
+# Makefile for VELM6030 pIoTServer plugin
 #
-# Builds plugins/ADS1115.so on Linux.
-# Builds plugins/ADS1115.dylib on macOS.
+# Builds plugins/VELM6030.so on Linux.
+# Builds plugins/VELM6030.dylib on macOS.
 #
 # This plugin intentionally references host-provided symbols from piotserver.
 # The top-level piotserver executable must export symbols on Linux, usually:
@@ -14,7 +14,7 @@
 CC  := clang
 CXX := clang++
 
-PLUGIN_NAME := ADS1115
+PLUGIN_NAME := VELM6030
 
 ROOT_DIR   := ../..
 SRC_DIR    := $(ROOT_DIR)/src
@@ -69,9 +69,9 @@ endif
 TARGET := $(PLUGIN_DIR)/$(PLUGIN_NAME).$(PLUGIN_EXT)
 
 OBJS := \
-	$(BUILD_DIR)/ADS1115_factory.o \
-	$(BUILD_DIR)/ADS1115_Device.o \
-	$(BUILD_DIR)/ADS1115.o \
+	$(BUILD_DIR)/VELM6030_factory.o \
+	$(BUILD_DIR)/VELM6030_Device.o \
+	$(BUILD_DIR)/VELM6030.o \
 	$(BUILD_DIR)/I2C.o
 
 DEPS := $(OBJS:.o=.d)
@@ -87,15 +87,15 @@ dirs:
 $(TARGET): $(OBJS)
 	$(CXX) $(LDFLAGS) $(PLUGIN_LDFLAGS) -o $@ $^ $(LDLIBS)
 
-$(BUILD_DIR)/ADS1115_factory.o: ADS1115_factory.cpp ADS1115_Device.hpp
+$(BUILD_DIR)/VELM6030_factory.o: VELM6030_factory.cpp VELM6030_Device.hpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/ADS1115_Device.o: ADS1115_Device.cpp ADS1115_Device.hpp
+$(BUILD_DIR)/VELM6030_Device.o: VELM6030_Device.cpp VELM6030_Device.hpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/ADS1115.o: ADS1115.cpp ADS1115.hpp
+$(BUILD_DIR)/VELM6030.o: VELM6030.cpp VELM6030.hpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 

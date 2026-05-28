@@ -28,9 +28,7 @@
 #include "RPi_RelayBoardDevice.hpp"
 #include "W1_Device.hpp"
 #include "Actuator_Device.hpp"
-#include "TankDepth_Device.hpp"
 #include "Sprinkler_Device.hpp"
-#include "VELM6030_Device.hpp"
 
 #include "pIoTServerEvaluator.hpp"
 
@@ -531,10 +529,8 @@ pIoTServerMgr::pIoTServerMgr(){
     //    RPSD( PROP_SENSOR_ID_ADS1115,        ADS1115_Device);
 
     RPSD( PROP_SENSOR_ID_1WIRE,         W1_Device);
-    RPSD( PROP_SENSOR_ID_VELM6030,      VELM6030_Device);
     RPSD( PROP_DEVICE_ACTUATOR,         Actuator_Device);
     RPSD( PROP_DEVICE_GPIO,             RPi_RelayBoardDevice);
-    RPSD( PROP_SENSOR_ID_TANKDEPTH,     TankDepth_Device);
     RPSD( PROP_DEVICE_SPRINKLER,        Sprinkler_Device);
 
     stringvector paths;

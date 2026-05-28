@@ -72,13 +72,9 @@ CPP_SOURCES := \
 	$(SRC_DIR)/ServerNouns.cpp \
 	$(SRC_DIR)/RPi_RelayBoardDevice.cpp \
 	$(SRC_DIR)/W1_Device.cpp \
-	$(SRC_DIR)/VELM6030_Device.cpp \
 	$(SRC_DIR)/Actuator_Device.cpp \
-	$(SRC_DIR)/TankDepth_Device.cpp \
 	$(SRC_DIR)/Sprinkler_Device.cpp \
 	$(SRC_DIR)/I2C.cpp \
-	$(SRC_DIR)/ADS1115.cpp \
-	$(SRC_DIR)/VELM6030.cpp \
 	$(SRC_DIR)/GPIO.cpp \
 	$(SRC_DIR)/pIoTServerAPISecretMgr.cpp \
 	$(SRC_DIR)/pIoTServerDB.cpp \
@@ -130,6 +126,8 @@ PLUGIN_DIRS := \
 	SHT25 \
 	SHT30 \
 	TCA9534 \
+	TANKDEPTH \
+	VELM6030 \
 	TMP10X
 
 .PHONY: all app plugins clean clean-plugins distclean run dirs print $(PLUGIN_DIRS)

@@ -8,14 +8,14 @@
 #include "MCP3427.hpp"
 #include "LogMgr.hpp"
 
- 
+
 MCP3427::MCP3427(){
 	_isSetup = false;
 }
 
 MCP3427::~MCP3427(){
 	stop();
-	
+
 }
 
 
@@ -24,26 +24,26 @@ bool MCP3427::begin(uint8_t deviceAddress){
 
     return begin(deviceAddress, error);
 }
- 
+
 
 bool MCP3427::begin(uint8_t deviceAddress,    int &error){
 	_isSetup = _i2cPort.begin(deviceAddress, error);
-  
+
 //    LOGT_DEBUG("MCP3427(%02x) begin: %s\n", deviceAddress, _isSetup?"OK":"FAIL");
-    
+
    return _isSetup;
 }
- 
+
 void MCP3427::stop(){
 //	LOGT_INFO("MCP3427(%02x) stop\n",  _i2cPort.getDevAddr());
 
 	_isSetup = false;
 	_i2cPort.stop();
 }
- 
+
 bool MCP3427::isOpen(){
 	return _isSetup;
-	
+
 };
 
 
@@ -53,37 +53,37 @@ uint8_t	MCP3427::getDevAddr(){
 
 
 bool MCP3427::analogRead(uint16_t &resultOut, uint8_t channel, ADCGain gain, ADCBitDepth bitDepth){
-	
+
 	int16_t adcVal = 0;
 	bool conversionDone = false;
-	
+
 	if(!isOpen())
 		return false;
-	
+
 	uint8_t configByte = computeConfigByte(channel, true, bitDepth, gain);
-	
+
 	if(!_i2cPort.writeByte(0, configByte))
 		return false;
-	
+
 	// Roughly wait the amount of time we need
 	delayByBitDepth(bitDepth);
-	
+
 	uint8_t reattempts = 0;
-	
+
 	while(!conversionDone && reattempts++ < 8)
 	{
-		
+
         I2C::i2c_block_t registerBytes = {0};
-     
+
         if(!_i2cPort.readBytes(0, 3, registerBytes) )
 		{
 			// Read error, got less than the expected byte
 			continue;
 		}
-		
+
 		adcVal = ((uint16_t)registerBytes[0])<<8;
 		adcVal |= (uint16_t)((uint16_t)registerBytes[1]);
-		
+
 		uint8_t confByte = registerBytes[2];
 		if (confByte & 0x80)
 		{
@@ -96,7 +96,7 @@ bool MCP3427::analogRead(uint16_t &resultOut, uint8_t channel, ADCGain gain, ADC
 			resultOut = adcVal;
 		}
 	}
-		
+
 	resultOut = adcVal;
 	return conversionDone;
 }
@@ -105,13 +105,13 @@ float MCP3427::convertToVoltage(uint16_t adcVal, ADCGain gain, ADCBitDepth bitDe
 {
 	float divisor = 32767.0;
 	float retval;
-	
+
 	// Mask off unused bits
 	if(ADC_12_BITS == bitDepth)
 		divisor = 2047.0;
 	else if (ADC_14_BITS == bitDepth)
 		divisor = 8191.0;
-	
+
 	switch(gain)
 	{
 		case GAIN_1X:
@@ -129,7 +129,7 @@ float MCP3427::convertToVoltage(uint16_t adcVal, ADCGain gain, ADCBitDepth bitDe
 		case GAIN_8X:
 			retval = (0.256/divisor) * adcVal;
 			break;
-			
+
 		default:
 			retval = 0.0;
 			break;
@@ -138,21 +138,21 @@ float MCP3427::convertToVoltage(uint16_t adcVal, ADCGain gain, ADCBitDepth bitDe
 	return(retval);
 }
 
- 
-void delay(int ms){
-	
+
+void delay(int){
+
 }
 
 uint8_t MCP3427::computeConfigByte(uint8_t channel, bool continuousConversion, ADCBitDepth bitDepth, ADCGain gain)
 {
 	uint8_t configByte = 0;
-	
+
 	if (channel < 4)
 		configByte |= (channel & 0x03) << 5;
 
 	if (continuousConversion)
 		configByte |= 0x10;
-		
+
 	switch(bitDepth)
 	{
 		case ADC_12_BITS:
@@ -184,13 +184,13 @@ uint8_t MCP3427::computeConfigByte(uint8_t channel, bool continuousConversion, A
 			configByte |= 0x03;
 			break;
 	}
-	
+
 	return configByte;
 }
 
 void MCP3427::delayByBitDepth(ADCBitDepth bitDepth)
 {
-	
+
 	switch(bitDepth)
 	{
 		case ADC_16_BITS:
@@ -205,4 +205,3 @@ void MCP3427::delayByBitDepth(ADCBitDepth bitDepth)
 		break;
 	}
 }
-

@@ -1,0 +1,29 @@
+{
+    "config": {
+        "access_keys": {},
+        "description": "The Raspbery Pi Irrigation System",
+        "lat_long": "34.465338, -93.362827",
+        "name": "Tank Depth Test"
+    },
+    "devices": [
+        {
+            "address": "0x49",
+            "data_type": "PERCENT",
+            "device_type": "TANKDEPTH",
+            "interval": 10,
+            "key": "TANKDEPTH",
+            "other.props": {
+                "tank.empty": 7800,
+                "tank.full": 15000,
+                "tank.gals": 2000
+            },
+            "title": "Amount of Water in Tank",
+            "tracking": "track.range"
+        }
+    ],
+    "prop.file.version": {
+        "file.etag": 2,
+        "last_write": 1779988517
+    },
+    "sequence": null
+}

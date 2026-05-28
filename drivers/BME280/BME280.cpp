@@ -21,17 +21,17 @@ static void dumpHex(uint8_t* buffer, int length, int offset)
     int                        lineLength;
     short                    c;
     const unsigned char      *bufferPtr = buffer;
-    
+
     char                    lineBuf[1024];
     char                    *p;
-    
+
 #define kLineSize    8
     for (lineStart = 0, p = lineBuf; lineStart < length; lineStart += lineLength,  p = lineBuf )
     {
         lineLength = kLineSize;
         if (lineStart + lineLength > length)
             lineLength = length - lineStart;
-        
+
         p += sprintf(p, "%6d: ", lineStart+offset);
         for (i = 0; i < lineLength; i++){
             *p++ = hexDigit[ bufferPtr[lineStart+i] >>4];
@@ -40,7 +40,7 @@ static void dumpHex(uint8_t* buffer, int length, int offset)
         }
         for (; i < kLineSize; i++)
             p += sprintf(p, "   ");
-        
+
         p += sprintf(p,"  ");
         for (i = 0; i < lineLength; i++) {
             c = bufferPtr[lineStart + i] & 0xFF;
@@ -51,8 +51,8 @@ static void dumpHex(uint8_t* buffer, int length, int offset)
             }
         }
         *p++ = 0;
-        
-        
+
+
         printf("%s\n",lineBuf);
     }
 #undef kLineSize
@@ -66,7 +66,7 @@ static void dumpHex(uint8_t* buffer, int length, int offset)
 
 /*! @name BME280 chip identifier */
 #define BME280_CHIP_ID                            UINT8_C(0x60)
- 
+
 /*! @name Register Address */
 #define BME280_REG_CHIP_ID                        UINT8_C(0xD0)
 #define BME280_REG_RESET                          UINT8_C(0xE0)
@@ -158,11 +158,11 @@ static void dumpHex(uint8_t* buffer, int length, int offset)
 #define BME280_12_BIT_SHIFT                       UINT8_C(12)
 #define BME280_8_BIT_SHIFT                        UINT8_C(8)
 #define BME280_4_BIT_SHIFT                        UINT8_C(4)
- 
+
 
 /*! @name Macro to combine two 8 bit data's to form a 16 bit data */
 #define BME280_CONCAT_BYTES(msb, lsb)             (((uint16_t)msb << 8) | (uint16_t)lsb)
- 
+
 /*! @name Sensor component selection macros
  * These values are internal for API implementation. Don't relate this to
  * data sheet.
@@ -227,7 +227,7 @@ BME280::BME280(){
 
 BME280::~BME280(){
     stop();
-    
+
 }
 
 
@@ -236,39 +236,39 @@ bool BME280::begin(uint8_t deviceAddress){
 
     return begin(deviceAddress, error);
 }
- 
+
 
 bool BME280::begin(uint8_t deviceAddress,    int &error){
-    
+
     uint8_t  chipID = 0;
-    
+
     if(!_i2cPort.begin(deviceAddress, error))
         return  false;
-    
+
     if( !getChipID(chipID)){
         LOGT_INFO("BME280(%02x) READ BME280_REG_CHIP_ID failed \n", deviceAddress );
         error = ENODEV;
         return  false;
     }
-    
+
     if(chipID != BME280_CHIP_ID)  {
         LOGT_INFO("BME280(%02x) unexpected chipID = %02x\n", deviceAddress, chipID );
         error = ENODEV;
         return  false;
     }
-  
+
     if( !softReset()){
         LOGT_INFO("BME280(%02x) SOFT RESET failed \n", deviceAddress );
         error = ENODEV;
         return  false;
     }
-  
+
     if( !getCalibrationData()){
         LOGT_INFO("BME280(%02x) GET CALIBRATION DATA failed \n", deviceAddress );
         error = ENODEV;
         return  false;
     }
-    
+
     if( !setPowerMode(BME280_POWERMODE_SLEEP)){
         LOGT_INFO("BME280(%02x) SET POWER MODE TO BME280_POWERMODE_SLEEP failed \n", deviceAddress );
         error = ENODEV;
@@ -282,20 +282,20 @@ bool BME280::begin(uint8_t deviceAddress,    int &error){
     }
 
     _isSetup = true;
-    
+
     return _isSetup;
 }
- 
+
 void BME280::stop(){
 //    LOGT_INFO("BME280(%02x) stop\n",  _i2cPort.getDevAddr());
 
     _isSetup = false;
     _i2cPort.stop();
 }
- 
+
 bool BME280::isOpen(){
     return _i2cPort.isAvailable() && _isSetup;
-    
+
 };
 
 
@@ -305,7 +305,7 @@ uint8_t    BME280::getDevAddr(){
 
 
 bool BME280::getChipID(uint8_t &chipID){
-    
+
     bool success = _i2cPort.readByte(BME280_REG_CHIP_ID, chipID);
     return success;
 }
@@ -316,30 +316,30 @@ bool BME280::softReset(){
      The “reset” register contains the soft reset word reset[7:0].
      If the value 0xB6 is written to the register, the device is reset using the complete power-on-reset
      procedure. Writing other values than 0xB6 has no effect. The readout value is always 0x00.
-     
+
      Status register update bit is  Automatically set to ‘1’ when the NVM data are being
      copied to image registers and back to ‘0’ when the copying is done.
      The data are copied at power-on-reset and before every conversion.
      */
-    
+
     bool success = false;
-    
+
     uint8_t status_reg = 0;
     uint8_t try_run = 5;
 
     if(!_i2cPort.writeByte(BME280_REG_RESET, BME280_SOFT_RESET_COMMAND) )
         return false;
-    
+
     do{
         usleep(BME280_STARTUP_DELAY);
- 
+
         if(!_i2cPort.readByte(BME280_REG_STATUS,status_reg))
             return false;
-   
+
     }  while (try_run-- && (status_reg & BME280_STATUS_MEAS_DONE));
-    
+
     success = (status_reg & BME280_STATUS_IM_UPDATE) == 0;
- 
+
     return success;
 }
 
@@ -347,7 +347,7 @@ bool BME280::softReset(){
 /*  BME280 output consists of the ADC output values. However, each sensing element behaves
  differently. Therefore, the actual pressure and temperature must be calculated using a set of
  calibration parameters.
- 
+
  he trimming parameters are programmed into the devices’ non-volatile memory (NVM) during
  production and cannot be altered by the customer. Each compensation word is a 16-bit signed or
  unsigned integer value stored in two’s complement. As the memory is organized into 8-bit words, two
@@ -355,7 +355,7 @@ bool BME280::softReset(){
  named calib00…calib41 and are stored at memory addresses 0x88…0xA1 and 0xE1…0xE7. The
  corresponding compensation words are named dig_T# for temperature compensation related values,
  dig_P# for pressure related values and dig_H# for humidity related values.
- 
+
  */
 
 
@@ -365,7 +365,7 @@ bool BME280::softReset(){
  */
 static bool  parse_temp_press_calib_data(const uint8_t *reg_data , struct bme280_calib_data &d)
 {
-    
+
     d.dig_t1 = BME280_CONCAT_BYTES(reg_data[1], reg_data[0]);
     d.dig_t2 = (int16_t)BME280_CONCAT_BYTES(reg_data[3], reg_data[2]);
     d.dig_t3 = (int16_t)BME280_CONCAT_BYTES(reg_data[5], reg_data[4]);
@@ -404,18 +404,18 @@ static bool  parse_humidity_calib_data(const uint8_t *reg_data,  struct bme280_c
 
 
 bool BME280::getCalibrationData(){
-    
+
     bool success = false;
      I2C::i2c_block_t calib_data = { 0 };
-    
+
     std::memset((void *) &_calib_data, 0, sizeof(_calib_data));
-    
+
     success = _i2cPort.isAvailable()
         && _i2cPort.readBytes(BME280_REG_TEMP_PRESS_CALIB_DATA,BME280_LEN_TEMP_PRESS_CALIB_DATA, calib_data)
         && parse_temp_press_calib_data(calib_data, _calib_data)
         && _i2cPort.readBytes(BME280_REG_HUMIDITY_CALIB_DATA,BME280_LEN_HUMIDITY_CALIB_DATA, calib_data)
         && parse_humidity_calib_data(calib_data, _calib_data);
- 
+
     return success;
 }
 
@@ -429,13 +429,13 @@ bool BME280::getCalibrationData(){
  • Normal mode: perpetual cycling of measurements and inactive periods.
  */
 bool  BME280::setPowerMode(uint8_t powerMode){
-    
+
     bool success = false;
- 
+
     uint8_t data;
-    
+
     /* Read the power mode register */
-    
+
     if( _i2cPort.isAvailable()
             && _i2cPort.readByte(BME280_REG_PWR_CTRL, data))
     {
@@ -443,25 +443,25 @@ bool  BME280::setPowerMode(uint8_t powerMode){
         data = BME280_SET_BITS(data, BME280_Device_MODE, powerMode);
         success = _i2cPort.writeByte(BME280_REG_PWR_CTRL, data);
     }
- 
+
     return success;
 }
 
 bool  BME280::getPowerMode(uint8_t &powerMode){
-    
+
     bool success = false;
-    
+
     uint8_t data;
-    
+
     /* Read the power mode register */
-    
+
     if( _i2cPort.isAvailable()
        && _i2cPort.readByte(BME280_REG_PWR_CTRL, data))  {
         // Get the power mode in Bits 0:1
         powerMode = BME280_GET_BITS_POS_0(data, BME280_Device_MODE);
         success = true;
     }
-    
+
     return success;
 }
 
@@ -575,45 +575,45 @@ static double compensate_humidity(const struct bme280_uncomp_data *uncomp_data,
     return  max(0.0, min(100.0, humidity));
 }
 
- 
+
 bool BME280::processSensorData(uint8_t *reg_data, compensated_data& dataOut){
-    
+
     bool success = false;
-    
+
     /* Variables to store the sensor data */
     uint32_t data_xlsb;
     uint32_t data_lsb;
     uint32_t data_msb;
-    
+
     /*! Un-compensated pressure , temperature ,  humidity */
-    struct bme280_uncomp_data uncomp_data = { 0 };
-    
+    struct bme280_uncomp_data uncomp_data = {};
+
     /* Store the parsed register values for pressure data */
     data_msb = (uint32_t)reg_data[0] << BME280_12_BIT_SHIFT;
     data_lsb = (uint32_t)reg_data[1] << BME280_4_BIT_SHIFT;
     data_xlsb = (uint32_t)reg_data[2] >> BME280_4_BIT_SHIFT;
     uncomp_data.pressure = data_msb | data_lsb | data_xlsb;
     double pressure = compensate_pressure(&uncomp_data, &_calib_data);
-    
+
     /* Store the parsed register values for temperature data */
     data_msb = (uint32_t)reg_data[3] << BME280_12_BIT_SHIFT;
     data_lsb = (uint32_t)reg_data[4] << BME280_4_BIT_SHIFT;
     data_xlsb = (uint32_t)reg_data[5] >> BME280_4_BIT_SHIFT;
     uncomp_data.temperature = data_msb | data_lsb | data_xlsb;
     double temperature = compensate_temperature(&uncomp_data, &_calib_data);
-    
+
     /* Store the parsed register values for humidity data */
     data_msb = (uint32_t)reg_data[6] << BME280_8_BIT_SHIFT;
     data_lsb = (uint32_t)reg_data[7];
     uncomp_data.humidity = data_msb | data_lsb;
     double humidity = compensate_humidity(&uncomp_data, &_calib_data);
-    
+
     dataOut.humidity = humidity;
     dataOut.pressure = pressure;
     dataOut.temperature = temperature;
-    
+
     success = true;
-    
+
     return success;
 }
 
@@ -622,7 +622,7 @@ bool BME280::processSensorData(uint8_t *reg_data, compensated_data& dataOut){
  Sensor mode forced mode, 1 sample / minute
  Oversampling settings pressure ×1
  Forced
- 
+
   settings.filter = BME280_FILTER_COEFF_2;
 
   settings.osr_h = BME280_OVERSAMPLING_1X;
@@ -635,21 +635,21 @@ bool BME280::processSensorData(uint8_t *reg_data, compensated_data& dataOut){
 
 bool BME280::configureForWeather(){
     bool success = false;
-    
+
     I2C::i2c_block_t regs;
-    
+
     if(  _i2cPort.isAvailable() && _i2cPort.readBytes(BME280_REG_CTRL_HUM, 4, regs))
     {
-        bme280_settings  settings {0};
-  
+        bme280_settings  settings {};
+
         /* Configuring the over-sampling rate, filter coefficient and standby time */
         /* Overwrite the desired settings */
-        
+
         /* Over-sampling rate for humidity, temperature and pressure */
         settings.osr_h = BME280_OVERSAMPLING_1X;
         settings.osr_p = BME280_OVERSAMPLING_1X;
         settings.osr_t = BME280_OVERSAMPLING_1X;
- 
+
         /* Setting the standby time */
          settings.standby_time = BME280_STANDBY_TIME_0_5_MS;
          settings.filter = BME280_FILTER_COEFF_2;
@@ -659,12 +659,12 @@ bool BME280::configureForWeather(){
  //       printf("mode was %d\n", mode);
         if(mode != BME280_POWERMODE_SLEEP)
             setPowerMode(BME280_POWERMODE_SLEEP);
-        
+
         uint8_t ctrl_hum;
         ctrl_hum = settings.osr_h & BME280_CTRL_HUM_MSK;
         /* Write the humidity control value in the register */
         _i2cPort.writeByte(BME280_REG_CTRL_HUM, ctrl_hum);
-        
+
         uint8_t ctrl_meas = 0;
         _i2cPort.readByte(BME280_REG_CTRL_MEAS, ctrl_meas);
         ctrl_meas = BME280_SET_BITS(ctrl_meas, BME280_CTRL_PRESS, settings.osr_p);
@@ -673,56 +673,54 @@ bool BME280::configureForWeather(){
         /* Humidity related changes will be only effective after a
          * write operation to ctrl_meas register
          */
-     
+
         uint8_t cnf_reg;
         _i2cPort.readByte(BME280_REG_CONFIG, cnf_reg);
         cnf_reg = BME280_SET_BITS(cnf_reg, BME280_FILTER, settings.filter);
         cnf_reg = BME280_SET_BITS(cnf_reg, BME280_STANDBY, settings.standby_time);
         _i2cPort.writeByte(BME280_REG_CONFIG, cnf_reg);
- 
+
         success = true;
     }
-    
+
     return success;
 }
 
 bool  BME280::readSensor(compensated_data &dataOut){
-    
+
     bool success = false;
     uint8_t try_run = 10;
-    
+
     // set the BME280 into forced mode and wait till it is no longer in Forced/
     if( _isSetup && setPowerMode(BME280_POWERMODE_FORCED) ) {
-        
+
         uint8_t newMode;
         do{
             usleep(5000);    // 11.5 ms?
-            
+
             if(!getPowerMode(newMode))
                 return false;
-            
+
             if(try_run-- == 0)
                 return false;
-            
+
         } while (newMode == BME280_POWERMODE_FORCED);
-        
+
         I2C::i2c_block_t reg_data = { 0 };
-        
+
         // GET REGISTERS
         /*
          Data readout is done by starting a burst read from 0xF7 to 0xFE (temperature, pressure and humidity).
          The data are read out in an unsigned 20-bit format both for pressure and for temperature
          and in an unsigned 16-bit format for humidity.
-         
+
          In spite of what Bosch claims, the BME280 doesnt handle I2c Burst reads,
          so read it a byte at a time.
          */
-        
+
         success = _i2cPort.readBytes(BME280_REG_DATA,BME280_LEN_P_T_H_DATA, reg_data)
                     && processSensorData(reg_data, dataOut);
     }
-    
+
     return success;
 }
-
-

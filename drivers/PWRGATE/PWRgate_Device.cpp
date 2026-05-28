@@ -397,6 +397,8 @@ static bool processPGString(uint8_t *data, size_t len,
                                 double &sol_volts
                                 ){
 
+    (void)len;
+
     /*
      Charging  PS=14.09V Bat=13.18V,  0.65A  Sol= 0.08V   Min=0
      Trickle   PS=14.09V Bat=13.57V,  0.05A  Sol= 0.08V   Min=38
@@ -518,7 +520,7 @@ void PWRgate_Device::actionThread(){
         else if ((_fd != -1)  && FD_ISSET(_fd, &dup)) {
 
             u_int8_t c;
-            size_t nbytes =  (size_t)::read( _fd, &c, 1 );
+            ssize_t nbytes = ::read( _fd, &c, 1 );
 
             if(nbytes == 1){
 

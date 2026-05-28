@@ -1,7 +1,7 @@
-# Makefile for ADS1115 pIoTServer plugin
+# Makefile for TANKDEPTH pIoTServer plugin
 #
-# Builds plugins/ADS1115.so on Linux.
-# Builds plugins/ADS1115.dylib on macOS.
+# Builds plugins/TANKDEPTH.so on Linux.
+# Builds plugins/TANKDEPTH.dylib on macOS.
 #
 # This plugin intentionally references host-provided symbols from piotserver.
 # The top-level piotserver executable must export symbols on Linux, usually:
@@ -14,17 +14,19 @@
 CC  := clang
 CXX := clang++
 
-PLUGIN_NAME := ADS1115
+PLUGIN_NAME := TANKDEPTH
 
-ROOT_DIR   := ../..
-SRC_DIR    := $(ROOT_DIR)/src
-BUILD_DIR  := $(ROOT_DIR)/build/drivers/$(PLUGIN_NAME)
-PLUGIN_DIR := $(ROOT_DIR)/plugins
+ROOT_DIR    := ../..
+SRC_DIR     := $(ROOT_DIR)/src
+ADS1115_DIR := ../ADS1115
+BUILD_DIR   := $(ROOT_DIR)/build/drivers/$(PLUGIN_NAME)
+PLUGIN_DIR  := $(ROOT_DIR)/plugins
 
 UNAME_S := $(shell uname -s)
 
 CPPFLAGS := \
 	-I$(SRC_DIR) \
+	-I$(ADS1115_DIR) \
 	-I.
 
 WARNINGS := \
@@ -69,8 +71,8 @@ endif
 TARGET := $(PLUGIN_DIR)/$(PLUGIN_NAME).$(PLUGIN_EXT)
 
 OBJS := \
-	$(BUILD_DIR)/ADS1115_factory.o \
-	$(BUILD_DIR)/ADS1115_Device.o \
+	$(BUILD_DIR)/TankDepth_factory.o \
+	$(BUILD_DIR)/TankDepth_Device.o \
 	$(BUILD_DIR)/ADS1115.o \
 	$(BUILD_DIR)/I2C.o
 
@@ -87,15 +89,15 @@ dirs:
 $(TARGET): $(OBJS)
 	$(CXX) $(LDFLAGS) $(PLUGIN_LDFLAGS) -o $@ $^ $(LDLIBS)
 
-$(BUILD_DIR)/ADS1115_factory.o: ADS1115_factory.cpp ADS1115_Device.hpp
+$(BUILD_DIR)/TankDepth_factory.o: TankDepth_factory.cpp TankDepth_Device.hpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/ADS1115_Device.o: ADS1115_Device.cpp ADS1115_Device.hpp
+$(BUILD_DIR)/TankDepth_Device.o: TankDepth_Device.cpp TankDepth_Device.hpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/ADS1115.o: ADS1115.cpp ADS1115.hpp
+$(BUILD_DIR)/ADS1115.o: $(ADS1115_DIR)/ADS1115.cpp $(ADS1115_DIR)/ADS1115.hpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
