@@ -54,10 +54,10 @@ constexpr string_view JSON_ARG_MESSAGE        = "message";            // for log
 
 constexpr string_view JSON_ARG_STATE            = "state";
 constexpr string_view JSON_ARG_STATE_STRING        = "state.string";
- 
+
 constexpr string_view JSON_ARG_PROPERTIES    = "properties";
 constexpr string_view JSON_ARG_DEVICES          = "devices";
- 
+
 constexpr string_view JSON_ARG_SCHEMA            = "schema";
 constexpr string_view JSON_ARG_VALUES            = "values";
 constexpr string_view JSON_ARG_EVENT           = "event";
@@ -89,7 +89,7 @@ constexpr string_view JSON_ARG_ALERT_DETAILS    = "alert.details";
 constexpr string_view JSON_ARG_TIME             = "time";
 constexpr string_view JSON_PROP_MAX             = "max";
 constexpr string_view JSON_PROP_MIN             = "min";
- 
+
 //* for triggers */
 constexpr string_view JSON_TIME_EPHMERAL      = "epoch.time";
 
@@ -113,7 +113,7 @@ constexpr string_view JSON_ARG_W1DEVICE        = "w1";
 
 constexpr string_view JSON_ARG_INITIAL_VALUE     = "initial.value";
 constexpr string_view JSON_ARG_FORMULA          = "formula";
- 
+
 constexpr string_view JSON_ARG_SUNRISE          = "sunrise";
 constexpr string_view JSON_ARG_SUNSET           = "sunset";
 constexpr string_view JSON_ARG_CIVIL_SUNRISE    = "civil sunrise";
@@ -146,9 +146,9 @@ constexpr string_view JSON_ARG_SOLAR_MIDNIGHT         = "midnight";
 constexpr string_view JSON_ARG_SOLAR_POM_VISABLE       = "pom.visable";
 constexpr string_view JSON_ARG_SOLAR_POM_PHASE         = "pom.phase";
 constexpr string_view JSON_ARG_SOLAR_POM_STR            = "pom.name";
- 
+
 // Well known keys
- 
+
 constexpr static string_view PROP_ACCESS_KEYS           = "access_keys";
 constexpr static string_view PROP_API_KEY           = "api_key";
 constexpr static string_view PROP_API_SECRET        = "api_secret";
@@ -181,15 +181,10 @@ constexpr static string_view JSON_ARG_TRACK_RANGE           = "track.range";
 
 constexpr static string_view PROP_SENSOR_ID_1WIRE       = "1WIRE";
 
-constexpr static string_view PROP_SENSOR_ID_QWIIC_BUTTON  = "QWIICBUTTON";
-constexpr static string_view PROP_SENSOR_ID_VELM6030        = "VELM6030";
-
-constexpr static string_view PROP_SENSOR_ID_TANKDEPTH      = "TANK_DEPTH";
-
 constexpr static string_view PROP_DEVICE_QWR_16566        = "QWR_16566";   //  COM-16566  Quad relay
 constexpr static string_view PROP_DEVICE_QWR_15093        = "QWR_15093";  //  COM-15093  single relay
 constexpr static string_view PROP_DEVICE_QWR_16810        = "QWR_16810";  //  COM-16810  DUAL SSR
- 
+
 constexpr static string_view PROP_PLUGIN_NAME      = "plugin.name";
 
 constexpr static string_view PROP_DEVICE_GPIO       = "GPIO";
@@ -200,9 +195,9 @@ constexpr static string_view PROP_DEVICE_PCA9671_BIT   = "bit";
 
 constexpr static string_view PROP_DEVICE_ACTUATOR    = "ACTUATOR";
 constexpr static string_view PROP_DEVICE_SPRINKLER    = "SPRINKLER";
- 
+
 /* these are now  plugins
- 
+
  //constexpr static string_view PROP_SENSOR_ID_TMP10X      = "TMP10X";
  //constexpr static string_view PROP_SENSOR_ID_BME280      = "BME280";
  //constexpr static string_view PROP_SENSOR_ID_MCP3427     = "MCP3427";
@@ -231,7 +226,7 @@ constexpr static string_view PROP_ARG_GPIO_OUTPUT    = "output";
 constexpr static string_view PROP_ARG_GPIO_INPUT      = "input";
 constexpr static string_view PROP_GPIO_FLAGS         = "gpio.flags";
 
- 
+
 // built in read only values
 inline static const string VAL_CPU_TEMPERATURE      = "CPU_TEMPERATURE";
 inline static const string VAL_CPU_FAN              = "CPU_FAN";
@@ -261,8 +256,8 @@ constexpr static string_view JSON_ARG_SEQUENCE_IDS         = "sequenceIDs";
 constexpr static string_view JSON_ARG_TIMED_SEQUENCES    = "sequences.timed";
 constexpr static string_view JSON_ARG_FUTURE_SEQUENCES    = "sequences.future";
 constexpr static string_view JSON_ARG_CRON_SEQUENCES   = "sequences.cron";
-constexpr static string_view PROP_SEQUENCE_GROUPS        = "sequence.groups";     
- 
+constexpr static string_view PROP_SEQUENCE_GROUPS        = "sequence.groups";
+
 constexpr static string_view JSON_ARG_ACTION            = "action";
 constexpr static string_view JSON_ARG_STEPS            = "steps";
 
@@ -280,4 +275,3 @@ constexpr static string_view JSON_ARG_SCHEDULE           = "schedule";
 
 constexpr static string_view JSON_ARG_STEP            = "step";
 constexpr static string_view JSON_ARG_CRON            = "cron";
-
