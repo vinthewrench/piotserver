@@ -100,6 +100,13 @@ sudo apt install -y \
     libgpiod-dev
 ```
 
+If Raspberry Pi OS installs only the versioned clang binaries, register them as the default `clang` and `clang++` commands:
+
+```bash
+sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 190
+sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 190
+```
+
 ##### Enable I2C
 
 run
