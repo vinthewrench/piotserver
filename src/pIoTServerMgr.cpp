@@ -52,12 +52,16 @@ pIoTServerMgrDevice::pIoTServerMgrDevice(){
     _lastQueryTime = {0,0};
 
     json j = {
-        { PROP_DEVICE_MFG_URL, {"/sys/class/thermal/thermal_zone0/temp",
-            "https://pip.raspberrypi.com/categories/685-whitepapers-app-notes/documents/RP-003608-WP/Cooling-a-Raspberry-Pi-device.pdf",
-            "https://www.raspberrypi.com/products/active-cooler/"
-        }},
-        { PROP_DEVICE_MFG_PART, "Raspberry Pi Active Cooler"},
+        { PROP_DEVICE_TYPE, PROP_DEVICE_BUILT_IN },
+        { PROP_TITLE, "pIoTServer System" },
+        { PROP_DESCRIPTION, "Built-in pIoTServer pseudo-device for server telemetry, solar values, formulas, and global values." },
+        { PROP_DEVICE_MFG_PART, "Built-in system telemetry" },
+        { PROP_OTHER, {
+            { "cpu_temp_path", "/sys/class/thermal/thermal_zone0/temp" },
+            { "cpu_fan_state_path", "/sys/class/thermal/cooling_device0/cur_state" }
+        }}
     };
+
     setProperties(j);
 
     _deviceState = DEVICE_STATE_UNKNOWN;
@@ -154,9 +158,9 @@ void pIoTServerMgrDevice::stop(){
 }
 
 // this device can not be disabled
-bool pIoTServerMgrDevice::setEnabled(bool enable){
-    if(enable) return true;
-    else return  false;;
+bool pIoTServerMgrDevice::setEnabled(bool enable)
+{
+    return enable;
 }
 
 
@@ -223,27 +227,38 @@ bool pIoTServerMgrDevice::setValues(keyValueMap_t kv){
 }
 
 
-void  pIoTServerMgrDevice::getProperties(json  &j){
+void pIoTServerMgrDevice::getProperties(json &j)
+{
     j = _deviceProperties;
-    string devID; getDeviceID(devID);       // PROP_DEVICE_ID is a psuedo prop
+
+    string devID;
+    getDeviceID(devID);       // PROP_DEVICE_ID is a pseudo prop
     j[PROP_DEVICE_ID] = devID;
 
     j[JSON_ARG_ENABLE] = isEnabled();
 
     vector<string> keys;
 
-    for (const auto& key : _globalValues | std::views::keys)
-        keys.push_back(key);
+    auto addUniqueKey = [&keys](const string& key) {
+        if(find(keys.begin(), keys.end(), key) == keys.end()) {
+            keys.push_back(key);
+        }
+    };
+
+    for(const auto& key : _globalValues | std::views::keys) {
+        addUniqueKey(key);
+    }
 
     deviceSchemaMap_t built_in_schemas;
     getBuiltInSchemas(built_in_schemas);
 
-    for (const auto& key : built_in_schemas | std::views::keys)
-        keys.push_back(key);
-
+    for(const auto& key : built_in_schemas | std::views::keys) {
+        addUniqueKey(key);
+    }
 
     j[PROP_KEYS] = keys;
 }
+
 
 
 bool pIoTServerMgrDevice::getValues( keyValueMap_t &results){
@@ -708,122 +723,164 @@ void pIoTServerMgr::setActiveConnections(bool isActive){
     _hasActiveConnections = isActive;
 }
 // MARK: - Global Values
-
-bool pIoTServerMgr::loadGlobalValues(){
+bool pIoTServerMgr::loadGlobalValues()
+{
     bool success = false;
 
     keyValueMap_t       kv = {};
     deviceSchemaMap_t   deviceSchemaMap;
     json j;
-    if(_db.getJSONProperty(string(JSON_ARG_VALUES), &j)){
-        if(j.is_array()) {
 
-            for( auto entry :j){
+    /*
+     * Parse optional top-level global values from the props file.
+     *
+     * These are user-defined globals and formulas. They are not required for
+     * the built-in server pseudo-device to exist.
+     */
+    if(_db.getJSONProperty(string(JSON_ARG_VALUES), &j)) {
+        if(j.is_array()) {
+            for(auto entry : j) {
                 if(entry.is_object()
                    && entry.contains(PROP_KEY)
-                   && entry.contains(PROP_DATA_TYPE)
-                   )
-                {
-                    string key = entry[PROP_KEY];
+                   && entry.contains(PROP_DATA_TYPE)) {
+
+                    string key      = entry[PROP_KEY];
                     string dataType = entry[PROP_DATA_TYPE];
 
                     string title =
-                    entry.contains(PROP_TITLE)? entry[PROP_TITLE] : "";
+                        entry.contains(PROP_TITLE) ? entry[PROP_TITLE] : "";
 
                     valueTracking_t tracking = TR_DONT_RECORD;
-                    if(entry.contains(PROP_TRACKING))
+                    if(entry.contains(PROP_TRACKING)) {
                         tracking = trackingValueForString(entry[PROP_TRACKING]);
+                    }
 
-                    bool isReadOnly = false;  // globals default to read write
-                    if( entry.contains(PROP_READONLY)
-                       && entry[PROP_READONLY].is_boolean())
+                    bool isReadOnly = false;  // globals default to read/write
+                    if(entry.contains(PROP_READONLY)
+                       && entry[PROP_READONLY].is_boolean()) {
                         isReadOnly = entry[PROP_READONLY];
+                    }
 
                     bool isFormula = false;
-                    if(entry.contains(JSON_ARG_FORMULA))
+                    if(entry.contains(JSON_ARG_FORMULA)) {
                         isFormula = true;
+                    }
 
-                    valueSchemaUnits_t  schemaUnit =  schemaUnitsForString(dataType);
-                    if(schemaUnit == UNKNOWN) continue;
+                    valueSchemaUnits_t schemaUnit = schemaUnitsForString(dataType);
+                    if(schemaUnit == UNKNOWN) {
+                        continue;
+                    }
 
                     deviceSchema_t schema = {
-                        .title  = title,
-                        .units  = schemaUnit,
-                        .tracking = tracking,
-                        .readOnly = isReadOnly,
+                        .title     = title,
+                        .units     = schemaUnit,
+                        .tracking  = tracking,
+                        .readOnly  = isReadOnly,
                         .isFormula = isFormula,
                     };
 
                     deviceSchemaMap[key] = schema;
 
                     if(entry.contains(JSON_ARG_FORMULA)
-                       && entry[JSON_ARG_FORMULA].is_string()){
+                       && entry[JSON_ARG_FORMULA].is_string()) {
                         string formula = entry[JSON_ARG_FORMULA];
                         kv[key] = formula;
                     }
-                    else
+                    else {
                         kv[key] = string();
+                    }
 
-                    // only add intial value if it's not already in DB
-                    if(!_db.isKeyInDB(key) &&
-                       entry.contains(JSON_ARG_INITIAL_VALUE)){
+                    /*
+                     * Only add an initial value if the key is not already in DB.
+                     */
+                    if(!_db.isKeyInDB(key)
+                       && entry.contains(JSON_ARG_INITIAL_VALUE)) {
                         string value = JSON_value_toString(entry[JSON_ARG_INITIAL_VALUE]);
                         kv[key] = value;
                     }
                 }
             }
         }
+    }
 
-        if(deviceSchemaMap.size()){
-            pIoTServerMgrDevice *device = new(pIoTServerMgrDevice);
-            string deviceID;
+    /*
+     * Always create the built-in pIoTServer pseudo-device.
+     *
+     * This device owns server-level telemetry such as CPU temperature, fan
+     * state, solar event values, moon phase, and user-defined global values.
+     */
+    pIoTServerMgrDevice *device = new pIoTServerMgrDevice;
+    string deviceID;
 
-            {
-                deviceSchemaMap_t built_in_schemas;
-                if(device->getBuiltInSchemas(built_in_schemas)){
-                    for(auto [key,schema]: built_in_schemas){
-                        _db.addSchema(key,
-                                      schema.units,
-                                      schema.title,
-                                      schema.tracking,
-                                      schema.readOnly);
-                    }
-                }
-            }
-            // create a vector of device keys as a property
-            if(device->getDeviceID(deviceID) ) {
-                deviceEntry_t       devEntry;
-                devEntry.device     = device;
-                devEntry.deviceID   = deviceID;
+    if(!device->getDeviceID(deviceID)) {
+        delete device;
+        LOGT_ERROR("Internal Error pIoTServerMgrDevice did not return ID\n");
+        return false;
+    }
 
-                if(device->initWithSchema(deviceSchemaMap)){
-                    for(auto [key,schema]: deviceSchemaMap){
-                        devEntry.keys.push_back(key);
-                        _db.addSchema(key,
-                                      schema.units,
-                                      schema.title,
-                                      schema.tracking,
-                                      schema.readOnly);
-                    }
+    deviceEntry_t devEntry;
+    devEntry.device   = device;
+    devEntry.deviceID = deviceID;
 
-                    // load up the initial values
-                    device->setInitialValues(kv);
+    /*
+     * Register built-in schemas and make sure their keys are associated with
+     * the pseudo-device.
+     */
+    {
+        deviceSchemaMap_t built_in_schemas;
 
-                    // add device to the our list fo devices
-                    _devices.push_back(devEntry);
+        if(device->getBuiltInSchemas(built_in_schemas)) {
+            for(auto [key, schema] : built_in_schemas) {
+                devEntry.keys.push_back(key);
 
-                    // start device
-                    device->start();
-                }
-            }
-            else {
-                LOGT_ERROR("Internal Error pIoTServerMgrDevice did not return ID\n");
+                _db.addSchema(key,
+                              schema.units,
+                              schema.title,
+                              schema.tracking,
+                              schema.readOnly);
             }
         }
     }
+
+    /*
+     * Initialize the pseudo-device with optional configured globals.
+     */
+    if(device->initWithSchema(deviceSchemaMap)) {
+        for(auto [key, schema] : deviceSchemaMap) {
+
+            /*
+             * Avoid duplicate key entries if a configured global intentionally
+             * overlaps a built-in key such as CPU_TEMPERATURE.
+             */
+            if(find(devEntry.keys.begin(), devEntry.keys.end(), key) == devEntry.keys.end()) {
+                devEntry.keys.push_back(key);
+            }
+
+            _db.addSchema(key,
+                          schema.units,
+                          schema.title,
+                          schema.tracking,
+                          schema.readOnly);
+        }
+
+        /*
+         * Load initial values and formulas for configured globals.
+         * Built-in values are generated by getValues(), not initialized here.
+         */
+        device->setInitialValues(kv);
+
+        _devices.push_back(devEntry);
+        device->start();
+
+        success = true;
+    }
+    else {
+        delete device;
+        LOGT_ERROR("Internal Error pIoTServerMgrDevice initWithSchema failed\n");
+    }
+
     return success;
 }
-
 
 // MARK: - Devices
 

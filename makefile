@@ -18,7 +18,7 @@
 #     make distclean        Remove clean products plus generated auxiliary files.
 
 APP_NAME := piotserver
-APP_VERSION := 1.3.0-field
+APP_VERSION := 1.4.0-field
 GIT_HASH := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 
 
