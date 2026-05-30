@@ -7,6 +7,43 @@
     },
     "devices": [
         {
+            "device_type": "POWERCONTROL",
+            "deviceID": "POWERCONTROL_1",
+            "address": "0x08",
+            "title": "Power Controller",
+            "interval": 5,
+            "pins": [
+                {
+                    "data_type": "BOOL",
+                    "key": "POWER_AC_OK",
+                    "title": "AC Power OK",
+                    "tracking": "track.changes",
+                    "read_only": true
+                },
+                {
+                    "data_type": "INT",
+                    "key": "POWER_STATUS",
+                    "title": "Power Controller Status Byte",
+                    "tracking": "track.latest",
+                    "read_only": true
+                },
+                {
+                    "data_type": "INT",
+                    "key": "POWER_FW_VERSION",
+                    "title": "Power Controller Firmware Version",
+                    "tracking": "track.latest",
+                    "read_only": true
+                },
+                {
+                    "data_type": "INT",
+                    "key": "POWER_WAKE_TIMER_MIN",
+                    "title": "Power Controller Wake Timer Minutes",
+                    "tracking": "track.latest",
+                    "read_only": true
+                }
+            ]
+        },
+        {
             "address": "/mnt/1wire/28.B9F533000000/",
             "data_type": "TEMPERATURE",
             "description": "Plot A Soil DS2482",

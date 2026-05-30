@@ -66,3 +66,16 @@ assets/piotserver.db
 
 
 
+
+# pIoTServer local runtime/build outputs
+/logfile.txt
+/piotserver
+/piotserver.db
+
+# AVR firmware build outputs
+powercontrol/*.elf
+powercontrol/*.hex
+powercontrol/*.o
+powercontrol/*.map
+powercontrol/*.lst
+powercontrol/*.eep
