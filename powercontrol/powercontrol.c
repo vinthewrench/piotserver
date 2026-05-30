@@ -374,14 +374,14 @@ static uint8_t eeprom_load_cfg(void)
 /**
  * @brief Initialize default configuration in RAM.
  *
- * Default wake timer is one minute. This is useful for testing. Change to
- * zero for production if automatic wake after shutdown is not desired.
+ * Default wake timer is zero. Set a non-zero value only if automatic
+ * wake after shutdown is desired by default.
  */
 static void eeprom_default_cfg(void)
 {
     cfg.signature = EEPROM_SIGNATURE;
     cfg.version = EEPROM_VERSION;
-    cfg.wake_timer_min = 1;
+    cfg.wake_timer_min = 0;
     cfg.checksum = cfg_checksum(&cfg);
 }
 
@@ -454,8 +454,6 @@ static volatile uint8_t shutdown_delay_seconds = 0;
 /** @brief Previous sampled AC_OK state used for software rising-edge detection. */
 static uint8_t ac_ok_prev = 0;
 
-/** @brief Set by TWI ISR when a serious TWI error occurred. */
-static volatile bool twi_error_blink_pending = false;
 
 /**
  * @brief Deferred relay request.
@@ -774,20 +772,41 @@ static void restore_after_sleep_powerdown(void)
  * ========================================================= */
 
 /**
- * @brief Configure INT0 and INT1 for runtime edge detection.
+ * @brief Configure INT0 for runtime edge detection.
  *
  * INT0 is falling edge for the active-low wake button.
- * INT1 is rising edge for AC_OK becoming valid.
+ *
+ * INT1 / AC_OK is intentionally disabled during normal runtime.
+ * AC_OK is still sampled by polling PIND in the main loop and in the
+ * I2C status byte. INT1 is only enabled in prepare_for_sleep_powerdown()
+ * so it can wake the AVR from power-down sleep.
  */
 static void extint_config_run_edges(void)
 {
+    /*
+     * INT0: falling edge for active-low wake button.
+     */
     EXTINT_CTRL_REG |= (1 << ISC01);
     EXTINT_CTRL_REG &= ~(1 << ISC00);
 
+    /*
+     * INT1: rising edge for AC_OK becoming valid.
+     * Configure the edge, but keep INT1 masked during runtime.
+     */
     EXTINT_CTRL_REG |= (1 << ISC11) | (1 << ISC10);
 
+    /*
+     * Clear stale external interrupt flags.
+     */
     EXTINT_FLAG_REG |= (1 << INTF0) | (1 << INTF1);
-    EXTINT_MASK_REG |= (1 << INT0) | (1 << INT1);
+
+    /*
+     * Runtime interrupt mask:
+     * - INT0 enabled
+     * - INT1 disabled
+     */
+    EXTINT_MASK_REG |= (1 << INT0);
+    EXTINT_MASK_REG &= ~(1 << INT1);
 }
 
 /**
@@ -1113,7 +1132,6 @@ ISR(TWI_vect)
                 TWCR = 0;
                 _delay_us(10);
                 i2c_init();
-                twi_error_blink_pending = true;
             } else {
                 TWCR = (1 << TWINT) | (1 << TWEA) | (1 << TWEN) | (1 << TWIE);
             }
@@ -1188,14 +1206,7 @@ static void io_init(void)
  *
  * @return Never returns.
  */
-/**
- * @brief Firmware entry point.
- *
- * Initializes hardware, loads persistent configuration, services deferred
- * relay and timer updates, and manages shutdown sleep/wake behavior.
- *
- * @return Never returns.
- */
+
 int main(void)
 {
     wdt_disable();
@@ -1225,13 +1236,6 @@ int main(void)
     for (;;) {
         wdt_reset();
 
-        if (twi_error_blink_pending) {
-            uint8_t s = SREG;
-
-            cli();
-            twi_error_blink_pending = false;
-            SREG = s;
-        }
 
         {
             relay_req_t r;
