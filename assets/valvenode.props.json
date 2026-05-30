@@ -157,9 +157,12 @@
             "title": "Valve Master I2C"
         }
     ],
+    "keys.manual": [
+        "SPRK_5"
+    ],
     "prop.file.version": {
-        "file.etag": 39,
-        "last_write": 1780004014
+        "file.etag": 45,
+        "last_write": 1780007310
     },
     "sequence": [
         {

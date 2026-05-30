@@ -30,7 +30,7 @@ static uint8_t SHT2X_CalcCrc(uint8_t data[], uint8_t nbrOfBytes)
     uint8_t bit;        // bit mask
     uint8_t crc = 0; // calculated checksum
     uint8_t byteCtr;    // byte counter
-  
+
   // calculates 8-Bit checksum with given polynomial
   for(byteCtr = 0; byteCtr < nbrOfBytes; byteCtr++)
   {
@@ -41,7 +41,7 @@ static uint8_t SHT2X_CalcCrc(uint8_t data[], uint8_t nbrOfBytes)
       else           crc = (crc << 1);
     }
   }
-  
+
   return crc;
 }
 
@@ -77,31 +77,31 @@ bool SHT25::begin(uint8_t deviceAddress){
 
     return begin(deviceAddress, error);
 }
- 
+
 
 bool SHT25::begin(uint8_t deviceAddress,    int &error){
-   
+
 //    LOGT_DEBUG("SHT25(%02X) begin ",deviceAddress);
- 
+
     if(!_i2cPort.begin(deviceAddress, error))
         return  false;
-    
+
     if(!softReset())
         return  false;
- 
+
     _isSetup = true;
 
     return _isSetup;
 }
- 
+
 
 bool SHT25::softReset(){
-    
+
 //    LOGT_DEBUG("SHT25(%02x) softReset",  _i2cPort.getDevAddr());
 
     uint8_t cmd[1] = {0};
     cmd[0] = SOFT_RESET;
-   
+
     if(!_i2cPort.stdWriteBytes(1,cmd)){
         LOGT_ERROR("SHT25(%02X) WRITE failed: %s",
                    _i2cPort.getDevAddr(),  strerror(errno));
@@ -114,7 +114,7 @@ bool SHT25::softReset(){
 }
 
 void SHT25::stop(){
-    
+
     if(_isSetup){
 //        LOGT_DEBUG("SHT25(%02x) stop",  _i2cPort.getDevAddr());
 
@@ -123,7 +123,7 @@ void SHT25::stop(){
 
     }
   }
- 
+
 bool SHT25::isOpen(){
 return _i2cPort.isAvailable() && _isSetup;
 };
@@ -143,10 +143,10 @@ bool SHT25::readSerialNumber(uint8_t serialNo[8]){
   //  LOGT_DEBUG("SHT25(%02x) readSerialNumber",  _i2cPort.getDevAddr());
 
    if(!_i2cPort.isAvailable()) return false;
-   
+
    cmd[0] = 0xFA;    // CMD_READ_SERIALNBR
    cmd[1] = 0x0F;
-   
+
     if(!_i2cPort.stdWriteBytes(2,cmd)){
        LOGT_ERROR("SHT25(%02X) WRITE readSerialNumber failed: %s",
                   _i2cPort.getDevAddr(),  strerror(errno));
@@ -159,9 +159,9 @@ bool SHT25::readSerialNumber(uint8_t serialNo[8]){
        LOGT_ERROR("SHT25(%02X) Read failed: %s",
                   _i2cPort.getDevAddr(),  strerror(errno));
        return false;
-       
+
    }
-    
+
     serialNo[5] = block[0];
     serialNo[4] = block[1];
     serialNo[3] = block[2];
@@ -169,13 +169,13 @@ bool SHT25::readSerialNumber(uint8_t serialNo[8]){
 
     cmd[0] = 0xFC;    // CMD_READ_SERIALNBR
     cmd[1] = 0xC9;
-    
+
      if(!_i2cPort.stdWriteBytes(2,cmd)){
         LOGT_ERROR("SHT25(%02X) WRITE readSerialNumber failed: %s",
                    _i2cPort.getDevAddr(),  strerror(errno));
         return false;
     }
-  
+
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
     if(!_i2cPort.stdReadBytes(4,block)){
@@ -188,75 +188,99 @@ bool SHT25::readSerialNumber(uint8_t serialNo[8]){
     serialNo[0] = block[1];
     serialNo[7] = block[2];
     serialNo[6] = block[3];
- 
+
    return true;
 }
- 
+
 #define  CONCAT_BYTES(msb, lsb)             (((uint16_t)msb << 8) | (uint16_t)lsb)
- 
-bool SHT25::readSensor(SHT25_data &data){
-  
+
+bool SHT25::readSensor(SHT25_data &data)
+{
     uint8_t cmd[1] = {0};
     uint8_t block[3] = {0};
 
-//    LOGT_DEBUG("SHT25(%02x) readSensor",  _i2cPort.getDevAddr());
-    
-    if(!_i2cPort.isAvailable()) return false;
-    
-//    LOGT_DEBUG("SHT25(%02x) Read Humidity",  _i2cPort.getDevAddr());
-    
-     cmd[0] = TRIGGER_RH_MEASUREMENT_NHM;
-    
-      if(!_i2cPort.stdWriteBytes(1,cmd)){
-        LOGT_ERROR("SHT25(%02X) WRITE failed: %s",
-                   _i2cPort.getDevAddr(),  strerror(errno));
-        return false;
-    }
-    
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
- 
-     if(!_i2cPort.stdReadBytes(3,block)){
-        LOGT_ERROR("SHT25(%02X) Read failed: %s",
-                   _i2cPort.getDevAddr(),  strerror(errno));
-        return false;
-    }
-    
-    if(block[2] !=  SHT2X_CalcCrc(&block[0],2)){
-        LOGT_ERROR("SHT25(%02X) CRC Error on read: %s",
-                   _i2cPort.getDevAddr(),  strerror(errno));
-        return false;
-    }
-    
-    // Convert the data
-    //// RH= -6 + 125 * SRH/2^16
-    data.humidity = (125.0 * (block[0] * 256 + block[1]) / 65535.0);// - 6;
- 
-    cmd[0] = TRIGGER_T_MEASUREMENT_NHM;
-    
-     if(!_i2cPort.stdWriteBytes(1,cmd)){
-        LOGT_ERROR("SHT25(%02X) WRITE failed: %s",
-                   _i2cPort.getDevAddr(),  strerror(errno));
-        return false;
-    }
-    
-     std::this_thread::sleep_for(std::chrono::milliseconds(300));
- 
-    if(!_i2cPort.stdReadBytes(3,block)){
-        LOGT_ERROR("SHT25(%02X) Read failed: %s",
-                   _i2cPort.getDevAddr(),  strerror(errno));
-        return false;
-    }
- 
-    if(block[2] !=  SHT2X_CalcCrc(&block[0],2)){
-        LOGT_ERROR("SHT25(%02X) CRC Error on read: %s",
-                   _i2cPort.getDevAddr(),  strerror(errno));
+    if(!_i2cPort.isAvailable()) {
         return false;
     }
 
-    uint16_t t = CONCAT_BYTES(block[0], block[1]);
-    //T= -46.85 + 175.72 * ST/2^16
-    data.temperature = -46.85 + (175.72 * t / 65535.0);
-    
+    /*
+     * Read humidity.
+     *
+     * SHT25 / SHT2x no-hold-master humidity conversion:
+     *
+     *   RH = -6 + 125 * SRH / 2^16
+     *
+     * The low two bits of the raw word are status bits and must be cleared
+     * before conversion.
+     */
+    cmd[0] = TRIGGER_RH_MEASUREMENT_NHM;
+
+    if(!_i2cPort.stdWriteBytes(1, cmd)) {
+        LOGT_ERROR("SHT25(%02X) WRITE failed: %s",
+                   _i2cPort.getDevAddr(),
+                   strerror(errno));
+        return false;
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
+    if(!_i2cPort.stdReadBytes(3, block)) {
+        LOGT_ERROR("SHT25(%02X) Read failed: %s",
+                   _i2cPort.getDevAddr(),
+                   strerror(errno));
+        return false;
+    }
+
+    if(block[2] != SHT2X_CalcCrc(&block[0], 2)) {
+        LOGT_ERROR("SHT25(%02X) CRC Error on humidity read",
+                   _i2cPort.getDevAddr());
+        return false;
+    }
+
+    uint16_t rawHumidity = CONCAT_BYTES(block[0], block[1]);
+    rawHumidity &= ~0x0003;
+
+    data.humidity = -6.0 + (125.0 * rawHumidity / 65536.0);
+
+    /*
+     * Read temperature.
+     *
+     * SHT25 / SHT2x temperature conversion:
+     *
+     *   T = -46.85 + 175.72 * ST / 2^16
+     *
+     * The low two bits of the raw word are status bits and must be cleared
+     * before conversion.
+     */
+    cmd[0] = TRIGGER_T_MEASUREMENT_NHM;
+
+    if(!_i2cPort.stdWriteBytes(1, cmd)) {
+        LOGT_ERROR("SHT25(%02X) WRITE failed: %s",
+                   _i2cPort.getDevAddr(),
+                   strerror(errno));
+        return false;
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
+    if(!_i2cPort.stdReadBytes(3, block)) {
+        LOGT_ERROR("SHT25(%02X) Read failed: %s",
+                   _i2cPort.getDevAddr(),
+                   strerror(errno));
+        return false;
+    }
+
+    if(block[2] != SHT2X_CalcCrc(&block[0], 2)) {
+        LOGT_ERROR("SHT25(%02X) CRC Error on temperature read",
+                   _i2cPort.getDevAddr());
+        return false;
+    }
+
+    uint16_t rawTemperature = CONCAT_BYTES(block[0], block[1]);
+    rawTemperature &= ~0x0003;
+
+    data.temperature = -46.85 + (175.72 * rawTemperature / 65536.0);
+
     return true;
 }
 
@@ -266,9 +290,9 @@ bool SHT25::readSensor(SHT25_data &data){
 //
 //void SHT25::test()
 //{
-//  
+//
 //    uint8_t addr = 0x40;
-//    
+//
 //    static const char *bus = "/dev/i2c-1";
 //#define I2C_SLAVE    0x0703
 //
@@ -301,11 +325,11 @@ bool SHT25::readSensor(SHT25_data &data){
 //    {
 //        // Convert the data
 //        float humidity = (((data[0] * 256.0 + data[1]) * 125.0) / 65536.0) - 6;
-//        
+//
 //        //Output data to screen
 //        printf("\tRelative Humidity : %.2f RH \n", humidity);
 //    }
-//    
+//
 //    // Send temperature measurement command, NO HOLD master
 //    config[0] = 0xF3;
 //    write(file, config, 1);
@@ -322,12 +346,12 @@ bool SHT25::readSensor(SHT25_data &data){
 //        // Convert the data
 //        float cTemp = (((((data[0] & 0xFF) * 256) + (data[1] & 0xFF)) * 175.72) / 65536.0) - 46.85;
 //        float fTemp = (cTemp * 1.8) + 32;
-//        
+//
 //        //Output data to screen
 //        printf("\tTemperature in Celsius : %.2f C \n", cTemp);
 //        printf("\tTemperature in Fahrenheit : %.2f F \n", fTemp);
 //    }
-//    
+//
 //    printf("\n");
-//    
+//
 //}
