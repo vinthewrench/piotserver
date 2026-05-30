@@ -1,0 +1,531 @@
+{
+    "config": {
+        "access_keys": {},
+        "description": "The Raspberry Pi Irrigation System",
+        "lat_long": "34.465338, -93.362827",
+        "name": "Stella Porta Irrigation V3.0"
+    },
+    "devices": [
+        {
+            "address": "/mnt/1wire/28.B9F533000000/",
+            "data_type": "TEMPERATURE",
+            "description": "Plot A Soil DS2482",
+            "device_type": "1wire",
+            "interval": 3600,
+            "key": "PLOT1",
+            "title": "Soil Temp Plot A",
+            "tracking": "track.changes"
+        },
+        {
+            "address": "0x4F",
+            "data_type": "TEMPERATURE",
+            "device_type": "TMP10X",
+            "interval": 30,
+            "key": "GREENHOUSE",
+            "title": "GREENHOUSE Temperature",
+            "tracking": "track.range"
+        },
+        {
+            "address": "0x41",
+            "device_type": "PCA9536",
+            "enable": true,
+            "pins": [
+                {
+                    "bit": 0,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RLY41_CH1",
+                    "title": "Relay 41 CH1"
+                },
+                {
+                    "bit": 1,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RLY41_CH2",
+                    "title": "Relay 41 CH2"
+                }
+            ]
+        },
+        {
+            "address": "0x40",
+            "description": "Walk-In Cooler Environment Sensor",
+            "device_type": "SHT25",
+            "pins": [
+                {
+                    "data_type": "TEMPERATURE",
+                    "interval": 30,
+                    "key": "COOLER_TEMPERATURE",
+                    "title": "Walk-In Cooler Temperature",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "HUMIDITY",
+                    "key": "COOLER_HUMIDITY",
+                    "title": "Walk-In Cooler Humidity",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "SERIAL_NO",
+                    "key": "COOLER_SERIAL_NO",
+                    "title": "Cooler Sensor Serial No",
+                    "tracking": "dont.record"
+                }
+            ]
+        },
+        {
+            "address": "0x44",
+            "description": "Outside Environment Sensor",
+            "device_type": "SHT30",
+            "pins": [
+                {
+                    "data_type": "TEMPERATURE",
+                    "interval": 30,
+                    "key": "GARDEN_TEMPERATURE",
+                    "title": "Garden Temperature",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "HUMIDITY",
+                    "key": "GARDEN_HUMIDITY",
+                    "title": "Garden Humidity",
+                    "tracking": "track.range"
+                },
+                {
+                    "data_type": "SERIAL_NO",
+                    "key": "GARDEN_SERIAL_NO",
+                    "title": "Garden Sensor Serial No",
+                    "tracking": "dont.record"
+                }
+            ],
+            "title": "Garden"
+        },
+        {
+            "address": "0x27",
+            "description": "Garden Irrigation Plugin board",
+            "deviceID": 4001,
+            "device_type": "MCP23008",
+            "pins": [
+                {
+                    "bit": 7,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "GI_1",
+                    "title": "BLUE"
+                },
+                {
+                    "bit": 6,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "GI_2",
+                    "title": "YELLOW"
+                },
+                {
+                    "bit": 5,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "GI_3",
+                    "title": "WHITE"
+                },
+                {
+                    "bit": 4,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "GI_4",
+                    "title": "ORANGE"
+                },
+                {
+                    "bit": 3,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "GI_5",
+                    "title": "BROWN"
+                },
+                {
+                    "bit": 0,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "GI_6",
+                    "title": "GREEN"
+                },
+                {
+                    "bit": 1,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "GI_7",
+                    "title": "GREY"
+                },
+                {
+                    "bit": 2,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "GI_8",
+                    "title": "PURPLE"
+                }
+            ],
+            "title": "GI2 plugin 2.0"
+        },
+        {
+            "address": "0x09",
+            "description": "Valve Master I2C to RS-485 irrigation controller",
+            "deviceID": 4000,
+            "device_type": "VALVEMASTER",
+            "interval": 5,
+            "key": "VALVEMASTER_1",
+            "pins": [
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_1",
+                    "other.props": {
+                        "node": 1,
+                        "valve": 1
+                    },
+                    "title": "A. Chard/Kale",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_2",
+                    "other.props": {
+                        "node": 1,
+                        "valve": 2
+                    },
+                    "title": "B. Cucumbers",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_3",
+                    "other.props": {
+                        "node": 2,
+                        "valve": 1
+                    },
+                    "title": "C. Tomatoes",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_4",
+                    "other.props": {
+                        "node": 2,
+                        "valve": 2
+                    },
+                    "title": "D. Peppers",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_5",
+                    "other.props": {
+                        "node": 3,
+                        "valve": 1
+                    },
+                    "title": "E. Beans",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_6",
+                    "other.props": {
+                        "node": 3,
+                        "valve": 2
+                    },
+                    "title": "F. Squash",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_7",
+                    "other.props": {
+                        "node": 4,
+                        "valve": 1
+                    },
+                    "title": "G. Corn",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_8",
+                    "other.props": {
+                        "node": 4,
+                        "valve": 2
+                    },
+                    "title": "H. Melons",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_9",
+                    "other.props": {
+                        "node": 5,
+                        "valve": 1
+                    },
+                    "title": "I. Herbs",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_10",
+                    "other.props": {
+                        "node": 5,
+                        "valve": 2
+                    },
+                    "title": "J. Lettuce",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_11",
+                    "other.props": {
+                        "node": 6,
+                        "valve": 1
+                    },
+                    "title": "K. Carrots",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_12",
+                    "other.props": {
+                        "node": 6,
+                        "valve": 2
+                    },
+                    "title": "L. Beets",
+                    "tracking": "track.changes"
+                }
+            ],
+            "power_hold_sec": 60,
+            "title": "Valve Master I2C"
+        }
+    ],
+    "keys.manual": ["SPRK_5"],
+    "prop.file.version": {
+        "file.etag": 73,
+        "last_write": 1780135275
+    },
+    "sequence": [
+        {
+            "description": "Runs each Valve Master sprinkler zone in sequence and shuts all zones off on abort.",
+            "enable": true,
+            "name": "Garden irrigation valve sequence",
+            "on_abort": {
+                "action": [
+                    {
+                        "cmd": "DEVICE_ACTION",
+                        "key": "VALVEMASTER_1",
+                        "value": "ALL_OFF"
+                    },
+                    {
+                        "cmd": "DEVICE_ACTION",
+                        "key": "VALVEMASTER_1",
+                        "value": "POWER_OFF"
+                    }
+                ]
+            },
+            "override_manualmode": true,
+            "sequenceID": "4000",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_1",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_1",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_2",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_2",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_3",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_3",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_4",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_4",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_5",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_5",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_6",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_6",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_7",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_7",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_8",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_8",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_9",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_9",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_10",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_10",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_11",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_11",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_12",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_12",
+                            "value": "off"
+                        }
+                    ],
+                    "duration": 5
+                }
+            ],
+            "trigger": {
+                "offset": 10,
+                "timeBase": "civil sunrise"
+            }
+        }
+    ]
+}

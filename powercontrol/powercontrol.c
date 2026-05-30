@@ -555,6 +555,30 @@ static void led_blink(uint8_t pin, uint8_t count)
     led_green(green_was);
 }
 
+/**
+ * @brief Toggle red LED physical output without changing red_state.
+ *
+ * Used for transient shutdown-pending indication. This does not alter the
+ * logical LED state reported over I2C.
+ */
+static inline void led_red_physical_toggle(void)
+{
+    PORTC ^= (1 << RED_LED);
+}
+
+/**
+ * @brief Restore physical red LED output from logical red_state.
+ */
+static inline void led_red_restore(void)
+{
+    if (red_state) {
+        PORTC &= ~(1 << RED_LED);
+    } else {
+        PORTC |= (1 << RED_LED);
+    }
+}
+
+
 /* =========================================================
  * RELAY HELPERS
  * ========================================================= */
@@ -1164,6 +1188,14 @@ static void io_init(void)
  *
  * @return Never returns.
  */
+/**
+ * @brief Firmware entry point.
+ *
+ * Initializes hardware, loads persistent configuration, services deferred
+ * relay and timer updates, and manages shutdown sleep/wake behavior.
+ *
+ * @return Never returns.
+ */
 int main(void)
 {
     wdt_disable();
@@ -1235,7 +1267,22 @@ int main(void)
                    pi_shutdown_requested &&
                    shutdown_delay_seconds > 0) {
 
+                /*
+                 * Blink RED while waiting to cut power.
+                 *
+                 * This is a physical indication only. It does not modify
+                 * red_state, so the I2C status byte remains a logical status
+                 * report.
+                 *
+                 * Active-low LED:
+                 * - output LOW  = LED ON
+                 * - output HIGH = LED OFF
+                 */
                 for (uint8_t j = 0; j < 10; j++) {
+                    if ((j == 0) || (j == 5)) {
+                        led_red_physical_toggle();
+                    }
+
                     _delay_ms(100);
                     wdt_reset();
 
@@ -1250,6 +1297,13 @@ int main(void)
                     shutdown_delay_seconds--;
                 }
             }
+
+            /*
+             * Restore red LED to its logical state after the shutdown-delay
+             * blink phase. If the relay actually turns off below, the Pi will
+             * lose power shortly after this point.
+             */
+            led_red_restore();
 
             if (shutdown_delay_active &&
                 pi_shutdown_requested &&

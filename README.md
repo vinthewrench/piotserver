@@ -209,6 +209,83 @@ gpiomon --bias=pull-up GPIO24
 # when AC is unplugged, it will return 1 (rising)
 ```
 
+#### AVR power-controller shutdown helper
+
+Some controller builds use an AVR power-control board on I2C address `0x08` to remove Raspberry Pi power after Linux has shut down.
+
+The AVR command is:
+
+```bash
+i2cset -y 1 0x08 0x01
+```
+
+That command tells the AVR that the Pi is shutting down. The AVR then waits for its firmware shutdown delay, blinks the red LED during the delay, pulses the latching relay OFF, and removes power from the Pi.
+
+Do not rely on a late systemd shutdown unit for this command. By the time late shutdown services run, I2C may already be unavailable. Instead, use an explicit shutdown wrapper that sends the I2C command while Linux and I2C are still fully alive, then starts normal shutdown.
+
+Create **/usr/local/sbin/poweroff-avr**:
+
+```bash
+sudo nano /usr/local/sbin/poweroff-avr
+```
+
+Add:
+
+```bash
+#!/bin/bash
+#
+# Request delayed relay-off from the AVR power controller, then shut down Linux.
+#
+# AVR I2C address 0x08
+# Command 0x01 = delayed relay OFF / Pi shutdown requested
+
+set -u
+
+I2C_BUS=1
+I2C_ADDR=0x08
+CMD_SHUTDOWN=0x01
+
+echo "Checking AVR power controller at 0x08..."
+/usr/sbin/i2cget -y "$I2C_BUS" "$I2C_ADDR" >/dev/null || {
+    echo "ERROR: AVR power controller not responding. Aborting." >&2
+    exit 1
+}
+
+echo "Sending AVR delayed power-off command..."
+/usr/sbin/i2cset -y "$I2C_BUS" "$I2C_ADDR" "$CMD_SHUTDOWN" || {
+    echo "ERROR: failed to send AVR shutdown command. Aborting Linux shutdown." >&2
+    exit 1
+}
+
+echo "AVR command accepted. Linux poweroff starts in 3 seconds."
+sleep 3
+
+/sbin/poweroff
+```
+
+Make it executable:
+
+```bash
+sudo chmod 755 /usr/local/sbin/poweroff-avr
+```
+
+Use this command when you want the Pi to shut down and have the AVR remove power:
+
+Expected behavior:
+
+1. Pi sends shutdown request to AVR over I2C.
+2. AVR starts its shutdown delay and blinks the red LED.
+3. Linux shuts down normally.
+4. AVR pulses the relay OFF and removes Pi power.
+5. AC_OK or the wake button can later wake the AVR and restore relay power.
+
+The AVR status byte currently reports:
+0x02 = red LED logical ON
+0x04 = green LED logical ON
+0x08 = AC_OK high on PD3
+
+Relay state is intentionally not reported in the status byte. If the relay is actually OFF, the Pi is unpowered and cannot read the status anyway.
+
 #### Check daughter board FAULT signal
 
 - **FAULT** - `gpiopin=22` is connected to the daughter board FAULT signal. You can check it by grounding pin 3 of the daughter board connector or shorting a DRV103 output while it is running. The red LED will illuminate and GPIO 22 will go low.
