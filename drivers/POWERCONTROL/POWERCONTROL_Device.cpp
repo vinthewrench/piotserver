@@ -13,11 +13,10 @@
 #include <errno.h>
 #include <string.h>
 
-constexpr string_view Driver_Version = "1.0.0 dev 0";
+constexpr string_view Driver_Version = "1.0.0 dev 4";
 
 static constexpr const char* KEY_POWER_AC_OK          = "POWER_AC_OK";
-static constexpr const char* KEY_POWER_STATUS         = "POWER_STATUS";
-static constexpr const char* KEY_POWER_FW_VERSION     = "POWER_FW_VERSION";
+static constexpr const char* KEY_POWER_STATUS         = "POWER_DIAGNOSTIC_STATUS";
 static constexpr const char* KEY_POWER_WAKE_TIMER_MIN = "POWER_WAKE_TIMER_MIN";
 
 bool POWERCONTROL_Device::getVersion(string &str)
@@ -40,10 +39,19 @@ POWERCONTROL_Device::POWERCONTROL_Device(string devID, string driverName)
 
     json j = {
         { PROP_DEVICE_MFG_PART, "ATmega88PB Power Controller" },
-        { PROP_DESCRIPTION, "I2C power controller status interface." },
+        { PROP_DESCRIPTION, "Read-only I2C power controller status interface, one-byte protocol." },
         { PROP_OTHER, {
-            { "status_register", "0xF0" },
-            { "i2c_default_address", "0x08" }
+            { "i2c_default_address", "0x08" },
+            { "protocol", "one-byte bare read status" },
+            { "status_read", "i2ctransfer -y 1 r1@0x08" },
+            { "register_pointer_reads", "disabled" },
+            { "repeated_start_reads", "disabled" },
+            { "multi_byte_operations", "disabled" },
+            { "wake_timer_source", "decoded from status byte bits 4-6" },
+            { "relay_control", "disabled" },
+            { "shutdown_control", "disabled" },
+            { "wake_timer_control", "disabled" },
+            { "led_control", "disabled" }
         }}
     };
 
@@ -71,11 +79,6 @@ bool POWERCONTROL_Device::initWithSchema(deviceSchemaMap_t deviceSchema)
         }
         else if(key == KEY_POWER_STATUS) {
             _resultKey_status = key;
-            if(entry.queryDelay < delay) delay = entry.queryDelay;
-            _isSetup = true;
-        }
-        else if(key == KEY_POWER_FW_VERSION) {
-            _resultKey_fwVersion = key;
             if(entry.queryDelay < delay) delay = entry.queryDelay;
             _isSetup = true;
         }
@@ -125,33 +128,32 @@ bool POWERCONTROL_Device::start()
         LOGT_ERROR("POWERCONTROL_Device(%02X) begin FAILED: %s",
                    i2cAddr,
                    strerror(errno));
+
         _state = INS_INVALID;
         _deviceState = DEVICE_STATE_ERROR;
         return false;
     }
 
-    POWERCONTROL::POWERCONTROL_data data = {};
+    /*
+     * Do not perform an immediate I2C status read here.
+     *
+     * Startup is the worst time to add extra bus traffic. The manager is
+     * starting all configured I2C devices, and VALVEMASTER may also start its
+     * action thread. The first POWERCONTROL status read should happen later,
+     * after the configured query interval has elapsed.
+     *
+     * This plugin is read-only during normal operation. It must never send
+     * shutdown, cancel, wake preset, LED, relay, reset, sleep, or all-off
+     * commands to the AVR from start().
+     */
+    gettimeofday(&_lastQueryTime, NULL);
 
-    status = _device.readStatus(data);
-    if(!status) {
-        LOGT_ERROR("POWERCONTROL_Device(%02X) readStatus FAILED: %s",
-                   i2cAddr,
-                   strerror(errno));
-        _state = INS_INVALID;
-        _deviceState = DEVICE_STATE_ERROR;
-        return false;
-    }
-
-    LOGT_INFO("POWERCONTROL_Device(%02X) fw=0x%02X status=0x%02X wake_timer=%u ac_ok=%s",
-              i2cAddr,
-              data.firmwareVersion,
-              data.statusByte,
-              data.wakeTimerMin,
-              data.acOK ? "true" : "false");
-
-    _lastQueryTime = {0,0};
     _state = INS_IDLE;
     _deviceState = DEVICE_STATE_CONNECTED;
+
+    LOGT_INFO("POWERCONTROL_Device(%02X) started read-only, first poll in %llu second(s)",
+              i2cAddr,
+              static_cast<unsigned long long>(_queryDelay));
 
     return true;
 }
@@ -163,6 +165,12 @@ void POWERCONTROL_Device::stop()
     _state = INS_UNKNOWN;
     _lastQueryTime = {0,0};
 
+    /*
+     * stop() only releases the local I2C object.
+     *
+     * It must not write anything to the AVR. Manager shutdown, sequence abort,
+     * generic cleanup, and plugin unload are not permission to cut Pi power.
+     */
     if(_device.isOpen()) {
         _device.stop();
     }
@@ -197,64 +205,100 @@ bool POWERCONTROL_Device::isConnected()
     return _device.isOpen();
 }
 
+bool POWERCONTROL_Device::allOff()
+{
+    /*
+     * POWERCONTROL is read-only from this device wrapper.
+     *
+     * allOff() must be a no-op. The AVR power controller must never interpret
+     * manager shutdown, sequence abort, global cleanup, or generic allOff()
+     * behavior as permission to turn off the Pi power relay.
+     */
+    return true;
+}
+
 bool POWERCONTROL_Device::getValues(keyValueMap_t &results)
 {
     bool hasData = false;
+
+    if(!isEnabled()) {
+        return false;
+    }
 
     if(!isConnected()) {
         return false;
     }
 
-    if(_state == INS_IDLE) {
+    if(_state != INS_IDLE) {
+        return false;
+    }
 
-        bool shouldQuery = false;
+    bool shouldQuery = false;
 
-        if(_lastQueryTime.tv_sec == 0 && _lastQueryTime.tv_usec == 0) {
+    if(_lastQueryTime.tv_sec == 0 && _lastQueryTime.tv_usec == 0) {
+        shouldQuery = true;
+    }
+    else {
+        timeval now, diff;
+        gettimeofday(&now, NULL);
+        timersub(&now, &_lastQueryTime, &diff);
+
+        if(diff.tv_sec >= 0 && static_cast<uint64_t>(diff.tv_sec) >= _queryDelay) {
             shouldQuery = true;
         }
-        else {
-            timeval now, diff;
-            gettimeofday(&now, NULL);
-            timersub(&now, &_lastQueryTime, &diff);
+    }
 
-            if(diff.tv_sec >= 0 && static_cast<uint64_t>(diff.tv_sec) >= _queryDelay) {
-                shouldQuery = true;
-            }
+    if(!shouldQuery) {
+        return false;
+    }
+
+    /*
+     * Update query time before touching I2C.
+     *
+     * If the bus is unhappy, this prevents POWERCONTROL from retrying every
+     * manager loop and making a bad bus situation worse.
+     */
+    gettimeofday(&_lastQueryTime, NULL);
+
+    POWERCONTROL::POWERCONTROL_data data = {};
+
+    if(_device.readStatus(data)) {
+
+        if(!_resultKey_acOK.empty()) {
+            results[_resultKey_acOK] = data.acOK ? "true" : "false";
         }
 
-        if(shouldQuery) {
-            POWERCONTROL::POWERCONTROL_data data = {};
-
-            if(_device.readStatus(data)) {
-
-                if(!_resultKey_acOK.empty()) {
-                    results[_resultKey_acOK] = data.acOK ? "true" : "false";
-                }
-
-                if(!_resultKey_status.empty()) {
-                    results[_resultKey_status] = to_string(data.statusByte);
-                }
-
-                if(!_resultKey_fwVersion.empty()) {
-                    results[_resultKey_fwVersion] = to_string(data.firmwareVersion);
-                }
-
-                if(!_resultKey_wakeTimerMin.empty()) {
-                    results[_resultKey_wakeTimerMin] = to_string(data.wakeTimerMin);
-                }
-
-                gettimeofday(&_lastQueryTime, NULL);
-                hasData = true;
-            }
-            else {
-                LOGT_ERROR("POWERCONTROL_Device(%02X) readStatus FAILED",
-                           _device.getDevAddr());
-
-                _state = INS_INVALID;
-                _deviceState = DEVICE_STATE_ERROR;
-                _device.stop();
-            }
+        if(!_resultKey_status.empty()) {
+            results[_resultKey_status] = to_string(data.statusByte);
         }
+
+        /*
+         * This is the stored wake preset decoded from the status byte.
+         * It is not a live countdown.
+         */
+        if(!_resultKey_wakeTimerMin.empty()) {
+            results[_resultKey_wakeTimerMin] = to_string(data.wakeTimerMin);
+        }
+
+        _state = INS_IDLE;
+        _deviceState = DEVICE_STATE_CONNECTED;
+        hasData = true;
+    }
+    else {
+        LOGT_ERROR("POWERCONTROL_Device(%02X) readStatus FAILED",
+                   _device.getDevAddr());
+
+        /*
+         * A single I2C miss on a shared bus should not poison the device.
+         *
+         * Do not stop the low-level I2C object here.
+         * Do not mark the device invalid.
+         * Do not send any recovery command to the AVR.
+         *
+         * Just report disconnected for this sample and try again after the next
+         * configured interval.
+         */
+        _deviceState = DEVICE_STATE_DISCONNECTED;
     }
 
     return hasData;
@@ -264,6 +308,12 @@ bool POWERCONTROL_Device::setValues(keyValueMap_t kv)
 {
     (void)kv;
 
+    /*
+     * Read-only driver.
+     *
+     * Do not add relay, sleep, shutdown, reset, wake timer, LED, or power-off
+     * writes through setValues().
+     */
     LOGT_ERROR("POWERCONTROL_Device setValues rejected: device is read-only");
     return false;
 }

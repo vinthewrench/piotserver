@@ -7,41 +7,35 @@
     },
     "devices": [
         {
-            "device_type": "POWERCONTROL",
-            "deviceID": "POWERCONTROL_1",
             "address": "0x08",
-            "title": "Power Controller",
-            "interval": 5,
+            "deviceID": "POWERCONTROL_1",
+            "device_type": "POWERCONTROL",
+            "enable": true,
+            "interval": 30,
             "pins": [
                 {
                     "data_type": "BOOL",
                     "key": "POWER_AC_OK",
+                    "read_only": true,
                     "title": "AC Power OK",
-                    "tracking": "track.changes",
-                    "read_only": true
+                    "tracking": "track.changes"
                 },
                 {
                     "data_type": "INT",
-                    "key": "POWER_STATUS",
-                    "title": "Power Controller Status Byte",
-                    "tracking": "track.latest",
-                    "read_only": true
-                },
-                {
-                    "data_type": "INT",
-                    "key": "POWER_FW_VERSION",
-                    "title": "Power Controller Firmware Version",
-                    "tracking": "track.latest",
-                    "read_only": true
+                    "key": "POWER_DIAGNOSTIC_STATUS",
+                    "read_only": true,
+                    "title": "Power Controller Diagnostic Status",
+                    "tracking": "dont.record"
                 },
                 {
                     "data_type": "INT",
                     "key": "POWER_WAKE_TIMER_MIN",
+                    "read_only": true,
                     "title": "Power Controller Wake Timer Minutes",
-                    "tracking": "track.latest",
-                    "read_only": true
+                    "tracking": "dont.record"
                 }
-            ]
+            ],
+            "title": "Power Controller"
         },
         {
             "address": "/mnt/1wire/28.B9F533000000/",
@@ -346,6 +340,11 @@
             "title": "Valve Master I2C"
         }
     ],
+    "keys.manual": [],
+    "prop.file.version": {
+        "file.etag": 14,
+        "last_write": 1780263950
+    },
     "sequence": [
         {
             "description": "Runs each Valve Master sprinkler zone in sequence and shuts all zones off on abort.",
