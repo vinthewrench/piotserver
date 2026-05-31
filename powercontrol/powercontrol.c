@@ -2,6 +2,8 @@
  * @file powercontrol.c
  * @brief Power Controller Firmware for ATmega88PB.
  *
+ * Firmware version: 26
+ *
  * This firmware controls a dual-coil latching power relay, active-low
  * red/green status LEDs, low-power sleep/wake behavior, and an I2C slave
  * command/status interface.
@@ -48,12 +50,22 @@
  *
  *   bit 1 / 0x02 = red LED logical state, 1 = ON
  *   bit 2 / 0x04 = green LED logical state, 1 = ON
- *   bit 3 / 0x08 = AC_OK input, raw PD3 high = 1
+ *   bit 3 / 0x08 = AC_OK logical state, 1 = AC OK
+ *                  raw PD3 low = AC OK, raw PD3 high = AC not OK
+ *   bits 4-6 / 0x70 = stored wake preset:
+ *       0x00 = wake timer clear / disabled
+ *       0x10 = wake after 1 minute
+ *       0x20 = wake after 5 minutes
+ *       0x30 = wake after 15 minutes
+ *       0x40 = wake after 60 minutes
+ *       0x50 = wake after 8 hours
+ *       0x60 = wake after 24 hours
  *
  * Relay state is intentionally omitted.
  *
- * The I2C read ISR returns a cached status byte. The cache is updated when
- * LED logical state changes and when main-line code samples AC_OK.
+ * The I2C read ISR returns a cached status byte. The cache is refreshed
+ * whenever firmware-visible status may have changed: LED logical state,
+ * logical AC_OK reporting, or committed wake timer preset.
  *
  * ============================================================
  * I2C PROTOCOL
@@ -81,7 +93,19 @@
  * There is no register pointer.
  * There is no repeated-start read model.
  * There is no STOP-based parser commit.
- * There is no I2C wake-timer write path in this protocol.
+ *
+ * Wake timer presets are also one-byte commands:
+ *
+ *   '0' / 0x30 = clear wake timer
+ *   '1' / 0x31 = wake after 1 minute
+ *   '5' / 0x35 = wake after 5 minutes
+ *   'F' / 0x46 = wake after 15 minutes
+ *   'H' / 0x48 = wake after 60 minutes
+ *   '8' / 0x38 = wake after 8 hours
+ *   'D' / 0x44 = wake after 24 hours
+ *
+ * Wake preset commands are latched in the TWI ISR and saved to EEPROM later
+ * from main-line code. The status byte reports the committed stored preset.
  *
  * ============================================================
  * TEST COMMANDS
@@ -103,6 +127,35 @@
  *   i2ctransfer -y 1 w1@0x08 0x53   # 'S', shutdown request
  *   i2ctransfer -y 1 w1@0x08 0x43   # 'C', cancel shutdown
  *
+ * Wake timer presets:
+ *
+ *   i2ctransfer -y 1 w1@0x08 0x30   # '0', clear wake timer
+ *   i2ctransfer -y 1 w1@0x08 0x31   # '1', wake after 1 minute
+ *   i2ctransfer -y 1 w1@0x08 0x35   # '5', wake after 5 minutes
+ *   i2ctransfer -y 1 w1@0x08 0x46   # 'F', wake after 15 minutes
+ *   i2ctransfer -y 1 w1@0x08 0x48   # 'H', wake after 60 minutes
+ *   i2ctransfer -y 1 w1@0x08 0x38   # '8', wake after 8 hours
+ *   i2ctransfer -y 1 w1@0x08 0x44   # 'D', wake after 24 hours
+ *
+ * Example status values with AC_OK logical OK, raw PD3 low, and LEDs off:
+ *
+ *   0x08 = wake timer clear
+ *   0x18 = wake after 1 minute
+ *   0x28 = wake after 5 minutes
+ *   0x38 = wake after 15 minutes
+ *   0x48 = wake after 60 minutes
+ *   0x58 = wake after 8 hours
+ *   0x68 = wake after 24 hours
+ *
+ * Example status values with AC not OK, raw PD3 high, and LEDs off:
+ *
+ *   0x00 = wake timer clear
+ *   0x10 = wake after 1 minute
+ *   0x20 = wake after 5 minutes
+ *   0x30 = wake after 15 minutes
+ *   0x40 = wake after 60 minutes
+ *   0x50 = wake after 8 hours
+ *   0x60 = wake after 24 hours *
  * ============================================================
  * BUILD & FLASH
  * ============================================================
@@ -166,6 +219,12 @@ static void enter_sleep_powerdown(void);
 static void restore_after_sleep_powerdown(void);
 
 /* =========================================================
+ * VERSION
+ * ========================================================= */
+
+#define POWERCONTROL_FW_VERSION 26
+
+/* =========================================================
  * CLOCK CONFIGURATION
  * ========================================================= */
 
@@ -218,6 +277,31 @@ static void restore_after_sleep_powerdown(void);
 #define CMD_RED_OFF           'r'
 #define CMD_GREEN_ON          'G'
 #define CMD_GREEN_OFF         'g'
+
+#define CMD_WAKE_CLEAR        '0'
+#define CMD_WAKE_1_MIN        '1'
+#define CMD_WAKE_5_MIN        '5'
+#define CMD_WAKE_15_MIN       'F'
+#define CMD_WAKE_60_MIN       'H'
+#define CMD_WAKE_8_HOURS      '8'
+#define CMD_WAKE_24_HOURS     'D'
+
+/* =========================================================
+ * STATUS BYTE BIT DEFINITIONS
+ * ========================================================= */
+
+#define STATUS_RED_ON         0x02
+#define STATUS_GREEN_ON       0x04
+#define STATUS_AC_OK          0x08
+
+#define STATUS_WAKE_MASK      0x70
+#define STATUS_WAKE_CLEAR     0x00
+#define STATUS_WAKE_1_MIN     0x10
+#define STATUS_WAKE_5_MIN     0x20
+#define STATUS_WAKE_15_MIN    0x30
+#define STATUS_WAKE_60_MIN    0x40
+#define STATUS_WAKE_8_HOURS   0x50
+#define STATUS_WAKE_24_HOURS  0x60
 
 /* =========================================================
  * EEPROM CONFIGURATION
@@ -317,6 +401,9 @@ static uint8_t ac_ok_prev = 0;
 static volatile uint8_t i2c_status_cache = 0;
 static volatile bool i2c_reinit_pending = false;
 
+static volatile bool wake_timer_save_pending = false;
+static volatile uint16_t pending_wake_timer_min = 0;
+
 typedef enum {
     RELAY_REQ_NONE = 0,
     RELAY_REQ_ON,
@@ -324,6 +411,39 @@ typedef enum {
 } relay_req_t;
 
 static volatile relay_req_t relay_req = RELAY_REQ_NONE;
+
+/* =========================================================
+ * WAKE PRESET HELPERS
+ * ========================================================= */
+
+static uint8_t wake_minutes_to_status_bits(uint16_t minutes)
+{
+    switch (minutes) {
+        case 0:
+            return STATUS_WAKE_CLEAR;
+
+        case 1:
+            return STATUS_WAKE_1_MIN;
+
+        case 5:
+            return STATUS_WAKE_5_MIN;
+
+        case 15:
+            return STATUS_WAKE_15_MIN;
+
+        case 60:
+            return STATUS_WAKE_60_MIN;
+
+        case 8 * 60:
+            return STATUS_WAKE_8_HOURS;
+
+        case 24 * 60:
+            return STATUS_WAKE_24_HOURS;
+
+        default:
+            return STATUS_WAKE_CLEAR;
+    }
+}
 
 /* =========================================================
  * STATUS CACHE
@@ -334,16 +454,27 @@ static inline void update_status_cache(void)
     uint8_t s = 0;
 
     if (red_state) {
-        s |= 0x02;
+        s |= STATUS_RED_ON;
     }
 
     if (green_state) {
-        s |= 0x04;
+        s |= STATUS_GREEN_ON;
     }
 
-    if (PIND & (1 << INT1_PIN)) {
-        s |= 0x08;
+    /*
+     * AC_OK is active-low.
+     *
+     * Raw PD3 low  = AC_OK
+     * Raw PD3 high = AC not OK / fail
+     *
+     * Reported status bit is logical:
+     * STATUS_AC_OK set means AC is OK.
+     */
+    if (!(PIND & (1 << INT1_PIN))) {
+        s |= STATUS_AC_OK;
     }
+
+    s |= wake_minutes_to_status_bits(cfg.wake_timer_min);
 
     i2c_status_cache = s;
 }
@@ -689,11 +820,24 @@ static inline void twi_arm_ack(void)
 }
 
 /*
+ * Request a persistent wake-timer update.
+ *
+ * This may be called from the TWI ISR. It only latches the requested value.
+ * The actual EEPROM write is done later from main-line code.
+ */
+static inline void request_wake_timer_save(uint16_t minutes)
+{
+    pending_wake_timer_min = minutes;
+    wake_timer_save_pending = true;
+}
+
+/*
  * This function is intentionally ISR-safe.
  *
  * It may:
  * - update LED output latches
  * - update simple policy flags
+ * - latch wake preset save requests
  *
  * It must not:
  * - pulse relay coils
@@ -734,6 +878,34 @@ static inline void process_command_byte(uint8_t cmd)
 
         case CMD_GREEN_OFF:
             led_green(false);
+            break;
+
+        case CMD_WAKE_CLEAR:
+            request_wake_timer_save(0);
+            break;
+
+        case CMD_WAKE_1_MIN:
+            request_wake_timer_save(1);
+            break;
+
+        case CMD_WAKE_5_MIN:
+            request_wake_timer_save(5);
+            break;
+
+        case CMD_WAKE_15_MIN:
+            request_wake_timer_save(15);
+            break;
+
+        case CMD_WAKE_60_MIN:
+            request_wake_timer_save(60);
+            break;
+
+        case CMD_WAKE_8_HOURS:
+            request_wake_timer_save(8 * 60);
+            break;
+
+        case CMD_WAKE_24_HOURS:
+            request_wake_timer_save(24 * 60);
             break;
 
         default:
@@ -883,6 +1055,17 @@ static void io_init(void)
     PORTB &= ~((1 << PB0) | (1 << PB1) | (1 << PB2) |
                (1 << PB6) | (1 << PB7));
 
+    /*
+     * Existing tested behavior leaves this as-is.
+     *
+     * NOTE:
+     * On ATmega88PB, PC4/PC5 are SDA/SCL. DIDR0 = 0x3F disables digital
+     * input buffers on ADC0..ADC5, which includes PC4/PC5. The current
+     * hardware/firmware has tested successfully this way, so do not change
+     * this in the same revision as the wake-preset protocol cleanup.
+     *
+     * A later isolated test may change this to DIDR0 = 0x00.
+     */
     DIDR0 = 0x3F;
     DIDR1 |= (1 << AIN0D) | (1 << AIN1D);
 
@@ -926,6 +1109,26 @@ int main(void)
 
     for (;;) {
         wdt_reset();
+
+        /*
+         * Apply deferred wake-timer EEPROM updates.
+         *
+         * Wake-timer preset commands are received in the TWI ISR, but
+         * EEPROM writes must stay in main-line code.
+         */
+        if (wake_timer_save_pending) {
+            uint16_t t;
+            uint8_t s = SREG;
+
+            cli();
+            t = pending_wake_timer_min;
+            wake_timer_save_pending = false;
+            SREG = s;
+
+            cfg.wake_timer_min = t;
+            eeprom_save_cfg();
+            update_status_cache();
+        }
 
         /*
          * Keep TWI recovery outside ISR context.
@@ -1007,8 +1210,11 @@ int main(void)
         }
 
         /*
-         * Shutdown sleep: relay is now off, Pi is unpowered.
-         * Enter power-down sleep and wake on button, timer, or AC_OK.
+         * Shutdown sleep:
+         *
+         * relay_state becomes 0 only after the RESET coil has been pulsed.
+         * Therefore reload_wake_timer() starts the watchdog wake countdown
+         * after relay power has already been cut.
          */
         if (pi_shutdown_requested && !relay_state) {
             wdt_stop();
