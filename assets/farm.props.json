@@ -57,27 +57,6 @@
             "tracking": "track.range"
         },
         {
-            "address": "0x41",
-            "device_type": "PCA9536",
-            "enable": true,
-            "pins": [
-                {
-                    "bit": 0,
-                    "data_type": "BOOL",
-                    "gpio.mode": "output",
-                    "key": "RLY41_CH1",
-                    "title": "Relay 41 CH1"
-                },
-                {
-                    "bit": 1,
-                    "data_type": "BOOL",
-                    "gpio.mode": "output",
-                    "key": "RLY41_CH2",
-                    "title": "Relay 41 CH2"
-                }
-            ]
-        },
-        {
             "address": "0x40",
             "description": "Walk-In Cooler Environment Sensor",
             "device_type": "SHT25",
@@ -340,10 +319,10 @@
             "title": "Valve Master I2C"
         }
     ],
-    "keys.manual": [],
+    "keys.manual": ["SPRK_5"],
     "prop.file.version": {
-        "file.etag": 14,
-        "last_write": 1780263950
+        "file.etag": 32,
+        "last_write": 1780339735
     },
     "sequence": [
         {
@@ -558,5 +537,39 @@
                 "timeBase": "civil sunrise"
             }
         }
-    ]
+    ],
+    "ui.groups": {
+        "garden_irrigation": {
+            "control": "valve",
+            "label": "Garden Irrigation",
+            "members": [
+                "GI_1",
+                "GI_2",
+                "GI_3",
+                "GI_4",
+                "GI_5",
+                "GI_6",
+                "GI_7",
+                "GI_8"
+            ]
+        },
+        "sprinklers": {
+            "control": "valve",
+            "label": "Sprinklers",
+            "members": [
+                "SPRK_1",
+                "SPRK_2",
+                "SPRK_3",
+                "SPRK_4",
+                "SPRK_5",
+                "SPRK_6",
+                "SPRK_7",
+                "SPRK_8",
+                "SPRK_9",
+                "SPRK_10",
+                "SPRK_11",
+                "SPRK_12"
+            ]
+        }
+    }
 }
