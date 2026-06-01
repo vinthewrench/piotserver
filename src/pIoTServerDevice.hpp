@@ -118,7 +118,16 @@ public:
 
     virtual bool allOff()
     {
-        return false;
+        /*
+         * Default device behavior.
+         *
+         * Most devices are read-only sensors or passive devices and have no outputs
+         * to turn off. For those devices, allOff() is a successful no-op.
+         *
+         * Output-capable devices should override this method and return false only
+         * when they actually fail to enter a safe/off state.
+         */
+        return true;
     }
 
     virtual bool deviceAction([[maybe_unused]] string cmd)  {

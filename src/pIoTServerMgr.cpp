@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <csignal>
 
 #include <dlfcn.h>
 
@@ -409,21 +410,6 @@ bool pIoTServerMgrDevice::getFanState(uint8_t  &state) {
 
 pIoTServerMgr *pIoTServerMgr::_sharedInstance = NULL;
 
-static void sigHandler (int signum) {
-    (void)signum;
-
-    static uint8_t killing = 0;
-
-    // avoid double kill
-    if(!killing){
-        killing++;
-        auto piMgr = pIoTServerMgr::shared();
-        piMgr->stop();
-    }
-
-    exit(EXIT_SUCCESS);
-}
-
 
 #if defined(__APPLE__)
 // used for cross compile on osx
@@ -514,13 +500,6 @@ bool pIoTServerMgr::findDriverPlugins(stringvector &paths){
 
 pIoTServerMgr::pIoTServerMgr(){
 
-    //pIoTServerMgr::pIoTServerMgr(){ : _tankSensor(){
-    //
-    //    signal(SIGHUP, sigHandler);
-    signal(SIGQUIT, sigHandler);
-    signal(SIGTERM, sigHandler);
-    signal(SIGINT, sigHandler);
-
     // create RNG engine
     constexpr std::size_t SEED_LENGTH = 8;
     std::array<uint_fast32_t, SEED_LENGTH> random_data;
@@ -568,21 +547,22 @@ void pIoTServerMgr::setPropFileName(string name){
 }
 
 
-pIoTServerMgr::~pIoTServerMgr(){
-
-    if(_running)
+pIoTServerMgr::~pIoTServerMgr()
+{
+    if(_running) {
         stop();
+    }
 
     {
         std::lock_guard<std::mutex> lock(_deviceMutex);
 
-        for( auto &e: _devices){
-            e.device->stop();
-            delete(e.device);
+        for(auto &e : _devices) {
+            delete e.device;
+            e.device = nullptr;
         }
+
         _devices.clear();
     }
-
 }
 
 
@@ -692,30 +672,50 @@ void pIoTServerMgr::setupDeviceNotifications(){
 }
 
 
-void pIoTServerMgr::stop(){
-
-    if(!_running)
+void pIoTServerMgr::stop()
+{
+    if(!_running) {
         return;
+    }
 
-    LOGT_DEBUG("Stop pIoTServerMgr");
+    LOGT_INFO("Stop pIoTServerMgr");
 
-    _db.logAlert(ALERT_SHUTDOWN );
+    _db.logAlert(ALERT_SHUTDOWN);
 
-    runSequenceForAppEvent(EventTrigger::APP_EVENT_SHUTDOWN, [=, this](bool) {
-        LOGT_DEBUG("Completed Shutdown events");
+    /*
+     * Stop the background thread first.
+     *
+     * This prevents polling and timed events from racing against shutdown
+     * sequences and device cleanup.
+     */
+    _shouldReconcileEvents = false;
+    _running = false;
 
-        _shouldReconcileEvents = false;
-        stopDevices();
-
-        _running = false;
-        // wait for server thread to complete
-        while(!_thread.joinable()){
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
+    if(_thread.joinable()) {
         _thread.join();
-    });
-}
+    }
 
+    /*
+     * Run shutdown app-event actions after the worker thread has stopped.
+     */
+    runSequenceForAppEvent(EventTrigger::APP_EVENT_SHUTDOWN, [](bool didSucceed) {
+        if(didSucceed) {
+            LOGT_DEBUG("Completed Shutdown events");
+        }
+        else {
+            LOGT_ERROR("Shutdown events failed");
+        }
+    });
+
+    /*
+     * Always stop devices after shutdown events.
+     */
+    if(!stopDevices()) {
+        LOGT_ERROR("One or more devices failed during shutdown");
+    }
+
+    LOGT_INFO("pIoTServerMgr stopped");
+}
 
 
 
@@ -1431,20 +1431,70 @@ bool pIoTServerMgr:: setValues(keyValueMap_t kv){
     return success;
 }
 
-bool pIoTServerMgr::stopDevices(){
-    bool success = false;
+bool pIoTServerMgr::stopDevices()
+{
+    bool success = true;
+    std::vector<pIoTServerDevice*> devices;
 
+    /*
+     * Copy device pointers while holding the mutex, then release it before
+     * calling device code. Device shutdown may block on hardware, log, or call
+     * back into manager paths. Holding _deviceMutex across that is a deadlock
+     * trap.
+     */
     {
         std::lock_guard<std::mutex> lock(_deviceMutex);
 
-        for( auto &e: _devices){
-
-            e.device->allOff();
-            e.device->stop();
+        for(auto &e : _devices) {
+            if(e.device != nullptr) {
+                devices.push_back(e.device);
+            }
         }
     }
+
+    /*
+     * Stop in reverse creation order.
+     */
+    for(auto it = devices.rbegin(); it != devices.rend(); ++it) {
+        pIoTServerDevice* device = *it;
+
+        try {
+            if(!device->allOff()) {
+                LOGT_ERROR("Device allOff failed during shutdown");
+                success = false;
+            }
+        }
+        catch(const std::exception& e) {
+            LOGT_ERROR("Device allOff threw during shutdown: %s", e.what());
+            success = false;
+        }
+        catch(...) {
+            LOGT_ERROR("Device allOff threw unknown exception during shutdown");
+            success = false;
+        }
+
+        /*
+         * Always call stop(), even if allOff() failed.
+         *
+         * This matters for VALVEMASTER. CLOSE_ALL/allOff may fail, but stop()
+         * must still force field power off.
+         */
+        try {
+            device->stop();
+        }
+        catch(const std::exception& e) {
+            LOGT_ERROR("Device stop threw during shutdown: %s", e.what());
+            success = false;
+        }
+        catch(...) {
+            LOGT_ERROR("Device stop threw unknown exception during shutdown");
+            success = false;
+        }
+    }
+
     return success;
 }
+
 
 //MARK: -  background event / device thread
 
