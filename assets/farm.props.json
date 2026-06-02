@@ -7,6 +7,27 @@
     },
     "devices": [
         {
+            "address": "0x41",
+            "device_type": "PCA9536",
+            "enable": true,
+            "pins": [
+                {
+                    "bit": 0,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RLY41_CH1",
+                    "title": "Greenhouse Light"
+                },
+                {
+                    "bit": 1,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RLY41_CH2",
+                    "title": "Floodlight"
+                }
+            ]
+        },
+        {
             "address": "0x08",
             "deviceID": "POWERCONTROL_1",
             "device_type": "POWERCONTROL",
@@ -319,10 +340,24 @@
             "title": "Valve Master I2C"
         }
     ],
-    "keys.manual": ["SPRK_5"],
+    "keys.manual": [
+        "RLY41_CH2",
+        "SPRK_1",
+        "SPRK_10",
+        "SPRK_11",
+        "SPRK_12",
+        "SPRK_2",
+        "SPRK_3",
+        "SPRK_4",
+        "SPRK_5",
+        "SPRK_6",
+        "SPRK_7",
+        "SPRK_8",
+        "SPRK_9"
+    ],
     "prop.file.version": {
-        "file.etag": 32,
-        "last_write": 1780339735
+        "file.etag": 173,
+        "last_write": 1780433465
     },
     "sequence": [
         {
@@ -536,9 +571,51 @@
                 "offset": 10,
                 "timeBase": "civil sunrise"
             }
+        },
+        {
+            "description": "Turn relay light on at sunset.",
+            "enable": true,
+            "name": "Lights on at sunset",
+            "override_manualmode": false,
+            "sequenceID": "4100",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RLY41_CH2",
+                            "value": "on"
+                        }
+                    ]
+                }
+            ],
+            "trigger": {
+                "timeBase": "sunset"
+            }
+        },
+        {
+            "description": "Turn relay light off at sunrise.",
+            "enable": true,
+            "name": "Lights off at sunrise",
+            "override_manualmode": false,
+            "sequenceID": "4101",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RLY41_CH2",
+                            "value": "off"
+                        }
+                    ]
+                }
+            ],
+            "trigger": {
+                "timeBase": "sunrise"
+            }
         }
     ],
-    "ui.groups": {
+    "ui.controls": {
         "garden_irrigation": {
             "control": "valve",
             "label": "Garden Irrigation",
@@ -551,6 +628,19 @@
                 "GI_6",
                 "GI_7",
                 "GI_8"
+            ]
+        },
+        "relays": {
+            "control": "switch",
+            "label": "Lights",
+            "members": [
+                {
+                    "key": "RLY41_CH1",
+                    "onIcon": "💡"
+                },
+                {
+                    "key": "RLY41_CH2"
+                }
             ]
         },
         "sprinklers": {
@@ -571,5 +661,109 @@
                 "SPRK_12"
             ]
         }
-    }
+    },
+    "ui.schedules": {
+        "garden_irrigation": {
+            "description": "Automatic sprinkler sequence",
+            "label": "Garden Irrigation",
+            "members": ["4000"]
+        },
+        "lights": {
+            "description": "Outdoor light schedule",
+            "label": "Lights",
+            "members": ["4100", "4101"]
+        }
+    },
+    "ui.sensors": {
+        "cooler": {
+            "description": "Walk-in cooler environment",
+            "label": "Cooler",
+            "members": [
+                {
+                    "key": "COOLER_TEMPERATURE",
+                    "kind": "temperature",
+                    "label": "Temperature",
+                    "range": {
+                        "max": 100,
+                        "min": 20
+                    }
+                },
+                {
+                    "key": "COOLER_HUMIDITY",
+                    "kind": "humidity",
+                    "label": "Humidity",
+                    "range": {
+                        "max": 100,
+                        "min": 0
+                    }
+                }
+            ]
+        },
+        "garden": {
+            "description": "Outside environment and soil conditions",
+            "label": "Garden",
+            "members": [
+                {
+                    "key": "GARDEN_TEMPERATURE",
+                    "kind": "temperature",
+                    "label": "Air Temperature",
+                    "range": {
+                        "max": 120,
+                        "min": 0
+                    }
+                },
+                {
+                    "key": "GARDEN_HUMIDITY",
+                    "kind": "humidity",
+                    "label": "Humidity",
+                    "range": {
+                        "max": 100,
+                        "min": 0
+                    }
+                },
+                {
+                    "key": "PLOT1",
+                    "kind": "temperature",
+                    "label": "Soil Temperature",
+                    "range": {
+                        "max": 120,
+                        "min": 0
+                    }
+                },
+                {
+                    "falseIcon": "☀️",
+                    "falseLabel": "No Rain",
+                    "key": "RAIN_SENSOR",
+                    "kind": "binary",
+                    "label": "Rain",
+                    "trueIcon": "🌧️",
+                    "trueLabel": "Rain"
+                }
+            ]
+        },
+        "greenhouse": {
+            "description": "Greenhouse temperature",
+            "label": "Greenhouse",
+            "members": [
+                {
+                    "key": "GREENHOUSE",
+                    "kind": "temperature",
+                    "label": "Temperature",
+                    "range": {
+                        "max": 140,
+                        "min": 0
+                    }
+                }
+            ]
+        }
+    },
+    "values": [
+        {
+            "data_type": "BOOL",
+            "description": "Orbit rain sensor",
+            "initial.value": false,
+            "key": "RAIN_SENSOR",
+            "title": "Rain Sensor"
+        }
+    ]
 }
