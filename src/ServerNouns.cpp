@@ -14,6 +14,16 @@
 #include <string>
 #include <exception>
 #include <filesystem>
+#include <cstdint>
+#include <climits>
+#include <fstream>
+
+#include <ifaddrs.h>
+#include <arpa/inet.h>
+#include <net/if.h>
+#include <netinet/in.h>
+
+#include <sys/statvfs.h>
 
 #include <stdexcept>
 #include <cstring>            //Needed for memset and string functions
@@ -1478,6 +1488,76 @@ static void Date_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
 
 // MARK: - version - NOUN HANDLER
 
+static uint64_t getDiskFreeMB(const std::string& path = "/") {
+    struct statvfs st {};
+
+    if (statvfs(path.c_str(), &st) != 0) {
+        return 0;
+    }
+
+    uint64_t freeBytes =
+        static_cast<uint64_t>(st.f_bavail) *
+        static_cast<uint64_t>(st.f_frsize);
+
+    return freeBytes / (1024ULL * 1024ULL);
+}
+
+static double getDiskUsedPercent(const std::string& path = "/")
+{
+    struct statvfs st {};
+
+    if (statvfs(path.c_str(), &st) != 0) {
+        return 0.0;
+    }
+
+    uint64_t total =
+        (uint64_t)st.f_blocks * (uint64_t)st.f_frsize;
+
+    uint64_t free =
+        (uint64_t)st.f_bavail * (uint64_t)st.f_frsize;
+
+    return 100.0 * (double)(total - free) / (double)total;
+}
+
+
+static std::string getPrimaryIPv4Address() {
+    struct ifaddrs* ifaddr = nullptr;
+
+    if (getifaddrs(&ifaddr) == -1) {
+        return "";
+    }
+
+    std::string result;
+
+    for (struct ifaddrs* ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == nullptr) {
+            continue;
+        }
+
+        if (ifa->ifa_addr->sa_family != AF_INET) {
+            continue;
+        }
+
+        if ((ifa->ifa_flags & IFF_LOOPBACK) != 0) {
+            continue;
+        }
+
+        char addrbuf[INET_ADDRSTRLEN] = {0};
+
+        auto* sa = reinterpret_cast<struct sockaddr_in*>(ifa->ifa_addr);
+
+        if (inet_ntop(AF_INET, &sa->sin_addr, addrbuf, sizeof(addrbuf)) == nullptr) {
+            continue;
+        }
+
+        result = addrbuf;
+        break;
+    }
+
+    freeifaddrs(ifaddr);
+    return result;
+}
+
 static bool getCPUinfo(map<string,string> &info){
     bool didSucceed = false;
     info.clear();
@@ -1511,6 +1591,60 @@ static bool getCPUinfo(map<string,string> &info){
     catch(std::ifstream::failure &err) {
     }
     return didSucceed;
+}
+
+static bool readDoubleFromFile(const std::string& path, double& valueOut) {
+    std::ifstream ifs(path);
+
+    if (!ifs.is_open()) {
+        return false;
+    }
+
+    double value = 0.0;
+    if (!(ifs >> value)) {
+        return false;
+    }
+
+    valueOut = value;
+    return true;
+}
+
+static bool readUInt8FromFile(const std::string& path, uint8_t& valueOut) {
+    std::ifstream ifs(path);
+
+    if (!ifs.is_open()) {
+        return false;
+    }
+
+    unsigned int value = 0;
+    if (!(ifs >> value)) {
+        return false;
+    }
+
+    if (value > UINT8_MAX) {
+        return false;
+    }
+
+    valueOut = static_cast<uint8_t>(value);
+    return true;
+}
+
+static bool getCPUTemp(double& tempOut) {
+    double milliC = 0.0;
+
+    if (!readDoubleFromFile("/sys/class/thermal/thermal_zone0/temp", milliC)) {
+        return false;
+    }
+
+    tempOut = milliC / 1000.0;
+    return true;
+}
+
+static bool getFanState(uint8_t& stateOut) {
+    return readUInt8FromFile(
+        "/sys/class/thermal/cooling_device0/cur_state",
+        stateOut
+    );
 }
 
 
@@ -1559,10 +1693,30 @@ static void Version_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
     if(procname.size())
         reply[string(JSON_ARG_SERVER_PROCNAME)] = string(procname);
 
+    std::string ipAddress = getPrimaryIPv4Address();
+    if (!ipAddress.empty()) {
+        reply[JSON_ARG_IP_V4ADDR] = ipAddress;
+    }
+
+    reply[JSON_ARG_IP_PORT] = db->getRESTPort();
 
     if(std::filesystem::exists(".dockerenv")) {
         reply[string("DOCKER")] = true;
     }
+
+
+    double tempC = 0;
+     if(getCPUTemp(tempC)){
+        reply[VAL_CPU_TEMPERATURE] = to_string(tempC);
+     }
+
+     uint8_t fanState = 0;
+     if(getFanState(fanState)){
+         reply[VAL_CPU_FAN] = to_string(fanState);
+     }
+
+     reply["disk_free_root_mb"] = getDiskFreeMB("/");
+     reply["disk_used_pct"] = getDiskUsedPercent("/");
 
     map<string,string> info = {};
     if(getCPUinfo(info) && info.size() > 0){

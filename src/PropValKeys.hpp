@@ -132,6 +132,10 @@ constexpr string_view JSON_ARG_OS_RELEASE    = "os.release";
 constexpr string_view JSON_ARG_OS_MACHINE    = "os.machine";
 constexpr string_view JSON_ARG_OS_VERSION    = "os.version";
 
+constexpr string_view JSON_ARG_IP_PORT          = "ip.port";
+constexpr string_view JSON_ARG_IP_V4ADDR        = "ip.v4addr";
+
+
 constexpr string_view JSON_ARG_SOLAR                 = "solar";
 constexpr string_view JSON_ARG_SOLAR_CIVIL_SUNRISE     = "civilSunRise";
 constexpr string_view JSON_ARG_SOLAR_SUNRISE         = "sunRise";
