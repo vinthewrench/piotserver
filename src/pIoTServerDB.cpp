@@ -1865,123 +1865,186 @@ string pIoTServerDB::defaultPropertyFileName(){
 }
 
 // MARK: -  API Secrets
-bool pIoTServerDB::apiSecretCreate(string APIkey, string APISecret){
+// MARK: - API Secrets
+
+bool pIoTServerDB::apiSecretCreate(string APIkey, string APISecret)
+{
+    if (APIkey.empty() || APISecret.empty()) {
+        return false;
+    }
+
     json config;
 
-    if(APIkey.empty() || APISecret.empty())
+    if (!getJSONProperty(string(PROP_CONFIG), &config)) {
         return false;
+    }
 
-    if(getJSONProperty(string(PROP_CONFIG), &config)
-       && config.contains(PROP_ACCESS_KEYS)
-       &&  config[PROP_ACCESS_KEYS].is_object()){
+    if (!config.contains(PROP_ACCESS_KEYS) || !config[PROP_ACCESS_KEYS].is_array()) {
+        config[PROP_ACCESS_KEYS] = json::array();
+    }
 
-        json accesskeys = config[PROP_ACCESS_KEYS];
-        if(accesskeys.count(APIkey))
+    json accessKeys = config[PROP_ACCESS_KEYS];
+
+    for (const auto& ak : accessKeys) {
+        if (!ak.is_object()) {
+            continue;
+        }
+
+        if (!ak.contains(PROP_API_KEY) || !ak[PROP_API_KEY].is_string()) {
+            continue;
+        }
+
+        if (ak[PROP_API_KEY].get<string>() == APIkey) {
             return false;
-
-        accesskeys[APIkey] = APISecret;
-
-        config[PROP_ACCESS_KEYS] = accesskeys;
-        _props.at(PROP_CONFIG) = config;
-
-        _didChangeProperties  = true;;
-        saveProperties();
-        return true;
+        }
     }
 
-    return false;
+    accessKeys.push_back({
+        { PROP_API_KEY, APIkey },
+        { PROP_API_SECRET, APISecret }
+    });
+
+    config[PROP_ACCESS_KEYS] = accessKeys;
+    _props.at(PROP_CONFIG) = config;
+
+    _didChangeProperties = true;
+    saveProperties();
+
+    return true;
 }
 
-bool pIoTServerDB::apiSecretSetSecret(string APIkey, string APISecret){
-
-    if(APIkey.empty() || APISecret.empty())
+bool pIoTServerDB::apiSecretSetSecret(string APIkey, string APISecret)
+{
+    if (APIkey.empty() || APISecret.empty()) {
         return false;
+    }
 
     json config;
 
-    if(!APIkey.empty()
-       &&   getJSONProperty(string(PROP_CONFIG), &config)
-       && config.contains(PROP_ACCESS_KEYS)
-       &&  config[PROP_ACCESS_KEYS].is_object()){
+    if (!getJSONProperty(string(PROP_CONFIG), &config)
+        || !config.contains(PROP_ACCESS_KEYS)
+        || !config[PROP_ACCESS_KEYS].is_array()) {
+        return false;
+    }
 
-        json accesskeys = config[PROP_ACCESS_KEYS];
-        if(accesskeys.count(APIkey)){
+    json accessKeys = config[PROP_ACCESS_KEYS];
 
-            accesskeys[APIkey] = APISecret;
+    for (auto& ak : accessKeys) {
+        if (!ak.is_object()) {
+            continue;
+        }
 
-            config[PROP_ACCESS_KEYS] = accesskeys;
+        if (!ak.contains(PROP_API_KEY) || !ak[PROP_API_KEY].is_string()) {
+            continue;
+        }
+
+        if (ak[PROP_API_KEY].get<string>() == APIkey) {
+            ak[PROP_API_SECRET] = APISecret;
+
+            config[PROP_ACCESS_KEYS] = accessKeys;
             _props.at(PROP_CONFIG) = config;
 
-            _didChangeProperties  = true;;
+            _didChangeProperties = true;
             saveProperties();
-            return true;
 
+            return true;
         }
     }
 
     return false;
 }
 
-bool pIoTServerDB::apiSecretDelete(string APIkey){
+bool pIoTServerDB::apiSecretDelete(string APIkey)
+{
+    if (APIkey.empty()) {
+        return false;
+    }
 
     json config;
 
-    if(!APIkey.empty()
-       &&   getJSONProperty(string(PROP_CONFIG), &config)
-       && config.contains(PROP_ACCESS_KEYS)
-       &&  config[PROP_ACCESS_KEYS].is_object()){
+    if (!getJSONProperty(string(PROP_CONFIG), &config)
+        || !config.contains(PROP_ACCESS_KEYS)
+        || !config[PROP_ACCESS_KEYS].is_array()) {
+        return false;
+    }
 
-        json accesskeys = config[PROP_ACCESS_KEYS];
-        if(accesskeys.count(APIkey)){
-            accesskeys.erase(APIkey);
+    json accessKeys = json::array();
+    bool found = false;
 
-            config[PROP_ACCESS_KEYS] = accesskeys;
-            _props.at(PROP_CONFIG) = config;
-
-            _didChangeProperties  = true;;
-            saveProperties();
-            return true;
-
+    for (const auto& ak : config[PROP_ACCESS_KEYS]) {
+        if (!ak.is_object()
+            || !ak.contains(PROP_API_KEY)
+            || !ak[PROP_API_KEY].is_string()) {
+            accessKeys.push_back(ak);
+            continue;
         }
-    };
 
-    return false;
+        if (ak[PROP_API_KEY].get<string>() == APIkey) {
+            found = true;
+            continue;
+        }
+
+        accessKeys.push_back(ak);
+    }
+
+    if (!found) {
+        return false;
+    }
+
+    config[PROP_ACCESS_KEYS] = accessKeys;
+    _props.at(PROP_CONFIG) = config;
+
+    _didChangeProperties = true;
+    saveProperties();
+
+    return true;
 }
 
-bool pIoTServerDB::apiSecretGetSecret(string APIkey, string &APISecret){
+bool pIoTServerDB::apiSecretGetSecret(string APIkey, string &APISecret)
+{
+    json config;
 
-     json config;
-    if(getJSONProperty(string(PROP_CONFIG), &config)
-     && config.contains(PROP_ACCESS_KEYS)
-       &&  config[PROP_ACCESS_KEYS].is_object()){
+    if (getJSONProperty(string(PROP_CONFIG), &config)
+        && config.contains(PROP_ACCESS_KEYS)
+        && config[PROP_ACCESS_KEYS].is_array()) {
 
-        json accesskeys = config[PROP_ACCESS_KEYS];
+        const json accessKeys = config[PROP_ACCESS_KEYS];
 
-        for (auto& ak : accesskeys.items()){
-            if(ak.key() ==  APIkey) {
-                if(ak.value().is_string()){
-                    APISecret = ak.value();
-                    return true;
-                 }
-                return false;
+        for (const auto& ak : accessKeys) {
+            if (!ak.is_object()) {
+                continue;
+            }
+
+            if (!ak.contains(PROP_API_KEY) || !ak.contains(PROP_API_SECRET)) {
+                continue;
+            }
+
+            if (!ak[PROP_API_KEY].is_string() || !ak[PROP_API_SECRET].is_string()) {
+                continue;
+            }
+
+            if (ak[PROP_API_KEY].get<string>() == APIkey) {
+                APISecret = ak[PROP_API_SECRET].get<string>();
+                return true;
             }
         }
-        return false;
     }
-    // NO access_keys - secret always matches
+
     return false;
 }
+
 
 bool pIoTServerDB::apiSecretMustAuthenticate(){
 
-    json config;
-    if(getJSONProperty(string(PROP_CONFIG), &config)
-       && config.contains(PROP_ACCESS_KEYS)
-       &&  config[PROP_ACCESS_KEYS].is_object()
-       && config[PROP_ACCESS_KEYS].size() > 0 )
-        return true;
+   json config;
 
-    return false;
+   if(getJSONProperty(string(PROP_CONFIG), &config)
+      && config.contains(PROP_ACCESS_KEYS)
+      &&  config[PROP_ACCESS_KEYS].is_array()
+      && config[PROP_ACCESS_KEYS].size() > 0 )
+       return true;
+
+   return false;
 }
 
 // MARK: -   SERVER PORTS

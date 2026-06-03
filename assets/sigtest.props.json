@@ -1,0 +1,17 @@
+{
+    "config": {
+        "access_keys": [
+            {
+                "api_key": "test",
+                "api_secret": "12345678"
+            }
+        ],
+        "description": "The Raspbery Pi Irrigation System",
+        "name": "Garden Irrigation V3.0"
+    },
+    "prop.file.version": {
+        "file.etag": 25,
+        "last_write": 1780525962
+    },
+    "sequence": null
+}
