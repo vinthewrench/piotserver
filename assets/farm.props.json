@@ -1,6 +1,11 @@
 {
     "config": {
-        "access_keys": {},
+        "access_keys": [
+            {
+                "api_key": "test",
+                "api_secret": "12345678"
+            }
+        ],
         "description": "The Raspberry Pi Irrigation System",
         "lat_long": "34.465338, -93.362827",
         "name": "Stella Porta Irrigation V3.0"
