@@ -1670,6 +1670,34 @@ static bool getSystemTimes(uint64_t& systemTimeOut,
     return true;
 }
 
+static std::string getOSPrettyName()
+{
+    std::ifstream ifs("/etc/os-release");
+
+    if (!ifs.is_open()) {
+        return "";
+    }
+
+    std::string line;
+    while (std::getline(ifs, line)) {
+        static const std::string key = "PRETTY_NAME=";
+
+        if (line.rfind(key, 0) != 0) {
+            continue;
+        }
+
+        std::string value = line.substr(key.size());
+
+        if (value.size() >= 2 && value.front() == '"' && value.back() == '"') {
+            value = value.substr(1, value.size() - 2);
+        }
+
+        return value;
+    }
+
+    return "";
+}
+
 static void Version_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                 REST_URL url,
                                 [[maybe_unused]] TCPClientInfo cInfo,
@@ -1757,12 +1785,15 @@ static void Version_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
         }
     }
 
+    std::string prettyName = getOSPrettyName();
+    if (!prettyName.empty()) {
+        reply[string(JSON_ARG_OS_VERSION)] = prettyName;
+    }
+
     struct utsname buffer {};
     if (uname(&buffer) == 0) {
-        reply[string(JSON_ARG_OS_SYSNAME)] = string(buffer.sysname);
         reply[string(JSON_ARG_OS_NODENAME)] = string(buffer.nodename);
         reply[string(JSON_ARG_OS_RELEASE)] = string(buffer.release);
-        reply[string(JSON_ARG_OS_VERSION)] = string(buffer.version);
         reply[string(JSON_ARG_OS_MACHINE)] = string(buffer.machine);
     }
 
