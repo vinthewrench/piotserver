@@ -74,7 +74,7 @@ static inline int i2c_smbus_access (int fd, char rw, uint8_t command, int size, 
 #define I2C_BUS_DEV_FILE_PATH "/dev/i2c-1"
 #endif /* I2C_SLAVE */
 
- 
+
 I2C::I2C(){
     _isSetup = false;
     _fd = -1;
@@ -84,9 +84,9 @@ I2C::I2C(){
 
 I2C::~I2C(){
     stop();
-    
+
 }
- 
+
 bool I2C::begin(uint8_t    devAddr){
     int error = 0;
 
@@ -96,7 +96,7 @@ bool I2C::begin(uint8_t    devAddr){
 
 bool I2C::begin(uint8_t    devAddr,   int &error){
     static const char *ic2_device = "/dev/i2c-1";
- 
+
     _isSetup = false;
     int fd ;
 
@@ -105,10 +105,10 @@ bool I2C::begin(uint8_t    devAddr,   int &error){
          error = errno;
         return false;
     }
-    
+
     if (::ioctl(fd, I2C_SLAVE, devAddr) < 0) {
         LOGT_ERROR("I2C(%02x) I2C_SLAVE: failed %s", devAddr, strerror(errno));
-  
+
         error = errno;
         return false;
     }
@@ -116,18 +116,18 @@ bool I2C::begin(uint8_t    devAddr,   int &error){
     _fd = fd;
     _isSetup = true;
     _devAddr = devAddr;
-    
+
     return _isSetup;
 }
 
 
 void I2C::stop(){
-    
+
     if(_isSetup){
         close(_fd);
         _devAddr = 00;
     }
-    
+
     _isSetup = false;
 }
 
@@ -137,42 +137,42 @@ bool I2C::isAvailable(){
 }
 
 bool I2C::writeByte(uint8_t regAddr, uint8_t b1){
-    
+
     if(!_isSetup) return false;
 
     union i2c_smbus_data data = {.byte = b1};
-  
+
     if(i2c_smbus_access (_fd, I2C_SMBUS_WRITE, regAddr, I2C_SMBUS_BYTE_DATA, &data) < 0){
-        
+
         LOGT_ERROR("I2C_SMBUS_WRITE BYTE(%02x,%02X) failed %s",_devAddr, regAddr, strerror(errno));
- 
+
           return false;
     }
-    
+
     return   true;
 }
 
 
 bool I2C::writeBytes(uint8_t regAddr, uint8_t size, uint8_t* block){
-    
+
     if(!_isSetup) return false;
-    
+
     if(size > 0 && this->writeByte(regAddr, block[0])){
         for(uint8_t i = 1; i < size; i++ ){
             if( i2c_smbus_access(_fd, I2C_SMBUS_WRITE, block[i], I2C_SMBUS_BYTE, NULL)  < 0) return false;
         }
         return  true;
     }
-    
+
     return   false;
 }
 
 bool I2C::stdWriteBytes(uint8_t size, uint8_t* block ){
-    
+
     if(!_isSetup) return false;
-  
+
     bool status =  write(_fd, block, size) == size;
-    
+
     if(!status){
         LOGT_ERROR("I2C STD WRITE(%02x) %d bytes failed %s", _devAddr,
                     size, strerror(errno));
@@ -187,25 +187,25 @@ bool I2C::writeWord(uint8_t regAddr, uint16_t word){
     if(!_isSetup) return false;
 
     union i2c_smbus_data data = {.word = word};
- 
+
     if(i2c_smbus_access (_fd, I2C_SMBUS_WRITE, regAddr, I2C_SMBUS_WORD_DATA, &data) < 0){
-        
+
         LOGT_ERROR("I2C_SMBUS_WRITE WORD(%02x,%02X) failed %s",_devAddr,  regAddr, strerror(errno));
-  
+
         return false;
     }
-    
+
     return   true;
 }
 
 bool I2C::readByte(uint8_t regAddr,  uint8_t& byte){
-    
+
     if(!_isSetup) return false;
 
     union i2c_smbus_data data;
-    
+
     if(i2c_smbus_access (_fd, I2C_SMBUS_READ, regAddr, I2C_SMBUS_BYTE_DATA, &data) < 0){
-        
+
         LOGT_ERROR("I2C_SMBUS_READ BYTE(%02x,%02X) failed %s", _devAddr, regAddr, strerror(errno));
 
         return false;
@@ -220,9 +220,9 @@ bool I2C::readWord(uint8_t regAddr,  uint16_t& word){
     if(!_isSetup) return false;
 
     union i2c_smbus_data data;
-    
+
     if(i2c_smbus_access (_fd, I2C_SMBUS_READ, regAddr, I2C_SMBUS_WORD_DATA, &data) < 0){
-        
+
         LOGT_ERROR("I2C_SMBUS_READ WORD(%02x,%02X) failed %s", _devAddr, regAddr, strerror(errno));
 
         return false;
@@ -231,7 +231,7 @@ bool I2C::readWord(uint8_t regAddr,  uint16_t& word){
     word = data.word & 0xFFFF;
     return true;
 }
- 
+
 
 
 bool I2C::readBlock(uint8_t regAddr, uint8_t size, i2c_block_t & block ){
@@ -244,41 +244,41 @@ bool I2C::readBlock(uint8_t regAddr, uint8_t size, i2c_block_t & block ){
     data.block[0] = size + 1;
 
     if(i2c_smbus_access (_fd, I2C_SMBUS_READ, regAddr, I2C_SMBUS_I2C_BLOCK_DATA, &data) < 0){
-   
+
         LOGT_ERROR("I2C_SMBUS_READ BLOCK(%02x,%02X) failed %s", _devAddr, regAddr, strerror(errno));
 
         return false;
     }
 
     memcpy(block, data.block, sizeof(block));
-    
+
     return true;
 }
 
- 
+
 
 bool I2C::readBytes(uint8_t regAddr, uint8_t size, uint8_t* block ){
 
     if(!_isSetup) return false;
- 
+
     uint8_t data;
-    
+
     for(uint8_t offset = 0; offset < size; offset++ )
         if(readByte(regAddr + offset, data))
             *(block+offset) = data;
         else
             return false;
-           
-           
+
+
     return true;
 }
 
 bool I2C::stdReadBytes(uint8_t size, uint8_t* block ){
-    
+
     if(!_isSetup) return false;
-  
+
     bool status =  read(_fd, block, size) == size;
-    
+
     if(!status){
         LOGT_ERROR("I2C STD READ(%02x) %d bytes failed %s", _devAddr,
                     size, strerror(errno));
@@ -290,11 +290,11 @@ bool I2C::stdReadBytes(uint8_t size, uint8_t* block ){
 
 bool I2C::smbQuick(){
     if(!_isSetup) return false;
-  
+
     union i2c_smbus_data data;
-    
+
     if(i2c_smbus_access (_fd, I2C_SMBUS_WRITE, 0, I2C_SMBUS_QUICK, &data) < 0){
-   
+
         LOGT_ERROR("I2C_SMBUS_QUICK(%02x) failed %s", _devAddr, strerror(errno));
 
         return false;
@@ -307,39 +307,43 @@ bool I2C::smbQuick(){
 
 // MARK: -   I2C tool
 
-bool I2C::getI2CAddressMap(std::vector<uint8_t> &addrs) {
- 
-    uint8_t first = 0x08;
-    uint8_t last  =  0x77;
-    
-    uint8_t address;
-     
-    static const char *ic2_device = "/dev/i2c-1";
-    int        fd;
-    
-     addrs.clear();
-    fd = open( ic2_device, O_RDWR);
-    
-    if(fd == -1){
-        LOGT_ERROR("Could Not open %s - %d %s\n", ic2_device, errno, strerror(errno));
+bool I2C::getI2CAddressMap(std::vector<uint8_t>& addrs)
+{
+    static constexpr const char* I2C_DEVICE = "/dev/i2c-1";
+    static constexpr uint8_t FIRST_ADDR = 0x08;
+    static constexpr uint8_t LAST_ADDR  = 0x77;
+
+    addrs.clear();
+
+    int fd = open(I2C_DEVICE, O_RDWR);
+    if (fd < 0) {
+        LOGT_ERROR("Could not open %s - %d %s\n",
+                   I2C_DEVICE,
+                   errno,
+                   strerror(errno));
         return false;
     }
 
-    // table body
-    // addresses 0x00 through 0x77
-    for (address = first; address <= last; address++) {
-        
-        uint8_t b;
- 
-        int error = ioctl(fd, I2C_SLAVE, address);
-        ssize_t count = read(fd,&b, 1);
+    /*
+     * Probe usable 7-bit I2C addresses.
+     *
+     * This performs a one-byte read from each address. It is intended for
+     * manual diagnostics only; do not call it frequently from normal polling,
+     * because arbitrary reads may have side effects on some I2C devices.
+     */
+    for (uint8_t address = FIRST_ADDR; address <= LAST_ADDR; ++address) {
+        if (ioctl(fd, I2C_SLAVE, address) < 0) {
+            continue;
+        }
 
-        if (error == 0 && count == 1) {
-            // device found
+        uint8_t value = 0;
+        ssize_t count = read(fd, &value, sizeof(value));
+
+        if (count == static_cast<ssize_t>(sizeof(value))) {
             addrs.push_back(address);
         }
     }
-   
-    close (fd);
+
+    close(fd);
     return true;
 }

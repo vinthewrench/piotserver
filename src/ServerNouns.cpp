@@ -5,31 +5,31 @@
 //  Created by Vincent Moscaritolo on 2/10/22.
 //
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <functional>
-#include <vector>
-#include <string>
-#include <exception>
-#include <filesystem>
-#include <cstdint>
-#include <climits>
-#include <fstream>
-
-#include <ifaddrs.h>
 #include <arpa/inet.h>
+#include <ifaddrs.h>
 #include <net/if.h>
 #include <netinet/in.h>
-
 #include <sys/statvfs.h>
+#include <sys/sysinfo.h>
 
-#include <stdexcept>
-#include <cstring>            //Needed for memset and string functions
-#include <type_traits>
+#include <climits>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
+#include <cstring>
+
+#include <exception>
+#include <filesystem>
+#include <fstream>
+#include <functional>
 #include <map>
 #include <ranges>
+#include <stdexcept>
+#include <string>
+#include <type_traits>
+#include <vector>
+
 
 #include "ServerNouns.hpp"
 #include "ServerCmdQueue.hpp"
@@ -1647,6 +1647,28 @@ static bool getFanState(uint8_t& stateOut) {
     );
 }
 
+static bool getSystemTimes(uint64_t& systemTimeOut,
+                           uint64_t& systemBootTimeOut,
+                           uint64_t& systemUptimeOut)
+{
+    struct sysinfo info {};
+
+    if (sysinfo(&info) != 0) {
+        return false;
+    }
+
+    time_t now = time(nullptr);
+
+    if (now <= 0 || info.uptime < 0) {
+        return false;
+    }
+
+    systemTimeOut = static_cast<uint64_t>(now);
+    systemUptimeOut = static_cast<uint64_t>(info.uptime);
+    systemBootTimeOut = systemTimeOut - systemUptimeOut;
+
+    return true;
+}
 
 static void Version_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                 REST_URL url,
@@ -1655,43 +1677,54 @@ static void Version_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
 
     using namespace rest;
     using namespace timestamp;
+
     auto pIoTServer = pIoTServerMgr::shared();
     auto db = pIoTServer->getDB();
 
     json reply;
 
-
     // CHECK METHOD
-    if(url.method() != HTTP_GET ) {
-        (completion) (reply, STATUS_INVALID_METHOD);
+    if (url.method() != HTTP_GET) {
+        completion(reply, STATUS_INVALID_METHOD);
         return;
     }
 
-    auto path = url.path();
-    string noun;
+    const uint64_t appUptime =
+        static_cast<uint64_t>(pIoTServer->upTime());
 
-    if(path.size() > 0) {
-        noun = path.at(0);
+    reply[string(JSON_ARG_UPTIME)] = appUptime;          // Legacy: app uptime
+    reply[string(JSON_ARG_VERSION)] = pIoTServerMgr::pIoTServerMgr_Version;
+    reply[string(JSON_ARG_BUILD_TIME)] = string(__DATE__) + " " + string(__TIME__);
+
+    uint64_t systemTime = 0;
+    uint64_t systemBootTime = 0;
+    uint64_t systemUptime = 0;
+
+    if (getSystemTimes(systemTime, systemBootTime, systemUptime)) {
+        reply["system_time"] = systemTime;
+        reply["system_boot_time"] = systemBootTime;
+        reply["system_uptime"] = systemUptime;
+
+        if (systemTime >= appUptime) {
+            reply["app_start_time"] = systemTime - appUptime;
+        }
     }
 
-    reply[string(JSON_ARG_UPTIME)]    = pIoTServer->upTime();
-    reply[string(JSON_ARG_VERSION)]     = pIoTServerMgr::pIoTServerMgr_Version;
-    reply[string(JSON_ARG_BUILD_TIME)]    =  string(__DATE__) + " " + string(__TIME__);
-
     string instanceName;
-    if(db->getConfigProperty(string(JSON_ARG_NAME), instanceName)){
+    if (db->getConfigProperty(string(JSON_ARG_NAME), instanceName)) {
         reply[string(JSON_ARG_NAME)] = instanceName;
     }
 
     string description;
-    if(db->getConfigProperty(string(PROP_DESCRIPTION), description)){
+    if (db->getConfigProperty(string(PROP_DESCRIPTION), description)) {
         reply[string(PROP_DESCRIPTION)] = description;
     }
 
     std::string procname;
     std::ifstream("/proc/self/comm") >> procname;
-    if(procname.size())
-        reply[string(JSON_ARG_SERVER_PROCNAME)] = string(procname);
+    if (!procname.empty()) {
+        reply[string(JSON_ARG_SERVER_PROCNAME)] = procname;
+    }
 
     std::string ipAddress = getPrimaryIPv4Address();
     if (!ipAddress.empty()) {
@@ -1700,45 +1733,42 @@ static void Version_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
 
     reply[JSON_ARG_IP_PORT] = db->getRESTPort();
 
-    if(std::filesystem::exists(".dockerenv")) {
-        reply[string("DOCKER")] = true;
+    if (std::filesystem::exists(".dockerenv")) {
+        reply["DOCKER"] = true;
     }
 
+    double tempC = 0.0;
+    if (getCPUTemp(tempC)) {
+        reply[VAL_CPU_TEMPERATURE] = tempC;
+    }
 
-    double tempC = 0;
-     if(getCPUTemp(tempC)){
-        reply[VAL_CPU_TEMPERATURE] = to_string(tempC);
-     }
+    uint8_t fanState = 0;
+    if (getFanState(fanState)) {
+        reply[VAL_CPU_FAN] = fanState;
+    }
 
-     uint8_t fanState = 0;
-     if(getFanState(fanState)){
-         reply[VAL_CPU_FAN] = to_string(fanState);
-     }
+    reply["disk_free_root_mb"] = getDiskFreeMB("/");
+    reply["disk_used_pct"] = getDiskUsedPercent("/");
 
-     reply["disk_free_root_mb"] = getDiskFreeMB("/");
-     reply["disk_used_pct"] = getDiskUsedPercent("/");
-
-    map<string,string> info = {};
-    if(getCPUinfo(info) && info.size() > 0){
-        for(auto &[key,val] : info){
-             reply["cpu."+key] = val;
+    map<string, string> info = {};
+    if (getCPUinfo(info) && !info.empty()) {
+        for (auto& [key, val] : info) {
+            reply["cpu." + key] = val;
         }
     }
 
-    struct utsname buffer;
-    if (uname(&buffer) == 0){
-        reply[string(JSON_ARG_OS_SYSNAME)] =   string(buffer.sysname);
-        reply[string(JSON_ARG_OS_NODENAME)] =   string(buffer.nodename);
-        reply[string(JSON_ARG_OS_RELEASE)] =   string(buffer.release);
-        reply[string(JSON_ARG_OS_VERSION)] =   string(buffer.version);
-        reply[string(JSON_ARG_OS_MACHINE)] =   string(buffer.machine);
+    struct utsname buffer {};
+    if (uname(&buffer) == 0) {
+        reply[string(JSON_ARG_OS_SYSNAME)] = string(buffer.sysname);
+        reply[string(JSON_ARG_OS_NODENAME)] = string(buffer.nodename);
+        reply[string(JSON_ARG_OS_RELEASE)] = string(buffer.release);
+        reply[string(JSON_ARG_OS_VERSION)] = string(buffer.version);
+        reply[string(JSON_ARG_OS_MACHINE)] = string(buffer.machine);
     }
 
-    makeStatusJSON(reply,STATUS_OK);
-    (completion) (reply, STATUS_OK);
+    makeStatusJSON(reply, STATUS_OK);
+    completion(reply, STATUS_OK);
 }
-
-
 
 // MARK: -  DEVICE NOUN HANDLERS
 
@@ -1767,21 +1797,6 @@ static bool Device_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
     if(path.size() == 1){
         if(queries.size() == 0){
             pIoTServer->getAllDeviceProperties(propEntries);
-
-            // askimg for all devices also gives you the I2c and W1 maps
-            stringvector hexAddr;
-            std::vector<uint8_t>  addrs;
-            if(I2C::getI2CAddressMap(addrs))
-            {
-                for(auto hex :addrs){
-                    hexAddr.push_back(to_hex(hex));
-                }
-            }
-            reply[JSON_ARG_I2C] = hexAddr;
-
-            std::vector<std::string> w1Devices;
-            W1_Device::getW1Devices(w1Devices);
-            reply[JSON_ARG_W1DEVICE] = w1Devices;
         }
         else {
             // asking for specific devices

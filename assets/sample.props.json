@@ -5,24 +5,11 @@
             "device_type": "SAMPLE",
             "key": "RUN_TIME",
             "title": "Run Time"
-        },
-        {
-            "device_type": "GPIO",
-            "pins": [
-                {
-                    "BCM": 24,
-                    "data_type": "BOOL",
-                    "gpio.flags": 512,
-                    "gpio.mode": "input",
-                    "key": "POWER_FAIL",
-                    "title": "AC Power Fail Bit"
-                }
-            ]
         }
     ],
     "prop.file.version": {
-        "file.etag": 1,
-        "last_write": 1779992383
+        "file.etag": 6,
+        "last_write": 1780691018
     },
     "sequence": [
         {
