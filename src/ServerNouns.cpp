@@ -1990,12 +1990,31 @@ static bool Sequence_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
     json cronSequences;
     json futureSequences;
     json timedSequences;
+    json runningSequences;
 
     for(auto sid : sids){
         json js = db->sequenceJSON(sid);
         if(!js.is_null()){
+
+            bool isRunning = db->sequenceIsRunning(sid);
+            js[PROP_ISRUNNING] = isRunning;
+
+            if(isRunning) {
+                uint stepNo;
+                if(db->sequenceCurrentStep(sid, stepNo)){
+                    js[JSON_ARG_STEP] =  stepNo;
+                    }
+             }
+
+            if(db->sequenceIsAborting(sid)){
+                js[JSON_ARG_ABORT]= true;
+            }
+
             string sidStr = to_hex<unsigned short>(sid);
             allSequences[sidStr] = js;
+
+            if(isRunning)
+                 runningSequences.push_back(sidStr);
 
             if(db->sequenceisEnable(sid)){
                 EventTrigger trig;
@@ -2027,6 +2046,7 @@ static bool Sequence_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
     reply[string(JSON_ARG_CRON_SEQUENCES)] = cronSequences;
     reply[string(JSON_ARG_FUTURE_SEQUENCES)] = futureSequences;
     reply[string(JSON_ARG_TIMED_SEQUENCES)] = timedSequences;
+    reply[string(JSON_ARG_RUNNING_SEQUENCES)] = runningSequences;
 
     makeStatusJSON(reply,STATUS_OK);
     (completion) (reply, STATUS_OK);
@@ -2237,13 +2257,19 @@ static bool Sequence_NounHandler_PUT([[maybe_unused]] ServerCmdQueue* cmdQueue,
     if(path.size() == 1) {
 
         sequenceID_t sid;
-
         string str;
 
         if(v1.getStringFromJSON(JSON_ARG_SEQUENCE_ID, url.body(), str)){
 
             if( !str_to_SequenceID(str.c_str(), &sid) || !db->sequenceIDIsValid(sid))
                 return false;
+
+            if(db->sequenceIsRunning(sid) || db->sequenceIsAborting(sid)) {
+                reply[string(JSON_ARG_SEQUENCE_ID)] = SequenceID_to_string(sid);
+                makeStatusJSON(reply, STATUS_CONFLICT, "Conflict", "Sequence is already running.");
+                (completion) (reply, STATUS_CONFLICT);
+                return true;
+            }
 
             bool queued = pIoTServer->startRunningSequence(sid);
 

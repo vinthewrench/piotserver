@@ -25,23 +25,23 @@ Step::Step(){
 Step::Step(nlohmann::json j) {
     initWithJSON(j);
 }
- 
- 
+
+
 void Step::initWithJSON(nlohmann::json j){
     _duration = 0;
     _actions .clear();
-    
+
     if( j.contains(JSON_ARG_DURATION) && j.at(JSON_ARG_DURATION).is_number_unsigned()){
         _duration = j.at(JSON_ARG_DURATION);
     }
     else _duration = 0;
-    
+
     if(j.contains(JSON_ARG_NAME)
         && j.at(string(JSON_ARG_NAME)).is_string()) {
         auto jS = j.at(string(JSON_ARG_NAME));
         _name = jS;
     }
-    
+
     if(j.contains(PROP_DESCRIPTION)
           && j.at(string(PROP_DESCRIPTION)).is_string()) {
           auto jS = j.at(string(PROP_DESCRIPTION));
@@ -50,10 +50,10 @@ void Step::initWithJSON(nlohmann::json j){
 
    if( j.contains(JSON_ARG_ACTION)){
         json jAct = j.at(JSON_ARG_ACTION);
-        
+
         vector<Action> actions;
         actions.clear();
-        
+
         if(jAct.is_object()){
             Action a = Action(jAct);
             if(a.isValid()){
@@ -83,22 +83,22 @@ Step::Step(std::string str){
 }
 
 bool Step::isValid(){
-    
+
     if(_actions.size()){
         for(auto a :_actions) {
             if(!a.isValid()) return false;
         }
     }
-    
+
     return true;;
 }
 
- 
+
 nlohmann::json Step::JSON(){
     json j;
-   
+
     if(_duration)  j[JSON_ARG_DURATION] = _duration;
-    
+
     if(!_name.empty()) j[string(JSON_ARG_NAME)] = _name;
     if(!_description.empty()) j[string(PROP_DESCRIPTION)] = _description;
 
@@ -108,7 +108,7 @@ nlohmann::json Step::JSON(){
         auto jA = e.JSON();
         jActions.push_back(jA);
     }
-    
+
     j[JSON_ARG_ACTION] = jActions;
 
     return j;
@@ -117,7 +117,7 @@ nlohmann::json Step::JSON(){
 
 
 bool Step::hasCallBackAction(){
-    
+
     for(auto e: _actions){
         if(e.isCallBack()) return true;
     }
@@ -127,24 +127,24 @@ bool Step::hasCallBackAction(){
 
 const std::string Step:: printString(){
     std::ostringstream oss;
-    
+
      if(_name.size())
             oss << "\"" << _name << "\" ";
-    
+
     if(_duration)
         oss <<  "(" << _duration << "s) ";
- 
+
     oss << endl;
     if(_actions.size()){
           for(auto a : _actions)
             oss << "\t  " << a.printString() << endl;
       }
-  
+
     return  oss.str();
 };
- 
+
 // MARK - AbortAction
- 
+
 AbortAction::AbortAction(){
     _actions .clear();
 }
@@ -152,17 +152,17 @@ AbortAction::AbortAction(){
 AbortAction::AbortAction(nlohmann::json j) {
     initWithJSON(j);
 }
- 
- 
+
+
 void AbortAction::initWithJSON(nlohmann::json j){
     _actions .clear();
- 
+
    if( j.contains(JSON_ARG_ACTION)){
         json jAct = j.at(JSON_ARG_ACTION);
-        
+
         vector<Action> actions;
         actions.clear();
-        
+
         if(jAct.is_object()){
             Action a = Action(jAct);
             if(a.isValid()){
@@ -191,27 +191,27 @@ AbortAction::AbortAction(std::string str){
 }
 
 bool AbortAction::isValid(){
-    
+
     if(_actions.size()){
         for(auto a :_actions) {
             if(!a.isValid()) return false;
         }
         return true;;
     }
-    
+
     return false;
 }
- 
+
 nlohmann::json AbortAction::JSON(){
     json j;
-   
+
     json jActions;
     for(auto e: _actions){
         // dont export callbacks.
         auto jA = e.JSON();
         jActions.push_back(jA);
     }
-    
+
     j[JSON_ARG_ACTION] = jActions;
 
     return j;
@@ -221,7 +221,7 @@ nlohmann::json AbortAction::JSON(){
 
 
 bool AbortAction::hasCallBackAction(){
-    
+
     for(auto e: _actions){
         if(e.isCallBack()) return true;
     }
@@ -237,24 +237,24 @@ const std::string AbortAction:: printString(){
           for(auto a : _actions)
             oss << "\t  " << a.printString() << endl;
       }
-  
+
     return  oss.str();
 };
- 
+
 
 // MARK: -   Sequence
 
 bool str_to_SequenceID(const char* str, sequenceID_t *idOut){
     bool status = false;
-    
+
     sequenceID_t val = 0;
- 
+
     status = sscanf(str, "%hx", &val) == 1;
-    
+
     if(idOut)  {
         *idOut = val;
     }
-    
+
     return status;
 
 }
@@ -269,7 +269,9 @@ void Sequence::commonInit(){
     _steps.clear();
      _nextStepToRun = 0;
     _lastStepRunTime = 0;
+    _currentStepNumber = UINT_MAX;
     _dontLog = true;
+    _isRunning = false;
     _overrideManualMode = false;
 }
 
@@ -289,7 +291,7 @@ Sequence::Sequence(EventTrigger trigger, Action action){
 
 Sequence::Sequence(std::string str){
     commonInit();
-    
+
     json j;
     j  = json::parse(str);
     initWithJSON(j);
@@ -297,15 +299,15 @@ Sequence::Sequence(std::string str){
 
 void Sequence::initWithJSON(nlohmann::json j){
     commonInit();
- 
+
     _rawSequenceID = 0;
-   
+
     if(j.contains(JSON_ARG_SEQUENCE_ID)
         && j.at(string(JSON_ARG_SEQUENCE_ID)).is_string()) {
         string jID = j.at(string(JSON_ARG_SEQUENCE_ID));
         str_to_SequenceID(jID.c_str(), &_rawSequenceID);
     }
-  
+
     if( j.contains(JSON_ARG_ENABLE) && j.at(JSON_ARG_ENABLE).is_boolean()){
         _enable = j.at(JSON_ARG_ENABLE);
     }
@@ -315,7 +317,7 @@ void Sequence::initWithJSON(nlohmann::json j){
         _overrideManualMode = j.at(JSON_ARG_OVERIDE_MANUAL);
     }
     else _overrideManualMode = false;
-    
+
     if( j.contains(JSON_ARG_TRIGGER)
         && j.at(string(JSON_ARG_TRIGGER)).is_object()) {
         auto jT = j.at(string(JSON_ARG_TRIGGER));
@@ -323,13 +325,13 @@ void Sequence::initWithJSON(nlohmann::json j){
     }
     else
         _trigger = EventTrigger(EventTrigger::APP_EVENT_MANUAL);
-    
+
     if( j.contains(JSON_ARG_STEPS)){
         json jStep = j.at(JSON_ARG_STEPS);
-     
+
         vector<Step> steps;
         steps.clear();
-        
+
         if(jStep.is_object()){
             Step a = Step(jStep);
             if(a.isValid()){
@@ -346,7 +348,7 @@ void Sequence::initWithJSON(nlohmann::json j){
         }
         _steps = steps;
      }
-    
+
     if(j.contains(JSON_ARG_CONDITION)
           && j.at(string(JSON_ARG_CONDITION)).is_string()) {
           auto jS = j.at(string(JSON_ARG_CONDITION));
@@ -358,13 +360,13 @@ void Sequence::initWithJSON(nlohmann::json j){
         auto jS = j.at(string(JSON_ARG_NAME));
         _name = jS;
     }
-    
+
     if(j.contains(PROP_DESCRIPTION)
           && j.at(string(PROP_DESCRIPTION)).is_string()) {
           auto jS = j.at(string(PROP_DESCRIPTION));
         _description = jS;
       }
-    
+
     if( j.contains(JSON_ARG_ON_ABORT)
         && j.at(string(JSON_ARG_ON_ABORT)).is_object()) {
         auto jT = j.at(string(JSON_ARG_ON_ABORT));
@@ -379,41 +381,41 @@ Sequence::Sequence(nlohmann::json j){
     initWithJSON(j);
 }
 
- 
+
 nlohmann::json Sequence::JSON(){
     json j;
-    
+
     json jSteps;
     for(auto e: _steps){
         // dont export callbacks.
         auto jA = e.JSON();
         jSteps.push_back(jA);
     }
-    
+
     j[JSON_ARG_STEPS] = jSteps;
 
      auto jT = _trigger.JSON();
     j[string(JSON_ARG_TRIGGER)] = jT;
-    
+
     j[string(JSON_ARG_SEQUENCE_ID)] = to_hex<unsigned short>(_rawSequenceID);
-    
+
     if(!_name.empty()) j[string(JSON_ARG_NAME)] = _name;
     if(!_description.empty()) j[string(PROP_DESCRIPTION)] = _description;
     if(!_condition.empty()) j[string(JSON_ARG_CONDITION)] = _condition;
-  
+
     if(_onAbort.isValid()){
         auto jAB = _onAbort.JSON();
         j[string(JSON_ARG_ON_ABORT)] = jAB;
    }
-  
+
     j[JSON_ARG_ENABLE] = _enable;
     j[JSON_ARG_OVERIDE_MANUAL] = _overrideManualMode;
-  
+
     return j;
 }
 
 bool Sequence::isValid(){
-  
+
     if(_steps.size()){
         for(auto a :_steps) {
             if(!a.isValid()) return false;
@@ -423,7 +425,7 @@ bool Sequence::isValid(){
 }
 
 
- 
+
 void Sequence::copy(const Sequence &seq1, Sequence *seq2){
     seq2->_rawSequenceID    = seq1._rawSequenceID;
     seq2->_name             = seq1._name;
@@ -437,6 +439,8 @@ void Sequence::copy(const Sequence &seq1, Sequence *seq2){
     seq2->_lastStepRunTime  = seq1._lastStepRunTime;
     seq2->_dontLog           = seq1._dontLog;
     seq2->_overrideManualMode = seq1._overrideManualMode;
+    seq2->_isRunning        = seq1._isRunning;
+    seq2->_currentStepNumber        = seq1._currentStepNumber;
   }
 
 
@@ -445,17 +449,19 @@ bool Sequence::getStep(uint stepNo, Step &stp){
         stp = _steps[stepNo];
         return true;
     }
-    
+
     return false;
 }
 
 void Sequence::resetSteps(){
     _nextStepToRun = 0;
     _lastStepRunTime = 0;
+    _currentStepNumber = UINT_MAX;
+    _isRunning = false;
  }
- 
+
 bool Sequence::shouldRunSequenceFromAppEvent(EventTrigger::app_event_t a, int &stepNo){
-    
+
     if( _trigger.shouldTriggerFromAppEvent(a)){
         if(_nextStepToRun < _steps.size()) {
             stepNo = _nextStepToRun;
@@ -467,21 +473,21 @@ bool Sequence::shouldRunSequenceFromAppEvent(EventTrigger::app_event_t a, int &s
 
 
 uint64_t Sequence::stepsDuration(){
-    
+
     uint64_t total = 0;
-    
+
     if(_steps.size()){
         for(auto a :_steps) {
             total +=  a.duration();
         }
     }
- 
+
     return total;
 }
- 
+
 
 bool Sequence::hasCallBackAction(){
-    
+
     for(auto e: _steps){
         if(e.hasCallBackAction()) return true;
     }
@@ -489,7 +495,7 @@ bool Sequence::hasCallBackAction(){
 }
 
 bool Sequence::hasAbortAction(){
-    
+
     return  _onAbort.isValid();
 }
 
@@ -504,15 +510,15 @@ bool  Sequence::getAbortActions(vector<Action> & act) {
 
 const std::string Sequence::printString(){
     std::ostringstream oss;
-    
+
     oss << "<" << SequenceID_to_string(_rawSequenceID) << ">";
-    
+
     if(_name.size()) oss << " \"" << _name << "\"";
     uint64_t duration = stepsDuration();
      if(duration)
          oss <<  " (" << duration << "s) ";
     oss << " " << _trigger.printString() << endl;
-   
+
     if(_condition.size()) oss << "condition: " << _condition << endl;
 
     auto count = _steps.size();
@@ -522,7 +528,7 @@ const std::string Sequence::printString(){
             oss <<  "\tstep:" <<  i++  << " " << a.printString();
         }
     }
-    
+
     oss << endl;
 
     return  oss.str();
@@ -531,28 +537,28 @@ const std::string Sequence::printString(){
 
 /*
  Walk the sequence looking for actions that effect the specified variable;
- 
+
  typedef struct {
       string          value;
       uint            stepNo;
  } ScheduleStepEntry_t;
 
- 
+
  */
 
 bool Sequence::scheduleForValue(string valueKey, vector<scheduleStepEntry_t> &ssEntry){
     bool found = false;
-    
+
     vector<scheduleStepEntry_t> entries;
     uint64_t   offset = 0;
-    
+
     for(uint stepNo = 0; stepNo < _steps.size(); stepNo++){
         auto &stp =  _steps[stepNo];
         for(auto &act : stp._actions){
             if((act.cmd() ==  Action::JSON_CMD_SET)
                 && (act.key() == valueKey)){
                 scheduleStepEntry_t entry;
-                
+
                 entry.stepNo = stepNo;
                 entry.value = act.value();
                 entry.offset = offset;
@@ -561,7 +567,7 @@ bool Sequence::scheduleForValue(string valueKey, vector<scheduleStepEntry_t> &ss
         }
         offset+=stp.duration();
       }
-    
+
     if(entries.size() > 0){
         ssEntry = entries;
         found = true;
@@ -573,7 +579,7 @@ bool Sequence::scheduleForValue(string valueKey, vector<scheduleStepEntry_t> &ss
 
 bool Sequence::allKeysInSequence(std::set<std::string> &keysfound){
     bool found = false;
- 
+
     for(uint stepNo = 0; stepNo < _steps.size(); stepNo++){
         auto &stp =  _steps[stepNo];
         for(auto &act : stp._actions){
@@ -581,8 +587,8 @@ bool Sequence::allKeysInSequence(std::set<std::string> &keysfound){
                 keysfound.insert(act.key());
         }
     }
-    
+
     found = keysfound.size() > 0;
-    
+
     return found;
 }

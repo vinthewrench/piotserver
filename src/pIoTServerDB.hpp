@@ -260,6 +260,7 @@ class pIoTServerDB  {
     bool sequenceisEnable(sequenceID_t sid);
     bool sequenceShouldIgnoreLog(sequenceID_t sid);
     bool sequenceShouldIgnoreManualMode(sequenceID_t sid);
+    bool sequenceIsRunning(sequenceID_t sid);
 
     bool triggerSequence(sequenceID_t sid);
     string sequenceGetCondition(sequenceID_t sid);
@@ -285,9 +286,17 @@ class pIoTServerDB  {
 
     bool sequenceGetAbortActions(sequenceID_t sid, vector<Action> & act);
 
+    bool sequenceStartAbort(sequenceID_t sid);
+    bool sequenceIsAborting(sequenceID_t sid);
+
     bool sequenceReset(sequenceID_t sid);       // reset the step count
 
+    bool sequenceSetRunning(sequenceID_t sid, bool isrunning);
+
     bool sequenceSetLastRunTime(sequenceID_t sid,time_t localNow);
+
+    bool sequenceSetCurrentStep(sequenceID_t sid, uint stepNo); // true == more steps
+    bool sequenceCurrentStep(sequenceID_t sid, uint &stepNo);
 
     bool sequenceEvaluateCondition(sequenceID_t sid);
 

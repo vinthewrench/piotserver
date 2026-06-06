@@ -147,6 +147,12 @@ public:
         _condition = cond;
     }
 
+
+    void setIsRunning(bool run) {
+        _isRunning = run;
+    }
+
+    bool isRunning() {return _isRunning; }
     string name() { return _name; }
     string description() { return _description; }
     string condition() { return _condition; }
@@ -234,8 +240,10 @@ protected:
     bool            _wasManuallyTriggered;
     bool            _overrideManualMode;    // doesnt require keys to be in manual mode
 
+    bool            _isRunning;
     uint            _nextStepToRun;
     time_t          _lastStepRunTime;       // in localNow units
+    uint            _currentStepNumber;
 
     bool            _dontLog;
 };

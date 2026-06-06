@@ -19,7 +19,7 @@
 
 using namespace nlohmann;
 using namespace std;
- 
+
 
 // MARK: - ServerCmdQueue
 
@@ -43,15 +43,15 @@ bool ServerCmdQueue::registerNoun(	string_view noun,
 }
 
 ServerCmdQueue::nounHandler_t ServerCmdQueue::handlerForNoun(string noun){
-	
+
 	nounHandler_t  handler = NULL;
 
 	auto it = _nounHandlers.find(noun);
 	if(it != _nounHandlers.end()){
 		handler = it->second;
 	}
-	
-	
+
+
  	return handler;
 }
 
@@ -60,20 +60,20 @@ ServerCmdQueue::nounHandler_t ServerCmdQueue::handlerForNoun(string noun){
 void ServerCmdQueue::queueRESTCommand(  REST_URL url,
 												  TCPClientInfo cInfo,
 												  cmdCallback_t completion  ) {
-	
+
 	using namespace rest;
-	
+
 	nounHandler_t  func = NULL;
 
  	auto path = url.path();
 //#warning DEBUG
 //    printf("ServerCmdQueue::queueRESTCommand %s\n", path[0].c_str());
-    
+
 	if(path.size() > 0) {
 		string noun = path.at(0);
 		func = handlerForNoun(noun);
 	}
-	
+
 	if(func) {
 		(func)(this, url, cInfo, completion);
 	}
@@ -84,16 +84,16 @@ void ServerCmdQueue::queueRESTCommand(  REST_URL url,
 							"Not Implemented",
                             "Lazy programmer hasn't written code for this yet.",
                              url.pathString());
-		
+
 		(completion) (reply, STATUS_NOT_IMPLEMENTED);
-		
+
 	}
 }
 
 // MARK: - User Authentication
 
 bool ServerCmdQueue::apiSecretCreate(string APIkey, string APISecret){
- 
+
 	return (_apiSecretMgr)
 		?_apiSecretMgr->apiSecretCreate(APIkey,APISecret )
 		:false;
@@ -105,7 +105,7 @@ bool ServerCmdQueue::apiSecretDelete(string APIkey){
 		?_apiSecretMgr->apiSecretDelete(APIkey)
 		:false;
 }
- 
+
 bool ServerCmdQueue::apiSecretGetSecret(string APIkey, string &APISecret){
 	return (_apiSecretMgr)
 		?_apiSecretMgr->apiSecretGetSecret(APIkey, APISecret)
@@ -117,5 +117,3 @@ bool ServerCmdQueue::apiSecretMustAuthenticate(){
 		?_apiSecretMgr->apiSecretMustAuthenticate()
 		:false;
  }
-
-

@@ -2933,6 +2933,20 @@ bool pIoTServerDB::sequenceisEnable(sequenceID_t sid){
 }
 
 
+bool pIoTServerDB::sequenceIsRunning(sequenceID_t sid){
+    {
+        std::lock_guard<std::mutex> lock(_mutex);
+
+        if(_sequences.count(sid) == 0)
+            return false;
+
+        Sequence* seq =  &_sequences[sid];
+        return (seq->_isRunning);
+    }
+      return false;
+}
+
+
 bool pIoTServerDB::sequenceShouldIgnoreManualMode(sequenceID_t sid){
     {
         std::lock_guard<std::mutex> lock(_mutex);
@@ -3065,6 +3079,33 @@ bool  pIoTServerDB::sequenceGetStep(sequenceID_t sid, uint stepNo, Step &step){
     return false;
 }
 
+
+bool pIoTServerDB::sequenceSetCurrentStep(sequenceID_t sid, uint stepNo){
+
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    if(_sequences.count(sid) >0 ){
+        auto seq = &_sequences[sid];
+        seq->_currentStepNumber = stepNo;
+        return true;
+
+      }
+    return false;
+}
+
+
+bool  pIoTServerDB::sequenceCurrentStep(sequenceID_t sid, uint &stepNo){
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    if(_sequences.count(sid) >0 ){
+       auto seq = _sequences[sid];
+        if(seq._currentStepNumber  != UINT_MAX){
+            stepNo = seq._currentStepNumber;
+            return true;
+        }
+     }
+    return false;
+}
 
 bool pIoTServerDB::sequenceCompletedStep(sequenceID_t sid, uint stepNo, time_t time){
 
@@ -3248,6 +3289,48 @@ bool pIoTServerDB::sequenceReset(sequenceID_t sid) {
 
     return false;
 }
+
+
+
+bool pIoTServerDB::sequenceSetRunning(sequenceID_t sid, bool isrunning){
+
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    if(_sequences.count(sid) > 0){
+        Sequence* seq =  &_sequences[sid];
+        seq->_isRunning = isrunning;
+       return true;
+    };
+
+    return false;
+}
+
+bool pIoTServerDB::sequenceStartAbort(sequenceID_t sid){
+
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    if(_sequences.count(sid) > 0){
+        Sequence* seq =  &_sequences[sid];
+        seq->_nextStepToRun = UINT_MAX;
+        return true;
+    };
+
+    return false;
+}
+
+bool pIoTServerDB::sequenceIsAborting(sequenceID_t sid){
+    {
+        std::lock_guard<std::mutex> lock(_mutex);
+
+        if(_sequences.count(sid) == 0)
+            return false;
+
+        Sequence* seq =  &_sequences[sid];
+        return (  seq->_isRunning  && (seq->_nextStepToRun == UINT_MAX));
+    }
+      return false;
+}
+
 
 bool  pIoTServerDB::sequenceGetAbortActions(sequenceID_t sid, vector<Action> & act){
     bool result  = false;

@@ -1621,7 +1621,7 @@ bool pIoTServerMgr::processEvents(){
                     string name = _db.sequenceGetName(sid);
                     string condition = _db.sequenceGetCondition(sid);
 
-                    if(!dontLog)
+       //              if(!dontLog)
                         LOGT_INFO("RUN %s SEQUENCE %04x (%d steps) \"%s\"",
                                   trgiStr.c_str(),
                                   sid, count, name.c_str());
@@ -1640,18 +1640,22 @@ bool pIoTServerMgr::processEvents(){
 
                 LOGT_INFO(msg.c_str());
 
+                _db.sequenceStartAbort(sid);
+
                 // check if we are in the middle of a sequence.
                 uint stepNo = 0;
                 _db.sequenceNextStepNumberToRun(sid,stepNo);
-
-                // reset the sequence
-                _db.sequenceReset(sid);
-                _db.sequenceSetLastRunTime(sid, localNow);
 
                 // if we already started a sequence,  run abort
                 if(stepNo > 0){
                     runAbortActions(sid);
                 }
+
+                // reset the sequence
+                _db.sequenceReset(sid);
+                _db.sequenceSetLastRunTime(sid, localNow);
+                _db.sequenceSetRunning(sid, false);
+
                 continue;
             }
 
@@ -1670,7 +1674,7 @@ bool pIoTServerMgr::processEvents(){
 
                     string name = _db.sequenceGetName(sid);
 
-                    if(!dontLog)
+           //         if(!dontLog)
                         LOGT_INFO("RUN %s SEQUENCE %04x, Step %d \"%s\"",
                                   trgiStr.c_str(),
                                   sid, stepNo, name.c_str());
@@ -1678,6 +1682,8 @@ bool pIoTServerMgr::processEvents(){
 
 
                 runSequenceStep(sid, stepNo, [=, this]( bool didSucceed){
+
+                   _db.sequenceSetRunning(sid, true);
 
                     time_t now = time(NULL);
                     struct tm* tm = localtime(&now);
@@ -1689,6 +1695,7 @@ bool pIoTServerMgr::processEvents(){
                         }
                         else {
                             // we completed..
+                            _db.sequenceSetRunning(sid, false);
                             _db.sequenceSetLastRunTime(sid, localNow);
                             //                           printf("Sequence: %04x, - done -\n\n", sid);
                         }
@@ -1911,6 +1918,10 @@ bool pIoTServerMgr::runSequenceStep(sequenceID_t sid, uint stepNo,
     vector<Action> actions;
     step.getActions(actions);
 
+    _db.sequenceSetCurrentStep(sid, stepNo);
+
+    LOGT_DEBUG("RUN SEQUENCE %s step %d", SequenceID_to_string(sid).c_str(), stepNo);
+
     for(auto action :actions){
         if(!dontLog)
             LOGT_DEBUG("RUN ACTION: %s", action.printString().c_str());
@@ -1932,7 +1943,6 @@ bool pIoTServerMgr::runSequenceStep(sequenceID_t sid, uint stepNo,
                            key.c_str(), value.c_str(), __LINE__);
             }
         }
-
         else if(action.cmd() == Action::JSON_CMD_RUN_SEQ){
             string str = action.key();
             sequenceID_t sid;
@@ -2026,6 +2036,8 @@ bool pIoTServerMgr::abortSequence(sequenceID_t sid){
 
             LOGT_INFO(msg.c_str());
 
+            _db.sequenceStartAbort(sid);
+
             // check if we are in the middle of a sequence.
             uint stepNo = 0;
             _db.sequenceNextStepNumberToRun(sid,stepNo);
@@ -2038,6 +2050,8 @@ bool pIoTServerMgr::abortSequence(sequenceID_t sid){
             if(stepNo > 0){
                 runAbortActions(sid);
             }
+
+             _db.sequenceSetRunning(sid, false);
             success = true;
         }
       }

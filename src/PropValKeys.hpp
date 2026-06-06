@@ -174,6 +174,8 @@ constexpr static string_view PROP_DEVICE_PARAMS     = "params";
 constexpr static string_view PROP_SEQUENCE         = "sequence";
 constexpr static string_view JSON_ARG_OVERIDE_MANUAL     = "override_manualmode";
 
+constexpr static string_view PROP_ISRUNNING         = "is_running";
+
 constexpr static string_view PROP_SENSOR_QUERY_INTERVAL  = "interval";
 constexpr static string_view PROP_TRACKING                 = "tracking";
 
@@ -259,6 +261,8 @@ constexpr static string_view JSON_ARG_SEQUENCE_ID         = "sequenceID";
 constexpr static string_view JSON_ARG_SEQUENCE_IDS         = "sequenceIDs";
 constexpr static string_view JSON_ARG_TIMED_SEQUENCES    = "sequences.timed";
 constexpr static string_view JSON_ARG_FUTURE_SEQUENCES    = "sequences.future";
+constexpr static string_view JSON_ARG_RUNNING_SEQUENCES    = "sequences.running";
+
 constexpr static string_view JSON_ARG_CRON_SEQUENCES   = "sequences.cron";
 constexpr static string_view PROP_SEQUENCE_GROUPS        = "sequence.groups";
 
