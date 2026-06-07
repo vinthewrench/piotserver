@@ -13,41 +13,45 @@
 #include "pIoTServerDevice.hpp"
 #include "GPIO.hpp"
 
- 
+
 using namespace std;
 
 class RPi_RelayBoardDevice : public pIoTServerDevice{
-    
+
 public:
- 
+
+    static constexpr std::string_view DEVICE_ACTION_ALL_OFF   = "ALL_OFF";
+
+
     RPi_RelayBoardDevice(string devID, string driverName);
     RPi_RelayBoardDevice(string devID);
     ~RPi_RelayBoardDevice();
     bool getVersion(string  &version);
-    
+
     bool initWithSchema(deviceSchemaMap_t deviceSchema);
-    
+
     bool start();
     void stop();
-    
+
     bool isConnected();
     bool setEnabled(bool enable);
-   
- 
+
+
     bool getValues ( keyValueMap_t &);
     bool setValues(keyValueMap_t kv);
  //   bool hasUpdates();
-  
+    bool deviceAction(string cmd);
+
     bool allOff();
-    
- 
+
+
 private:
-    
+
     bool        _isSetup = false;
     GPIO        _gpio;
-    
+
     map <string, GPIO::gpio_pin_t> _pinMap = {};
-  
+
     mutable std::mutex           _mutex;
     bool                         _pinDidChange = false;
  };

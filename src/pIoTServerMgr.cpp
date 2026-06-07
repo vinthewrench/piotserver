@@ -1640,11 +1640,12 @@ bool pIoTServerMgr::processEvents(){
 
                 LOGT_INFO(msg.c_str());
 
-                _db.sequenceStartAbort(sid);
 
                 // check if we are in the middle of a sequence.
                 uint stepNo = 0;
                 _db.sequenceNextStepNumberToRun(sid,stepNo);
+
+                _db.sequenceStartAbort(sid);
 
                 // if we already started a sequence,  run abort
                 if(stepNo > 0){
@@ -1985,7 +1986,6 @@ bool pIoTServerMgr::runSequenceStep(sequenceID_t sid, uint stepNo,
             if(device == nullptr){
                 LOGT_ERROR("DEVICE_ACTION failed: no device found for key \"%s\"",
                            key.c_str());
-                success = false;
                 continue;
             }
 
@@ -1993,8 +1993,7 @@ bool pIoTServerMgr::runSequenceStep(sequenceID_t sid, uint stepNo,
                 LOGT_ERROR("DEVICE_ACTION failed: key \"%s\" value \"%s\"",
                            key.c_str(),
                            value.c_str());
-                success = false;
-            }
+             }
         }
 
     }
@@ -2036,11 +2035,11 @@ bool pIoTServerMgr::abortSequence(sequenceID_t sid){
 
             LOGT_INFO(msg.c_str());
 
-            _db.sequenceStartAbort(sid);
-
-            // check if we are in the middle of a sequence.
+              // check if we are in the middle of a sequence.
             uint stepNo = 0;
             _db.sequenceNextStepNumberToRun(sid,stepNo);
+
+            _db.sequenceStartAbort(sid);
 
             // reset the sequence
             _db.sequenceReset(sid);

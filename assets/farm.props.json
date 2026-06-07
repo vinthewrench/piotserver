@@ -140,6 +140,7 @@
             "description": "Garden Irrigation Plugin board",
             "deviceID": 4001,
             "device_type": "MCP23008",
+            "key": "GARDEN_27",
             "pins": [
                 {
                     "bit": 7,
@@ -369,8 +370,8 @@
         "SPRK_9"
     ],
     "prop.file.version": {
-        "file.etag": 528,
-        "last_write": 1780838652
+        "file.etag": 529,
+        "last_write": 1780850897
     },
     "sequence": [
         {
@@ -592,44 +593,9 @@
             "on_abort": {
                 "action": [
                     {
-                        "cmd": "SET",
-                        "key": "GI_1",
-                        "value": "off"
-                    },
-                    {
-                        "cmd": "SET",
-                        "key": "GI_2",
-                        "value": "off"
-                    },
-                    {
-                        "cmd": "SET",
-                        "key": "GI_3",
-                        "value": "off"
-                    },
-                    {
-                        "cmd": "SET",
-                        "key": "GI_4",
-                        "value": "off"
-                    },
-                    {
-                        "cmd": "SET",
-                        "key": "GI_5",
-                        "value": "off"
-                    },
-                    {
-                        "cmd": "SET",
-                        "key": "GI_6",
-                        "value": "off"
-                    },
-                    {
-                        "cmd": "SET",
-                        "key": "GI_7",
-                        "value": "off"
-                    },
-                    {
-                        "cmd": "SET",
-                        "key": "GI_8",
-                        "value": "off"
+                        "cmd": "DEVICE_ACTION",
+                        "key": "GARDEN_27",
+                        "value": "ALL_OFF"
                     }
                 ]
             },

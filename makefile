@@ -11,8 +11,9 @@
 #
 # Useful commands:
 #
-#     make -j4              Build app and plugins in parallel.
+#     make -j4              Build app and plugins in parallel, then strip products.
 #     make -j4 plugins      Build only plugins in parallel.
+#     make strip            Strip app and plugins.
 #     make clean            Remove app, app objects, plugin objects, and plugin products.
 #     make clean-plugins    Clean only plugin object directories and plugin products.
 #     make distclean        Remove clean products plus generated auxiliary files.
@@ -20,7 +21,6 @@
 APP_NAME := piotserver
 APP_VERSION := 1.4.0-field
 GIT_HASH := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
-
 
 CXX := clang++
 CC  := clang
@@ -136,9 +136,9 @@ PLUGIN_DIRS := \
 	VELM6030 \
 	TMP10X
 
-.PHONY: all app plugins clean clean-plugins distclean run dirs print $(PLUGIN_DIRS)
+.PHONY: all app plugins strip strip-app strip-plugins clean clean-plugins distclean run dirs print $(PLUGIN_DIRS)
 
-all: app plugins
+all: app plugins strip
 
 app: $(APP_NAME)
 
@@ -156,6 +156,9 @@ $(PLUGIN_DIRS):
 
 $(APP_NAME): $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+ifneq ($(UNAME_S),Darwin)
+	strip $@
+endif
 
 $(BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
@@ -164,6 +167,20 @@ $(BUILD_DIR)/%.o: %.cpp
 $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -c $< -o $@
+
+strip: strip-app strip-plugins
+
+strip-app: app
+ifneq ($(UNAME_S),Darwin)
+	strip $(APP_NAME)
+endif
+
+strip-plugins: plugins
+ifneq ($(UNAME_S),Darwin)
+	@if ls plugins/*.so >/dev/null 2>&1; then \
+		strip plugins/*.so; \
+	fi
+endif
 
 run: all
 	./$(APP_NAME)
@@ -185,6 +202,7 @@ distclean: clean
 	rm -f *.db
 	rm -f *.db-shm
 	rm -f *.db-wal
+
 print:
 	@echo "APP_NAME:    $(APP_NAME)"
 	@echo "UNAME_S:     $(UNAME_S)"

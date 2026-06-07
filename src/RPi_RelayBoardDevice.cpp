@@ -244,3 +244,33 @@ bool RPi_RelayBoardDevice::getValues(keyValueMap_t& results)
 //
 //     return _pinDidChange;
 // }
+
+
+
+bool RPi_RelayBoardDevice::deviceAction(string cmd)
+{
+    std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
+
+    if(!_isEnabled){
+        LOGT_ERROR("RPi_RelayBoardDevice devID \"%s\" DEVICE_ACTION \"%s\" failed: device disabled",
+                   _deviceID.c_str(),
+                   cmd.c_str());
+        return false;
+    }
+
+    LOGT_DEBUG("RPi_RelayBoardDevice devID \"%s\" DEVICE_ACTION : \"%s\"",
+               _deviceID.c_str(),
+               cmd.c_str());
+
+
+    if(cmd == DEVICE_ACTION_ALL_OFF){
+        return allOff();;
+    }
+
+
+    LOGT_ERROR("RPi_RelayBoardDevice devID \"%s\" unknown DEVICE_ACTION \"%s\"",
+               _deviceID.c_str(),
+               cmd.c_str());
+
+    return false;
+}
