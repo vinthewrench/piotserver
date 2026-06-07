@@ -346,6 +346,14 @@
         }
     ],
     "keys.manual": [
+        "GI_1",
+        "GI_2",
+        "GI_3",
+        "GI_4",
+        "GI_5",
+        "GI_6",
+        "GI_7",
+        "GI_8",
         "RLY41_CH2",
         "SPRK_1",
         "SPRK_10",
@@ -361,13 +369,13 @@
         "SPRK_9"
     ],
     "prop.file.version": {
-        "file.etag": 173,
-        "last_write": 1780433465
+        "file.etag": 528,
+        "last_write": 1780838652
     },
     "sequence": [
         {
             "description": "Runs each Valve Master sprinkler zone in sequence and shuts all zones off on abort.",
-            "enable": true,
+            "enable": false,
             "name": "Garden irrigation valve sequence",
             "on_abort": {
                 "action": [
@@ -578,10 +586,191 @@
             }
         },
         {
+            "description": "Runs each Garden Irrigation MCP23008 output for 10 seconds in sequence and shuts all outputs off on abort.",
+            "enable": true,
+            "name": "Garden irrigation plugin test sequence",
+            "on_abort": {
+                "action": [
+                    {
+                        "cmd": "SET",
+                        "key": "GI_1",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "GI_2",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "GI_3",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "GI_4",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "GI_5",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "GI_6",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "GI_7",
+                        "value": "off"
+                    },
+                    {
+                        "cmd": "SET",
+                        "key": "GI_8",
+                        "value": "off"
+                    }
+                ]
+            },
+            "override_manualmode": true,
+            "sequenceID": "4001",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GI_1",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GI_1",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "GI_2",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GI_2",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "GI_3",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GI_3",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "GI_4",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GI_4",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "GI_5",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GI_5",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "GI_6",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GI_6",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "GI_7",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GI_7",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "GI_8",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GI_8",
+                            "value": "off"
+                        }
+                    ]
+                }
+            ],
+            "trigger": {
+                "offset": 10,
+                "timeBase": "civil sunrise"
+            }
+        },
+        {
             "description": "Turn relay light on at sunset.",
             "enable": true,
             "name": "Lights on at sunset",
-            "override_manualmode": false,
+            "override_manualmode": true,
             "sequenceID": "4100",
             "steps": [
                 {
@@ -602,7 +791,7 @@
             "description": "Turn relay light off at sunrise.",
             "enable": true,
             "name": "Lights off at sunrise",
-            "override_manualmode": false,
+            "override_manualmode": true,
             "sequenceID": "4101",
             "steps": [
                 {
@@ -669,14 +858,19 @@
     },
     "ui.schedules": {
         "garden_irrigation": {
-            "description": "Automatic sprinkler sequence",
-            "label": "Garden Irrigation",
+            "description": "ValveMaster sprinkler sequence",
+            "label": "New Garden Irrigation",
             "members": ["4000"]
         },
         "lights": {
             "description": "Outdoor light schedule",
             "label": "Lights",
             "members": ["4100", "4101"]
+        },
+        "old_garden_irrigation": {
+            "description": "PWM sprinkler sequence",
+            "label": "Garden Irrigation",
+            "members": ["4001"]
         }
     },
     "ui.sensors": {
