@@ -1621,7 +1621,7 @@ bool pIoTServerMgr::processEvents(){
                     string name = _db.sequenceGetName(sid);
                     string condition = _db.sequenceGetCondition(sid);
 
-       //              if(!dontLog)
+                    if(!dontLog)
                         LOGT_INFO("RUN %s SEQUENCE %04x (%d steps) \"%s\"",
                                   trgiStr.c_str(),
                                   sid, count, name.c_str());
@@ -1675,7 +1675,7 @@ bool pIoTServerMgr::processEvents(){
 
                     string name = _db.sequenceGetName(sid);
 
-           //         if(!dontLog)
+                    if(!dontLog)
                         LOGT_INFO("RUN %s SEQUENCE %04x, Step %d \"%s\"",
                                   trgiStr.c_str(),
                                   sid, stepNo, name.c_str());
