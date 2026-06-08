@@ -1921,7 +1921,8 @@ bool pIoTServerMgr::runSequenceStep(sequenceID_t sid, uint stepNo,
 
     _db.sequenceSetCurrentStep(sid, stepNo);
 
-    LOGT_DEBUG("RUN SEQUENCE %s step %d", SequenceID_to_string(sid).c_str(), stepNo);
+    if(!dontLog)
+          LOGT_DEBUG("RUN SEQUENCE %s step %d", SequenceID_to_string(sid).c_str(), stepNo);
 
     for(auto action :actions){
         if(!dontLog)

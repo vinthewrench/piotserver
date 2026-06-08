@@ -1729,13 +1729,14 @@ static void Version_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
     uint64_t systemUptime = 0;
 
     if (getSystemTimes(systemTime, systemBootTime, systemUptime)) {
+        const uint64_t safeAppUptime = std::min(appUptime, systemUptime);
+
         reply["system_time"] = systemTime;
         reply["system_boot_time"] = systemBootTime;
         reply["system_uptime"] = systemUptime;
 
-        if (systemTime >= appUptime) {
-            reply["app_start_time"] = systemTime - appUptime;
-        }
+        reply[string(JSON_ARG_UPTIME)] = safeAppUptime;
+        reply["app_start_time"] = systemTime - safeAppUptime;
     }
 
     string instanceName;
