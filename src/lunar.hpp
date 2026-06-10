@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------------------------------------------------
- * lunar.h
+ * lunar.hpp
  * Header file for lunar library
  *  https://github.com/ciroque/lunar
  * Calculate functions are based on https://github.com/mourner/suncalc/blob/master/suncalc.js
@@ -34,7 +34,7 @@ struct Phase {
 };
 
 // Used in intermediate calculations.
-// Describes the well, position of a celestial body.
+// Describes the position of a celestial body.
 struct Position {
     double declination;
     double distance;
@@ -62,7 +62,7 @@ public:
     // Params:
     //  - int year: the year to be used in the calculation
     //  - int month: the month to be used in the calculation
-    //  - int day: the day to be used in the calculation
+    //  - double day: the day to be used in the calculation
     // Return:
     //  An integer value representing the Julian day.
     static int CalculateJulianDay(int year, int month, double day);
@@ -75,16 +75,16 @@ public:
 
     // Calculates the phase of the moon for the specified Julian date.
     // Params:
-    //  -int julianDay: the Julian day to use in the calculation
+    //  - int julianDay: the Julian day to use in the calculation
     // Return:
     //  A Phase instance containing the details of the moon's phase.
     static Phase CalculateMoonPhase(int julianDay);
 
-    // Calculates the phase of the moon for the specified Julian date.
+    // Calculates the phase of the moon for the specified date.
     // Params:
     //  - int year: the year to be used in the calculation
     //  - int month: the month to be used in the calculation
-    //  - int day: the day to be used in the calculation
+    //  - double day: the day to be used in the calculation
     // Return:
     //  A Phase instance containing the details of the moon's phase.
     static Phase CalculateMoonPhase(int year, int month, double day);
@@ -107,25 +107,35 @@ private:
     static Position CalculateLunarCoordinates(int julianDay);
     static Illumination CalculateIllumination(int julianDay);
 
+    // Converts raw lunar phase + illumination into the user-facing moon segment.
+    static Segment CalculateSegment(double phase, double visible);
+
     static inline double CalculateEclipticLongitude(double solarMeanAnomaly) {
-        auto center = RAD * (1.9148 * sin(solarMeanAnomaly) + 0.02
-            * sin(2 * solarMeanAnomaly) + 0.0003 * sin(3 * solarMeanAnomaly));
+        auto center = RAD * (
+            1.9148 * sin(solarMeanAnomaly)
+            + 0.02 * sin(2 * solarMeanAnomaly)
+            + 0.0003 * sin(3 * solarMeanAnomaly)
+        );
+
         auto earthPerihelion = RAD * 102.9372;
 
         return solarMeanAnomaly + center + earthPerihelion + PI;
     }
 
     static inline double CalculateDeclination(double l, double b) {
-        return std::asin(std::sin(b)
-            * std::cos(EARTH_OBLIQUITY) + std::cos(b)
-            * std::sin(EARTH_OBLIQUITY) * std::sin(l));
+        return std::asin(
+            std::sin(b) * std::cos(EARTH_OBLIQUITY)
+            + std::cos(b) * std::sin(EARTH_OBLIQUITY) * std::sin(l)
+        );
     }
 
     static inline double CalculateRightAscension(double l, double b) {
-        return std::atan2(std::sin(l)
-            * std::cos(EARTH_OBLIQUITY) - std::tan(b)
-            * std::sin(EARTH_OBLIQUITY), std::cos(l));
+        return std::atan2(
+            std::sin(l) * std::cos(EARTH_OBLIQUITY)
+            - std::tan(b) * std::sin(EARTH_OBLIQUITY),
+            std::cos(l)
+        );
     }
 };
 
-#endif //LUNAR_LUNAR_H
+#endif // LUNAR_LUNAR_H

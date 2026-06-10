@@ -28,40 +28,47 @@ void SolarTimeMgr::setLatLong(double latitude, double longitude){
 	_longitude = longitude;
 }
 
-bool  SolarTimeMgr::calculateSolarEventTimes(){
+bool SolarTimeMgr::calculateSolarEventTimes() {
 
-	if(_latitude == numeric_limits<double>::max()
-		|| _longitude == numeric_limits<double>::max())
-		return  false;
+    if(_latitude == numeric_limits<double>::max()
+        || _longitude == numeric_limits<double>::max()) {
+        return false;
+    }
 
-	_cachedSolar.previousMidnight = 0;
+    _cachedSolar.previousMidnight = 0;
 
-	solarTimes_t solar = {};
+    solarTimes_t solar = {};
 
-	time_t now = time(NULL);
-	struct tm* tm = localtime(&now);
+    time_t now = time(NULL);
+    struct tm* tm = localtime(&now);
 
-	solar.gmtOffset = tm->tm_gmtoff;
-    solar.previousMidnight =  previousMidnight((now + tm->tm_gmtoff));
+    solar.gmtOffset = tm->tm_gmtoff;
+    solar.previousMidnight = previousMidnight((now + tm->tm_gmtoff));
 
-  	_sun.setPosition(_latitude, _longitude, (double) (tm->tm_gmtoff / SECS_PER_HOUR));
-	_sun.setCurrentDate(tm->tm_year + 1900,  tm->tm_mon + 1, tm->tm_mday);
+    _sun.setPosition(_latitude, _longitude, (double) (tm->tm_gmtoff / SECS_PER_HOUR));
+    _sun.setCurrentDate(tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
 
- 	solar.sunSetMins 			= _sun.calcSunset();
-	solar.sunriseMins 			= _sun.calcSunrise();
-	solar.civilSunSetMins 		= _sun.calcCivilSunset();
-	solar.civilSunRiseMins 	    = _sun.calcCivilSunrise();
- 	solar.latitude 				= _latitude;
-	solar.longitude 			= _longitude;
- 	solar.timeZoneString		= string(tm->tm_zone);
+    solar.sunSetMins = _sun.calcSunset();
+    solar.sunriseMins = _sun.calcSunrise();
+    solar.civilSunSetMins = _sun.calcCivilSunset();
+    solar.civilSunRiseMins = _sun.calcCivilSunrise();
 
-    auto moon = Lunar::CalculateMoonPhase(tm->tm_year + 1900, tm->tm_mon +1, tm->tm_mday);
-    solar.moonPhase             = (uint8_t) (moon.phase * 8);
-    solar.moonVisable           = moon.visible;
-    solar.moonPhaseName         = Lunar::GetSegmentName(moon.segment);
+    solar.latitude = _latitude;
+    solar.longitude = _longitude;
+    solar.timeZoneString = string(tm->tm_zone);
 
-	_cachedSolar = solar;
-	return true;
+    auto moon = Lunar::CalculateMoonPhase(
+        tm->tm_year + 1900,
+        tm->tm_mon + 1,
+        tm->tm_mday
+    );
+
+    solar.moonPhase = static_cast<uint8_t>(moon.segment);
+    solar.moonVisable = moon.visible;
+    solar.moonPhaseName = Lunar::GetSegmentName(static_cast<int>(moon.segment));
+
+    _cachedSolar = solar;
+    return true;
 }
 
 bool SolarTimeMgr::getSolarEventTimes(solarTimes_t& events){

@@ -147,7 +147,7 @@ constexpr string_view JSON_ARG_SOLAR_GMTOFFSET         = "gmtOffset";
 constexpr string_view JSON_ARG_SOLAR_TIMEZONE         = "timeZone";
 constexpr string_view JSON_ARG_SOLAR_MIDNIGHT         = "midnight";
 
-constexpr string_view JSON_ARG_SOLAR_POM_VISABLE       = "pom.visable";
+constexpr string_view JSON_ARG_SOLAR_POM_VISIBLE       = "pom.visible";
 constexpr string_view JSON_ARG_SOLAR_POM_PHASE         = "pom.phase";
 constexpr string_view JSON_ARG_SOLAR_POM_STR            = "pom.name";
 

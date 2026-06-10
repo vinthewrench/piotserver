@@ -1476,7 +1476,7 @@ static void Date_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
         sj[JSON_ARG_SOLAR_TIMEZONE] = solar.timeZoneString;
         sj[JSON_ARG_SOLAR_MIDNIGHT] = solar.previousMidnight - solar.gmtOffset;
 
-        sj[JSON_ARG_SOLAR_POM_VISABLE] = solar.moonVisable;
+        sj[JSON_ARG_SOLAR_POM_VISIBLE] = solar.moonVisable;
         sj[JSON_ARG_SOLAR_POM_STR] = solar.moonPhaseName;
         sj[JSON_ARG_SOLAR_POM_PHASE] = solar.moonPhase;
         reply[JSON_ARG_SOLAR] = sj;
