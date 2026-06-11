@@ -1,0 +1,157 @@
+{
+    "config": {
+        "lat_long": "34.465338, -93.362827"
+    },
+    "devices": [
+        {
+            "address": "0x09",
+            "description": "Valve Master I2C to RS-485 irrigation controller",
+            "deviceID": 4000,
+            "device_type": "VALVEMASTER",
+            "key": "VALVEMASTER_1",
+            "pins": [
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_1",
+                    "other.props": {
+                        "node": 1,
+                        "valve": 1
+                    },
+                    "title": "A. Chard/Kale",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_2",
+                    "other.props": {
+                        "node": 1,
+                        "valve": 2
+                    },
+                    "title": "B. Cucumbers",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_3",
+                    "other.props": {
+                        "node": 2,
+                        "valve": 1
+                    },
+                    "title": "C. Tomatoes",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_4",
+                    "other.props": {
+                        "node": 2,
+                        "valve": 2
+                    },
+                    "title": "D. Peppers",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_5",
+                    "other.props": {
+                        "node": 3,
+                        "valve": 1
+                    },
+                    "title": "E. Beans",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_6",
+                    "other.props": {
+                        "node": 3,
+                        "valve": 2
+                    },
+                    "title": "F. Squash",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_7",
+                    "other.props": {
+                        "node": 4,
+                        "valve": 1
+                    },
+                    "title": "G. Corn",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_8",
+                    "other.props": {
+                        "node": 4,
+                        "valve": 2
+                    },
+                    "title": "H. Melons",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_9",
+                    "other.props": {
+                        "node": 5,
+                        "valve": 1
+                    },
+                    "title": "I. Herbs",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_10",
+                    "other.props": {
+                        "node": 5,
+                        "valve": 2
+                    },
+                    "title": "J. Lettuce",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_11",
+                    "other.props": {
+                        "node": 6,
+                        "valve": 1
+                    },
+                    "title": "K. Carrots",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_12",
+                    "other.props": {
+                        "node": 6,
+                        "valve": 2
+                    },
+                    "title": "L. Beets",
+                    "tracking": "dont.record"
+                }
+            ],
+            "power_hold_sec": 10,
+            "retry_count": 3,
+            "retry_delay_ms": 150,
+            "title": "Valve Master I2C"
+        }
+    ],
+    "prop.file.version": {
+        "file.etag": 10,
+        "last_write": 1781201347
+    },
+    "sequence": null
+}

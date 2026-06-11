@@ -14,7 +14,7 @@ CC  := clang
 CXX := clang++
 
 PLUGIN_NAME := VALVEMASTER
-VALVEMASTER_DRIVER_VERSION ?= 1.1
+VALVEMASTER_DRIVER_VERSION ?= 2.0.0
 
 ROOT_DIR   := ../..
 SRC_DIR    := $(ROOT_DIR)/src
@@ -41,6 +41,13 @@ CXXFLAGS := \
 	-MMD \
 	-MP
 
+#
+# Make the VALVEMASTER driver version available to the source.
+#
+# The production pIoTServer plugin should advertise a stable integration
+# version. Keep temporary dev/test suffixes in the standalone test tree unless
+# you intentionally want them visible on the farm runtime.
+#
 CXXFLAGS += -DVALVEMASTER_DRIVER_VERSION=\"$(VALVEMASTER_DRIVER_VERSION)\"
 
 LDFLAGS :=
@@ -76,6 +83,7 @@ TARGET := $(PLUGIN_DIR)/$(PLUGIN_NAME).$(PLUGIN_EXT)
 OBJS := \
 	$(BUILD_DIR)/VALVEMASTER_factory.o \
 	$(BUILD_DIR)/VALVEMASTER_Device.o \
+	$(BUILD_DIR)/VALVEMASTER.o \
 	$(BUILD_DIR)/I2C.o
 
 DEPS := $(OBJS:.o=.d)
@@ -95,7 +103,11 @@ $(BUILD_DIR)/VALVEMASTER_factory.o: VALVEMASTER_factory.cpp VALVEMASTER_Device.h
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/VALVEMASTER_Device.o: VALVEMASTER_Device.cpp VALVEMASTER_Device.hpp
+$(BUILD_DIR)/VALVEMASTER_Device.o: VALVEMASTER_Device.cpp VALVEMASTER_Device.hpp VALVEMASTER.hpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/VALVEMASTER.o: VALVEMASTER.cpp VALVEMASTER.hpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
@@ -111,6 +123,7 @@ distclean: clean
 
 print:
 	@echo "PLUGIN_NAME: $(PLUGIN_NAME)"
+	@echo "VALVEMASTER_DRIVER_VERSION: $(VALVEMASTER_DRIVER_VERSION)"
 	@echo "UNAME_S:     $(UNAME_S)"
 	@echo "TARGET:      $(TARGET)"
 	@echo "CC:          $(CC)"
