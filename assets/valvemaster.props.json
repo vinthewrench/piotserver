@@ -150,8 +150,220 @@
         }
     ],
     "prop.file.version": {
-        "file.etag": 10,
-        "last_write": 1781201347
+        "file.etag": 1,
+        "last_write": 1781201937
     },
-    "sequence": null
+    "sequence": [
+        {
+            "description": "Runs each Valve Master sprinkler zone in sequence and shuts all zones off on abort.",
+            "enable": true,
+            "name": "Garden irrigation valve sequence",
+            "on_abort": {
+                "action": [
+                    {
+                        "cmd": "DEVICE_ACTION",
+                        "key": "VALVEMASTER_1",
+                        "value": "ALL_OFF"
+                    },
+                    {
+                        "cmd": "DEVICE_ACTION",
+                        "key": "VALVEMASTER_1",
+                        "value": "POWER_OFF"
+                    }
+                ]
+            },
+            "override_manualmode": true,
+            "sequenceID": "4000",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_1",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_1",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_2",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_2",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_3",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_3",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_4",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_4",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_5",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_5",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_6",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_6",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_7",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_7",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_8",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_8",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_9",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_9",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_10",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_10",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_11",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_11",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_12",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 5
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_12",
+                            "value": "off"
+                        }
+                    ],
+                    "duration": 5
+                }
+            ],
+            "trigger": {
+                "event": "manual"
+            }
+        }
+    ]
 }
