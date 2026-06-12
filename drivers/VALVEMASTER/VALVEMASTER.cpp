@@ -929,6 +929,69 @@ bool VALVEMASTER::runCommandOnce(queuedCommand_t item,
     completionVersionHi = 0;
     completionVersionLo = 0;
 
+    /*
+     * Read one command-related firmware register with local retry pacing.
+     *
+     * This is deliberately used only after the command byte has been written.
+     * Once the command write succeeds, the VALVEMASTER may already be acting on
+     * the request. A transient I2C read failure while fetching STATUS, RESULT,
+     * or reply registers does not prove the command did not happen.
+     *
+     * Therefore:
+     *
+     *   - command write failure may retry the whole command
+     *   - post-command read failure retries the read first
+     *
+     * This prevents the action thread from immediately re-sending commands such
+     * as POWER_ON, CLOSE_ALL, POWER_OFF, or SET_CHANNEL just because the first
+     * confirmation read missed on the isolated I2C bus.
+     */
+    auto readCommandRegisterWithRetries =
+        [this, &item](uint8_t reg,
+                      uint8_t &value,
+                      const char *label) -> bool {
+
+            for (uint8_t attempt = 1;
+                 attempt <= VALVEMASTER_COMMAND_RETRY_COUNT;
+                 attempt++) {
+
+                if (_i2cPort.readByte(reg, value)) {
+                    if (attempt > 1) {
+                        LOGT_DEBUG("VALVEMASTER(%02X) command 0x%02X %s read succeeded on attempt %u/%u",
+                                   _i2cPort.getDevAddr(),
+                                   item.command,
+                                   label,
+                                   attempt,
+                                   VALVEMASTER_COMMAND_RETRY_COUNT);
+                    }
+
+                    return true;
+                }
+
+                LOGT_ERROR("VALVEMASTER(%02X) command 0x%02X %s read failed attempt %u/%u: %s",
+                           _i2cPort.getDevAddr(),
+                           item.command,
+                           label,
+                           attempt,
+                           VALVEMASTER_COMMAND_RETRY_COUNT,
+                           strerror(errno));
+
+                if (attempt < VALVEMASTER_COMMAND_RETRY_COUNT) {
+                    std::this_thread::sleep_for(
+                        std::chrono::milliseconds(VALVEMASTER_COMMAND_RETRY_DELAY_MS));
+                }
+            }
+
+            return false;
+        };
+
+    /*
+     * Command submission path.
+     *
+     * If one of these writes fails, the command may not have reached the
+     * controller. In that case it is valid for the outer command-attempt loop
+     * to retry the whole command.
+     */
     success = _i2cPort.writeByte(VALVEMASTER_REG_ARG0, item.arg0);
 
     if (success) {
@@ -955,15 +1018,17 @@ bool VALVEMASTER::runCommandOnce(queuedCommand_t item,
         return false;
     }
 
+    /*
+     * Command was submitted.
+     *
+     * From this point on, do not immediately re-send the command because of a
+     * missed STATUS or RESULT read. The action may already have occurred.
+     * Retry confirmation reads locally first.
+     */
     for (;;) {
-        success = _i2cPort.readByte(VALVEMASTER_REG_STATUS, status);
-
-        if (!success) {
-            LOGT_ERROR("VALVEMASTER(%02X) command 0x%02X status read failed: %s",
-                       _i2cPort.getDevAddr(),
-                       item.command,
-                       strerror(errno));
-
+        if (!readCommandRegisterWithRetries(VALVEMASTER_REG_STATUS,
+                                            status,
+                                            "status")) {
             result = VALVEMASTER_RESULT_RS485_BAD_REPLY;
             status = 0;
             commandOk = false;
@@ -971,14 +1036,9 @@ bool VALVEMASTER::runCommandOnce(queuedCommand_t item,
         }
 
         if ((status & VALVEMASTER_STATUS_BUSY) == 0) {
-            success = _i2cPort.readByte(VALVEMASTER_REG_RESULT, result);
-
-            if (!success) {
-                LOGT_ERROR("VALVEMASTER(%02X) command 0x%02X result read failed: %s",
-                           _i2cPort.getDevAddr(),
-                           item.command,
-                           strerror(errno));
-
+            if (!readCommandRegisterWithRetries(VALVEMASTER_REG_RESULT,
+                                                result,
+                                                "result")) {
                 result = VALVEMASTER_RESULT_RS485_BAD_REPLY;
                 commandOk = false;
                 return false;
@@ -989,7 +1049,8 @@ bool VALVEMASTER::runCommandOnce(queuedCommand_t item,
 
         {
             auto now = std::chrono::steady_clock::now();
-            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - busyStart).count();
+            auto elapsed =
+                std::chrono::duration_cast<std::chrono::milliseconds>(now - busyStart).count();
 
             if (elapsed >= busyTimeoutMs) {
                 LOGT_ERROR("VALVEMASTER(%02X) command 0x%02X timed out waiting for BUSY to clear after %u ms",
@@ -1036,25 +1097,36 @@ bool VALVEMASTER::runCommandOnce(queuedCommand_t item,
         bool replySuccess = true;
         bool parsedOpen = false;
 
-        replySuccess = _i2cPort.readByte(VALVEMASTER_REG_REPLY_NODE, replyNode);
+        replySuccess =
+            readCommandRegisterWithRetries(VALVEMASTER_REG_REPLY_NODE,
+                                           replyNode,
+                                           "reply-node");
 
         if (replySuccess) {
-            replySuccess = _i2cPort.readByte(VALVEMASTER_REG_REPLY_CMD, replyCmd);
+            replySuccess =
+                readCommandRegisterWithRetries(VALVEMASTER_REG_REPLY_CMD,
+                                               replyCmd,
+                                               "reply-cmd");
         }
 
         if (replySuccess) {
-            replySuccess = _i2cPort.readByte(VALVEMASTER_REG_REPLY_ARG0, replyArg0);
+            replySuccess =
+                readCommandRegisterWithRetries(VALVEMASTER_REG_REPLY_ARG0,
+                                               replyArg0,
+                                               "reply-arg0");
         }
 
         if (replySuccess) {
-            replySuccess = _i2cPort.readByte(VALVEMASTER_REG_REPLY_ARG1, replyArg1);
+            replySuccess =
+                readCommandRegisterWithRetries(VALVEMASTER_REG_REPLY_ARG1,
+                                               replyArg1,
+                                               "reply-arg1");
         }
 
         if (!replySuccess) {
-            LOGT_ERROR("VALVEMASTER(%02X) command 0x%02X reply read failed: %s",
+            LOGT_ERROR("VALVEMASTER(%02X) command 0x%02X reply read failed after retries",
                        _i2cPort.getDevAddr(),
-                       item.command,
-                       strerror(errno));
+                       item.command);
 
             commandOk = false;
             result = VALVEMASTER_RESULT_RS485_BAD_REPLY;
@@ -1091,25 +1163,36 @@ bool VALVEMASTER::runCommandOnce(queuedCommand_t item,
     if (commandOk && item.command == VALVEMASTER_CMD_GET_NODE_VERSION) {
         bool replySuccess = true;
 
-        replySuccess = _i2cPort.readByte(VALVEMASTER_REG_REPLY_NODE, replyNode);
+        replySuccess =
+            readCommandRegisterWithRetries(VALVEMASTER_REG_REPLY_NODE,
+                                           replyNode,
+                                           "version-reply-node");
 
         if (replySuccess) {
-            replySuccess = _i2cPort.readByte(VALVEMASTER_REG_REPLY_CMD, replyCmd);
+            replySuccess =
+                readCommandRegisterWithRetries(VALVEMASTER_REG_REPLY_CMD,
+                                               replyCmd,
+                                               "version-reply-cmd");
         }
 
         if (replySuccess) {
-            replySuccess = _i2cPort.readByte(VALVEMASTER_REG_REPLY_ARG0, replyArg0);
+            replySuccess =
+                readCommandRegisterWithRetries(VALVEMASTER_REG_REPLY_ARG0,
+                                               replyArg0,
+                                               "version-reply-arg0");
         }
 
         if (replySuccess) {
-            replySuccess = _i2cPort.readByte(VALVEMASTER_REG_REPLY_ARG1, replyArg1);
+            replySuccess =
+                readCommandRegisterWithRetries(VALVEMASTER_REG_REPLY_ARG1,
+                                               replyArg1,
+                                               "version-reply-arg1");
         }
 
         if (!replySuccess) {
-            LOGT_ERROR("VALVEMASTER(%02X) command 0x%02X version reply read failed: %s",
+            LOGT_ERROR("VALVEMASTER(%02X) command 0x%02X version reply read failed after retries",
                        _i2cPort.getDevAddr(),
-                       item.command,
-                       strerror(errno));
+                       item.command);
 
             commandOk = false;
             result = VALVEMASTER_RESULT_RS485_BAD_REPLY;
@@ -1130,7 +1213,6 @@ bool VALVEMASTER::runCommandOnce(queuedCommand_t item,
 
     return commandOk;
 }
-
 
 void VALVEMASTER::actionThread()
 {
