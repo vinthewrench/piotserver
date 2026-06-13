@@ -85,9 +85,9 @@
 // Host-side timing / retry policy
 // -----------------------------------------------------------------------------
 
-#define VALVEMASTER_POLL_DELAY_MS                25
+#define VALVEMASTER_POLL_DELAY_MS                200
 #define VALVEMASTER_NODE_SETTLE_MS               1000
-#define VALVEMASTER_RS485_COMMAND_GAP_MS         100
+#define VALVEMASTER_RS485_COMMAND_GAP_MS         500
 #define VALVEMASTER_COMMAND_RETRY_COUNT          3
 #define VALVEMASTER_COMMAND_RETRY_DELAY_MS       150
 #define VALVEMASTER_COMMAND_BUSY_TIMEOUT_MS      5000
@@ -1036,6 +1036,17 @@ bool VALVEMASTER::runCommandOnce(queuedCommand_t item,
         }
 
         if ((status & VALVEMASTER_STATUS_BUSY) == 0) {
+            /*
+             * The controller has reported command completion. Give the AVR/I2C
+             * register interface a conservative settle window before reading
+             * RESULT and, for commands that return data, reply registers.
+             *
+             * This delay is intentionally host-side/I2C-side. It is not an
+             * RS-485 valve-node delay. The RS-485 command already completed
+             * before BUSY was cleared by the controller firmware.
+             */
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
             if (!readCommandRegisterWithRetries(VALVEMASTER_REG_RESULT,
                                                 result,
                                                 "result")) {

@@ -3,23 +3,20 @@
 # Builds plugins/TMP10X.so on Linux.
 # Builds plugins/TMP10X.dylib on macOS.
 #
-# This plugin intentionally references host-provided symbols from piotserver.
-# The top-level piotserver executable must export symbols on Linux, usually:
-#
-#     LDFLAGS += -rdynamic
-#
-# Do not link host singleton implementation files such as LogMgr.cpp into the
-# plugin. The plugin should use the host process symbols.
+# This plugin intentionally uses common runtime code from libpiotcore.
+# In particular, I2C.cpp is not compiled into the plugin. The plugin resolves
+# I2C symbols from libpiotcore.so so all I2C users share one implementation.
 
 CC  := clang
 CXX := clang++
 
 PLUGIN_NAME := TMP10X
 
-ROOT_DIR   := ../..
-SRC_DIR    := $(ROOT_DIR)/src
-BUILD_DIR  := $(ROOT_DIR)/build/drivers/$(PLUGIN_NAME)
-PLUGIN_DIR := $(ROOT_DIR)/plugins
+ROOT_DIR     := ../..
+SRC_DIR      := $(ROOT_DIR)/src
+BUILD_DIR    := $(ROOT_DIR)/build/drivers/$(PLUGIN_NAME)
+PLUGIN_DIR   := $(ROOT_DIR)/plugins
+CORE_LIB_DIR := $(ROOT_DIR)/lib
 
 UNAME_S := $(shell uname -s)
 
@@ -51,19 +48,17 @@ ifeq ($(UNAME_S),Darwin)
 	PLUGIN_EXT := dylib
 
 	# macOS plugin build.
-	#
-	# The plugin intentionally references symbols supplied by the host process.
-	# -undefined dynamic_lookup tells the macOS linker that unresolved symbols
-	# may be resolved from the executable that loads this plugin with dlopen().
 	PLUGIN_LDFLAGS := -dynamiclib -undefined dynamic_lookup
 else
 	PLUGIN_EXT := so
 
 	# Linux plugin build.
 	#
-	# Shared objects used as plugins commonly leave host-provided symbols to be
-	# resolved by the process that calls dlopen().
-	PLUGIN_LDFLAGS := -shared
+	# plugins/TMP10X.so needs to find lib/libpiotcore.so at runtime.
+	# From plugins/, that path is ../lib.
+	PLUGIN_LDFLAGS := -shared -Wl,-rpath,'$$ORIGIN/../lib'
+
+	LDLIBS += -L$(CORE_LIB_DIR) -lpiotcore
 endif
 
 TARGET := $(PLUGIN_DIR)/$(PLUGIN_NAME).$(PLUGIN_EXT)
@@ -71,8 +66,7 @@ TARGET := $(PLUGIN_DIR)/$(PLUGIN_NAME).$(PLUGIN_EXT)
 OBJS := \
 	$(BUILD_DIR)/TMP10X_factory.o \
 	$(BUILD_DIR)/TMP10X_Device.o \
-	$(BUILD_DIR)/TMP10X.o \
-	$(BUILD_DIR)/I2C.o
+	$(BUILD_DIR)/TMP10X.o
 
 DEPS := $(OBJS:.o=.d)
 
@@ -99,10 +93,6 @@ $(BUILD_DIR)/TMP10X.o: TMP10X.cpp TMP10X.hpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/I2C.o: $(SRC_DIR)/I2C.cpp $(SRC_DIR)/I2C.hpp
-	@mkdir -p $(dir $@)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
-
 clean:
 	rm -rf $(BUILD_DIR)
 
@@ -110,16 +100,17 @@ distclean: clean
 	rm -f $(TARGET)
 
 print:
-	@echo "PLUGIN_NAME: $(PLUGIN_NAME)"
-	@echo "UNAME_S:     $(UNAME_S)"
-	@echo "TARGET:      $(TARGET)"
-	@echo "CC:          $(CC)"
-	@echo "CXX:         $(CXX)"
-	@echo "CPPFLAGS:    $(CPPFLAGS)"
-	@echo "CXXFLAGS:    $(CXXFLAGS)"
-	@echo "LDFLAGS:     $(LDFLAGS)"
-	@echo "PLUGIN_LDFLAGS: $(PLUGIN_LDFLAGS)"
-	@echo "LDLIBS:      $(LDLIBS)"
+	@echo "PLUGIN_NAME:     $(PLUGIN_NAME)"
+	@echo "UNAME_S:         $(UNAME_S)"
+	@echo "TARGET:          $(TARGET)"
+	@echo "CC:              $(CC)"
+	@echo "CXX:             $(CXX)"
+	@echo "CPPFLAGS:        $(CPPFLAGS)"
+	@echo "CXXFLAGS:        $(CXXFLAGS)"
+	@echo "LDFLAGS:         $(LDFLAGS)"
+	@echo "PLUGIN_LDFLAGS:  $(PLUGIN_LDFLAGS)"
+	@echo "LDLIBS:          $(LDLIBS)"
+	@echo "CORE_LIB_DIR:    $(CORE_LIB_DIR)"
 	@echo "OBJS:"
 	@printf '  %s\n' $(OBJS)
 

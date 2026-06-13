@@ -142,6 +142,7 @@ static bool readOtherPropInt(const json& props,
 }
 
 
+
 /**
  * @brief Parse a pIoTServer boolean-ish valve value.
  *
@@ -157,6 +158,29 @@ static bool readOtherPropInt(const json& props,
  * @param value Receives parsed boolean.
  * @return true if parsed.
  */
+
+static string normalizedActionCommand(const string& text)
+{
+    string normalized = text;
+
+    normalized.erase(
+        std::remove_if(normalized.begin(),
+                       normalized.end(),
+                       [](unsigned char c) {
+                           return std::isspace(c);
+                       }),
+        normalized.end());
+
+    std::transform(normalized.begin(),
+                   normalized.end(),
+                   normalized.begin(),
+                   [](unsigned char c) {
+                       return static_cast<char>(std::tolower(c));
+                   });
+
+    return normalized;
+}
+
 static bool parseValveBoolValue(const string& text, bool& value)
 {
     string normalized = text;
@@ -1416,6 +1440,34 @@ bool VALVEMASTER_Device::idlePowerOffDueLocked() const
  *
  * @return true if no fatal driver error occurred.
  */
+/**
+ * @brief Run post-command field-power-off if the hold timer expires.
+ *
+ * This function is called only by the action thread after the field-power hold
+ * timer expires and no queued action was available.
+ *
+ * Latching valve rule:
+ *
+ *   Field-bus power does not hold a valve open or closed.
+ *
+ * Therefore automatic timer-based power-off is allowed after a verified valve
+ * command even if one or more valves are commanded open.
+ *
+ * Important state-trust rule:
+ *
+ *   Intentional timer-based field-power-off does not invalidate trusted
+ *   commanded valve state. If the driver just verified a valve command, then
+ *   removing field power later does not make that commanded state unknown.
+ *
+ * Therefore this path must not set _needPowerOnValveReset = true merely
+ * because the hold timer removed field power.
+ *
+ * Manual ACTION_POWER_OFF remains stricter because a direct user-requested
+ * power_off is not a valve command and does not by itself establish commanded
+ * valve state.
+ *
+ * @return true if no fatal driver error occurred.
+ */
 bool VALVEMASTER_Device::runIdlePowerOff()
 {
     {
@@ -1452,18 +1504,20 @@ bool VALVEMASTER_Device::runIdlePowerOff()
         _fieldPowerOn = false;
 
         /*
-         * Once field power has been removed, the next trusted valve command
-         * must re-establish commanded-state trust:
+         * Do not invalidate valve commanded-state trust here.
          *
-         *   power on
-         *   wait for nodes
-         *   allOff reset
-         *   apply requested command
+         * This is an intentional post-command field-power shutdown after a
+         * verified valve command. Latching valves retain their commanded
+         * mechanical state without field-bus power, and the node-reported
+         * commanded state we cached remains the best available truth.
          *
-         * This is true even though latching valves retain their commanded
-         * mechanical state without field power.
+         * In particular, do not set:
+         *
+         *   _needPowerOnValveReset = true
+         *
+         * Doing so would cause the next valve command to run CLOSE_ALL merely
+         * because the hold timer expired, which is wrong.
          */
-        _needPowerOnValveReset = true;
 
         if(!_powerKey.empty()) {
             setCachedValue(_powerKey, "off", true);
@@ -1476,6 +1530,11 @@ bool VALVEMASTER_Device::runIdlePowerOff()
         return true;
     }
 
+    /*
+     * If power-off itself failed, field-power truth is no longer reliable.
+     * Keep valve commanded-state trust conservative because the driver does not
+     * know whether the controller accepted the power transition cleanly.
+     */
     _fieldPowerKnown = false;
     _needPowerOnValveReset = true;
 
@@ -1485,7 +1544,6 @@ bool VALVEMASTER_Device::runIdlePowerOff()
 
     return false;
 }
-
 
 /**
  * @brief Execute one valve set action and verify node-reported commanded state.
@@ -2157,6 +2215,10 @@ void VALVEMASTER_Device::actionThreadMain()
 
                 /*
                  * Drop field power after all outputs are closed.
+                 *
+                 * Intentional power-off after a successful allOff does not
+                 * invalidate commanded-state trust. We just established that
+                 * all configured valves are commanded closed.
                  */
                 bool powerOffOK = runQueuedCommandWithRetries(
                     "all_off_power_off",
@@ -2168,7 +2230,7 @@ void VALVEMASTER_Device::actionThreadMain()
                 if(powerOffOK) {
                     _fieldPowerKnown = true;
                     _fieldPowerOn = false;
-                    _needPowerOnValveReset = true;
+                    _needPowerOnValveReset = false;
 
                     if(!_powerKey.empty()) {
                         setCachedValue(_powerKey, "off", true);
@@ -2183,7 +2245,7 @@ void VALVEMASTER_Device::actionThreadMain()
                      * energized. Keep power state conservative.
                      */
                     _fieldPowerKnown = false;
-                    _needPowerOnValveReset = true;
+                    _needPowerOnValveReset = false;
 
                     if(!_resultKey.empty()) {
                         setCachedValue(_resultKey, "all-off-ok-power-off-failed", true);
@@ -2643,6 +2705,13 @@ bool VALVEMASTER_Device::getValues(keyValueMap_t &results)
  *   set_error
  *   clear_error
  *
+ * Command matching is case-insensitive and ignores surrounding/embedded
+ * whitespace. This allows REST/sequence JSON to use either:
+ *
+ *   power_on
+ *   POWER_ON
+ *   Power_On
+ *
  * Individual valve commands are accepted through setValues(), not
  * deviceAction().
  *
@@ -2653,18 +2722,20 @@ bool VALVEMASTER_Device::getValues(keyValueMap_t &results)
  */
 bool VALVEMASTER_Device::deviceAction(string cmd)
 {
-    if(cmd == "noop") {
+    string normalized = normalizedActionCommand(cmd);
+
+    if(normalized == "noop") {
         Action action;
         action.type = ACTION_NOOP;
-        action.name = cmd;
+        action.name = normalized;
 
         return enqueueAction(action);
     }
 
-    if(cmd == "power_on") {
+    if(normalized == "power_on") {
         Action action;
         action.type = ACTION_POWER_ON;
-        action.name = cmd;
+        action.name = normalized;
 
         /*
          * power-on success is not reported until after node stabilization.
@@ -2678,34 +2749,34 @@ bool VALVEMASTER_Device::deviceAction(string cmd)
         return enqueueDelay(DELAY_NODE_STABILIZE, FIELD_BUS_NODE_STABILIZE_MS);
     }
 
-    if(cmd == "power_off") {
+    if(normalized == "power_off") {
         Action action;
         action.type = ACTION_POWER_OFF;
-        action.name = cmd;
+        action.name = normalized;
 
         return enqueueAction(action);
     }
 
-    if(cmd == "all_off") {
+    if(normalized == "all_off") {
         Action action;
         action.type = ACTION_ALL_OFF;
-        action.name = cmd;
+        action.name = normalized;
 
         return enqueueAction(action);
     }
 
-    if(cmd == "set_error") {
+    if(normalized == "set_error") {
         Action action;
         action.type = ACTION_SET_ERROR;
-        action.name = cmd;
+        action.name = normalized;
 
         return enqueueAction(action);
     }
 
-    if(cmd == "clear_error") {
+    if(normalized == "clear_error") {
         Action action;
         action.type = ACTION_CLEAR_ERROR;
-        action.name = cmd;
+        action.name = normalized;
 
         return enqueueAction(action);
     }
@@ -2715,7 +2786,6 @@ bool VALVEMASTER_Device::deviceAction(string cmd)
 
     return false;
 }
-
 
 /**
  * @brief Runtime value-set path.
