@@ -328,8 +328,7 @@ VALVEMASTER_Device::VALVEMASTER_Device(string devID, string driverName)
             { "start_policy", "open local I2C, detect inherited field power, sync valves only if field power is already on" },
             { "getvalues_policy", "cache drain only" },
             { "deviceaction_policy", "bounded runtime commands only; no provisioning" },
-            { "setvalues_policy", "configured valve writes with read-back verification and queued-action coalescing" },
-            { "runtime_start_power_on", "disabled" },
+            { "setvalues_policy", "configured valve writes use SET_CHANNEL acknowledgement as success; status reads are reserved for sync/diagnostic/audit paths" },         { "runtime_start_power_on", "disabled" },
             { "runtime_start_who", "disabled" },
             { "runtime_start_valve_sync", "enabled only if inherited field power is already on" },
             { "runtime_power_on_reset", "enabled before trusted valve commands when commanded-state trust is invalid" },
@@ -1546,7 +1545,7 @@ bool VALVEMASTER_Device::runIdlePowerOff()
 }
 
 /**
- * @brief Execute one valve set action and verify node-reported commanded state.
+ * @brief Execute one valve set action.
  *
  * This is called only by the serialized action thread.
  *
@@ -1555,24 +1554,33 @@ bool VALVEMASTER_Device::runIdlePowerOff()
  *   - ensure field power is on
  *   - perform power-on valve reset if commanded-state trust is invalid
  *   - send SET_CHANNEL through VALVEMASTER wrapper
- *   - read the valve back using getValve()
- *   - cache node-reported commanded state
+ *   - treat SET_CHANNEL RESULT_OK as authoritative command success
+ *   - cache the requested commanded state
  *   - update commanded-state tracking
- *   - arm post-command field-power hold timer after verified command
+ *   - arm post-command field-power hold timer after successful command
  *
  * Important latching-valve rule:
  *
  *   Field-bus power does not hold a valve open or closed.
  *
- *   After a verified open command, the valve remains open without field-bus
- *   power. After a verified close command, the valve remains closed without
+ *   After a successful open command, the valve remains open without field-bus
+ *   power. After a successful close command, the valve remains closed without
  *   field-bus power.
  *
- *   Therefore the field-power hold timer is armed after any successfully
- *   verified valve command, not only after all valves are closed.
+ * Important feedback rule:
+ *
+ *   Valve nodes report commanded/logical state only. They do not read true
+ *   mechanical valve position. Therefore an immediate GET_CHANNEL_STATUS after
+ *   every SET_CHANNEL does not prove mechanical truth; it only asks the node to
+ *   repeat commanded/logical state.
+ *
+ *   The normal runtime hot path treats SET_CHANNEL RESULT_OK as success.
+ *   GET_CHANNEL_STATUS remains available for startup sync, diagnostics,
+ *   periodic audit, or explicit manual refresh, but is not required after every
+ *   successful SET_CHANNEL.
  *
  * @param action ACTION_SET_VALVE record.
- * @return true if set and verification both succeeded.
+ * @return true if the command completed successfully.
  */
 bool VALVEMASTER_Device::runSetValveAction(const Action& action)
 {
@@ -1604,6 +1612,11 @@ bool VALVEMASTER_Device::runSetValveAction(const Action& action)
 
     /*
      * Send the requested valve command.
+     *
+     * For this protocol, SET_CHANNEL RESULT_OK means the VALVEMASTER controller
+     * accepted the command, sent it to the ValveNode, and received an acceptable
+     * node response. Treat that as the authoritative success condition for the
+     * normal runtime hot path.
      */
     bool setOK = runQueuedCommandWithRetries(
         "set_valve",
@@ -1622,6 +1635,11 @@ bool VALVEMASTER_Device::runSetValveAction(const Action& action)
                    static_cast<unsigned int>(action.channel),
                    action.desiredOpen ? "open" : "closed");
 
+        /*
+         * A failed SET_CHANNEL means commanded state is not trustworthy.
+         * Stay conservative. The next trusted valve command must re-establish
+         * safe commanded state with power-on reset/allOff.
+         */
         _valveStateKnown = false;
         _anyValveMayBeOpen = true;
         _needPowerOnValveReset = true;
@@ -1634,32 +1652,12 @@ bool VALVEMASTER_Device::runSetValveAction(const Action& action)
     }
 
     /*
-     * Read back node-reported commanded state.
+     * SET_CHANNEL completed successfully. Cache the requested commanded state.
+     *
+     * This is not physical valve position feedback. It is commanded/logical
+     * state based on successful command acknowledgement.
      */
-    bool actualOpen = false;
-
-    if(!readValveWithRetries("set_valve_verify",
-                             action.key,
-                             action.node,
-                             action.channel,
-                             actualOpen)) {
-        _valveStateKnown = false;
-        _anyValveMayBeOpen = true;
-        _needPowerOnValveReset = true;
-
-        if(!_resultKey.empty()) {
-            setCachedValue(_resultKey, "set-valve-verify-failed", true);
-        }
-
-        return false;
-    }
-
-    /*
-     * Report node-reported commanded state, even if it disagrees with the
-     * requested value. If pIoTServer already inserted the optimistic requested
-     * value, this cache update becomes the correction path.
-     */
-    setCachedValue(action.key, actualOpen ? "1" : "0", true);
+    setCachedValue(action.key, action.desiredOpen ? "1" : "0", true);
 
     /*
      * Recompute commanded-state tracking from cached configured valves.
@@ -1694,46 +1692,36 @@ bool VALVEMASTER_Device::runSetValveAction(const Action& action)
     _anyValveMayBeOpen = anyKnownOpen || !allConfiguredKnown;
 
     /*
+     * A successful SET_CHANNEL establishes commanded-state trust for this
+     * valve action. Do not require a power-on reset merely because immediate
+     * status verification was skipped.
+     */
+    if(allConfiguredKnown) {
+        _needPowerOnValveReset = false;
+    }
+
+    /*
      * Latching valve rule:
      *
-     * Field-bus power is not required to hold the verified commanded state.
-     * Arm the post-command field-power hold timer after any verified set,
-     * whether the requested state was open or closed.
+     * Field-bus power is not required to hold the commanded state. Arm the
+     * post-command field-power hold timer after any successful set, whether
+     * the requested state was open or closed.
      */
     if(_fieldPowerKnown && _fieldPowerOn) {
         armIdlePowerOff();
     }
 
-    if(actualOpen == action.desiredOpen) {
-        if(!_resultKey.empty()) {
-            setCachedValue(_resultKey, "set-valve-ok", true);
-        }
-
-        LOGT_DEBUG("VALVEMASTER_Device set valve verified key=\"%s\" node=%u channel=%u reported=%s",
-                   action.key.c_str(),
-                   static_cast<unsigned int>(action.node),
-                   static_cast<unsigned int>(action.channel),
-                   actualOpen ? "open" : "closed");
-
-        return true;
-    }
-
-    /*
-     * Node-reported state disagreed with requested value. Cache already
-     * contains reported state, so report a correction condition.
-     */
     if(!_resultKey.empty()) {
-        setCachedValue(_resultKey, "set-valve-corrected", true);
+        setCachedValue(_resultKey, "set-valve-ok", true);
     }
 
-    LOGT_ERROR("VALVEMASTER_Device set valve corrected key=\"%s\" node=%u channel=%u requested=%s reported=%s",
+    LOGT_DEBUG("VALVEMASTER_Device set valve accepted key=\"%s\" node=%u channel=%u commanded=%s",
                action.key.c_str(),
                static_cast<unsigned int>(action.node),
                static_cast<unsigned int>(action.channel),
-               action.desiredOpen ? "open" : "closed",
-               actualOpen ? "open" : "closed");
+               action.desiredOpen ? "open" : "closed");
 
-    return false;
+    return true;
 }
 
 

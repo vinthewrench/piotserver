@@ -218,7 +218,7 @@
                         "valve": 1
                     },
                     "title": "A. Chard/Kale",
-                    "tracking": "track.changes"
+                    "tracking": "dont.record"
                 },
                 {
                     "data_type": "BOOL",
@@ -229,7 +229,7 @@
                         "valve": 2
                     },
                     "title": "B. Cucumbers",
-                    "tracking": "track.changes"
+                    "tracking": "dont.record"
                 },
                 {
                     "data_type": "BOOL",
@@ -240,7 +240,7 @@
                         "valve": 1
                     },
                     "title": "C. Tomatoes",
-                    "tracking": "track.changes"
+                    "tracking": "dont.record"
                 },
                 {
                     "data_type": "BOOL",
@@ -251,7 +251,7 @@
                         "valve": 2
                     },
                     "title": "D. Peppers",
-                    "tracking": "track.changes"
+                    "tracking": "dont.record"
                 },
                 {
                     "data_type": "BOOL",
@@ -262,7 +262,7 @@
                         "valve": 1
                     },
                     "title": "E. Beans",
-                    "tracking": "track.changes"
+                    "tracking": "dont.record"
                 },
                 {
                     "data_type": "BOOL",
@@ -273,7 +273,7 @@
                         "valve": 2
                     },
                     "title": "F. Squash",
-                    "tracking": "track.changes"
+                    "tracking": "dont.record"
                 },
                 {
                     "data_type": "BOOL",
@@ -284,7 +284,7 @@
                         "valve": 1
                     },
                     "title": "G. Corn",
-                    "tracking": "track.changes"
+                    "tracking": "dont.record"
                 },
                 {
                     "data_type": "BOOL",
@@ -295,7 +295,7 @@
                         "valve": 2
                     },
                     "title": "H. Melons",
-                    "tracking": "track.changes"
+                    "tracking": "dont.record"
                 },
                 {
                     "data_type": "BOOL",
@@ -306,7 +306,7 @@
                         "valve": 1
                     },
                     "title": "I. Herbs",
-                    "tracking": "track.changes"
+                    "tracking": "dont.record"
                 },
                 {
                     "data_type": "BOOL",
@@ -317,7 +317,7 @@
                         "valve": 2
                     },
                     "title": "J. Lettuce",
-                    "tracking": "track.changes"
+                    "tracking": "dont.record"
                 },
                 {
                     "data_type": "BOOL",
@@ -328,7 +328,7 @@
                         "valve": 1
                     },
                     "title": "K. Carrots",
-                    "tracking": "track.changes"
+                    "tracking": "dont.record"
                 },
                 {
                     "data_type": "BOOL",
@@ -339,10 +339,12 @@
                         "valve": 2
                     },
                     "title": "L. Beets",
-                    "tracking": "track.changes"
+                    "tracking": "dont.record"
                 }
             ],
             "power_hold_sec": 60,
+            "retry_count": 5,
+            "retry_delay_ms": 300,
             "title": "Valve Master I2C"
         }
     ],
@@ -370,13 +372,13 @@
         "SPRK_9"
     ],
     "prop.file.version": {
-        "file.etag": 529,
-        "last_write": 1780850897
+        "file.etag": 542,
+        "last_write": 1781387920
     },
     "sequence": [
         {
             "description": "Runs each Valve Master sprinkler zone in sequence and shuts all zones off on abort.",
-            "enable": false,
+            "enable": true,
             "name": "Garden irrigation valve sequence",
             "on_abort": {
                 "action": [
@@ -403,7 +405,7 @@
                             "value": "on"
                         }
                     ],
-                    "duration": 5
+                    "duration": 30
                 },
                 {
                     "action": [
@@ -418,7 +420,7 @@
                             "value": "on"
                         }
                     ],
-                    "duration": 5
+                    "duration": 30
                 },
                 {
                     "action": [
@@ -433,7 +435,7 @@
                             "value": "on"
                         }
                     ],
-                    "duration": 5
+                    "duration": 30
                 },
                 {
                     "action": [
@@ -448,7 +450,7 @@
                             "value": "on"
                         }
                     ],
-                    "duration": 5
+                    "duration": 30
                 },
                 {
                     "action": [
@@ -463,7 +465,7 @@
                             "value": "on"
                         }
                     ],
-                    "duration": 5
+                    "duration": 30
                 },
                 {
                     "action": [
@@ -478,7 +480,7 @@
                             "value": "on"
                         }
                     ],
-                    "duration": 5
+                    "duration": 30
                 },
                 {
                     "action": [
@@ -493,7 +495,7 @@
                             "value": "on"
                         }
                     ],
-                    "duration": 5
+                    "duration": 30
                 },
                 {
                     "action": [
@@ -508,7 +510,7 @@
                             "value": "on"
                         }
                     ],
-                    "duration": 5
+                    "duration": 30
                 },
                 {
                     "action": [
@@ -523,7 +525,7 @@
                             "value": "on"
                         }
                     ],
-                    "duration": 5
+                    "duration": 30
                 },
                 {
                     "action": [
@@ -538,7 +540,7 @@
                             "value": "on"
                         }
                     ],
-                    "duration": 5
+                    "duration": 30
                 },
                 {
                     "action": [
@@ -553,7 +555,7 @@
                             "value": "on"
                         }
                     ],
-                    "duration": 5
+                    "duration": 30
                 },
                 {
                     "action": [
@@ -568,7 +570,7 @@
                             "value": "on"
                         }
                     ],
-                    "duration": 5
+                    "duration": 30
                 },
                 {
                     "action": [
@@ -578,7 +580,7 @@
                             "value": "off"
                         }
                     ],
-                    "duration": 5
+                    "duration": 30
                 }
             ],
             "trigger": {
@@ -623,16 +625,6 @@
                             "cmd": "SET",
                             "key": "GI_2",
                             "value": "on"
-                        }
-                    ],
-                    "duration": 10
-                },
-                {
-                    "action": [
-                        {
-                            "cmd": "SET",
-                            "key": "GI_2",
-                            "value": "off"
                         },
                         {
                             "cmd": "SET",
@@ -644,6 +636,11 @@
                 },
                 {
                     "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GI_2",
+                            "value": "off"
+                        },
                         {
                             "cmd": "SET",
                             "key": "GI_3",
