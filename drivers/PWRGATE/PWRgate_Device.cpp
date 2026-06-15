@@ -9,6 +9,7 @@
 #include "PropValKeys.hpp"
 #include "ServerCmdValidators.hpp"
 #include "LogMgr.hpp"
+#include "IncidentMgr.hpp"
 
 #include <fcntl.h>
 #include <cassert>
@@ -76,6 +77,7 @@ bool PWRgate_Device::openSerialPort(int &error){
         LOGT_ERROR("tcgetattr() %s Error %d, %s",  _ttyPath.c_str(),
                    errno, strerror(errno));
         error = errno;
+        close(fd);
         return false;
     }
 
@@ -105,6 +107,7 @@ bool PWRgate_Device::openSerialPort(int &error){
         LOGT_ERROR("tcsetattr() %s Error %d, %s",  _ttyPath.c_str(),
                    errno, strerror(errno));
         error = errno;
+        close(fd);
         return false;
     }
 
@@ -489,9 +492,27 @@ void PWRgate_Device::actionThread(){
         // is the port setup yet?
         if (! isConnected() && _running){
             if(!openSerialPort(lastError)){
+                IncidentMgr::shared()->raise(
+                    _deviceID,
+                    IncidentMgr::Severity::Error,
+                    "DEVICE_IO_FAILED",
+                    _resultKey_status,
+                    nullptr,
+                    "PWRgate serial port open failed"
+                );
+
                 std::this_thread::sleep_for(std::chrono::seconds(2));
                 continue;
             }
+
+            IncidentMgr::shared()->clear(
+                _deviceID,
+                "DEVICE_IO_FAILED",
+                _resultKey_status,
+                nullptr,
+                "PWRgate serial port opened"
+            );
+
             buff.reset();
         }
 
@@ -509,6 +530,16 @@ void PWRgate_Device::actionThread(){
 //            LOGT_ERROR("Serial port %s select() Error: %d %s", _ttyPath.c_str(),
 //                       errno, strerror(errno));
              pg_state = STATE_ERROR;
+
+            IncidentMgr::shared()->raise(
+                _deviceID,
+                IncidentMgr::Severity::Error,
+                "DEVICE_IO_FAILED",
+                _resultKey_status,
+                nullptr,
+                "PWRgate serial select failed"
+            );
+
             break;
         }
         else if(numReady == 0){
@@ -587,6 +618,14 @@ void PWRgate_Device::actionThread(){
                                     _dataDidChange = true;
                                 }
 
+                                IncidentMgr::shared()->clear(
+                                    _deviceID,
+                                    "DEVICE_IO_FAILED",
+                                    _resultKey_status,
+                                    nullptr,
+                                    "PWRgate serial data received"
+                                );
+
                               }
 
                             buff.reset();
@@ -616,11 +655,31 @@ void PWRgate_Device::actionThread(){
                 if(lastError == ENXIO){  // device disconnected..
                     pg_state = STATE_ERROR;
                     LOGT_ERROR("Serial port %s  disconnected", _ttyPath.c_str());
+
+                    IncidentMgr::shared()->raise(
+                        _deviceID,
+                        IncidentMgr::Severity::Error,
+                        "DEVICE_IO_FAILED",
+                        _resultKey_status,
+                        nullptr,
+                        "PWRgate serial port disconnected"
+                    );
+
                     closeSerialPort();
                 }
                 else {
                     LOGT_ERROR("Serial port %s read() Error %d %s", _ttyPath.c_str(),
                                lastError, strerror(lastError));
+
+                    IncidentMgr::shared()->raise(
+                        _deviceID,
+                        IncidentMgr::Severity::Error,
+                        "DEVICE_IO_FAILED",
+                        _resultKey_status,
+                        nullptr,
+                        "PWRgate serial read failed"
+                    );
+
                     closeSerialPort();
                 }
             }

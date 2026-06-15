@@ -9,6 +9,7 @@
 #include "TimeStamp.hpp"
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
+#include "IncidentMgr.hpp"
 
 constexpr string_view Driver_Version = "1.1.0 dev 0";
 
@@ -100,11 +101,28 @@ bool TankDepth_Device::start(){
         _lastQueryTime = {0,0};
         _state = INS_IDLE;
         _deviceState = DEVICE_STATE_CONNECTED;
+
+        IncidentMgr::shared()->clear(
+            _deviceID,
+            "DEVICE_IO_FAILED",
+            _resultKey,
+            nullptr,
+            "TankDepth begin succeeded"
+        );
     }
     else {
-        LOGT_ERROR("TankDepth_Device(%02X) begin FAILED: %s",i2cAddr,strerror(errno));
-       _state = INS_INVALID;
+        LOGT_ERROR("TankDepth_Device(%02X) begin FAILED: %s",i2cAddr,strerror(error));
+        _state = INS_INVALID;
         _deviceState = DEVICE_STATE_ERROR;
+
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _resultKey,
+            nullptr,
+            "TankDepth begin failed"
+        );
     }
      return status;
 }
@@ -198,6 +216,26 @@ bool TankDepth_Device::getValues( keyValueMap_t &results){
 
                 gettimeofday(&_lastQueryTime, NULL);
                 hasData = true;
+
+                IncidentMgr::shared()->clear(
+                    _deviceID,
+                    "DEVICE_IO_FAILED",
+                    _resultKey,
+                    nullptr,
+                    "TankDepth analog read succeeded"
+                );
+           }
+           else {
+                LOGT_ERROR("TankDepth_Device(%02X) analogRead FAILED", _device.getDevAddr());
+
+                IncidentMgr::shared()->raise(
+                    _deviceID,
+                    IncidentMgr::Severity::Error,
+                    "DEVICE_IO_FAILED",
+                    _resultKey,
+                    nullptr,
+                    "TankDepth analog read failed"
+                );
            }
         }
     }

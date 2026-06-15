@@ -9,6 +9,7 @@
 #include "TimeStamp.hpp"
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
+#include "IncidentMgr.hpp"
 
 constexpr string_view Driver_Version = "1.1.0 dev 0";
 
@@ -84,11 +85,28 @@ bool MCP3427_Device::start(){
         _lastQueryTime = {0,0};
         _state = INS_IDLE;
         _deviceState = DEVICE_STATE_CONNECTED;
+
+        IncidentMgr::shared()->clear(
+            _deviceID,
+            "DEVICE_IO_FAILED",
+            _resultKey,
+            nullptr,
+            "MCP3427 begin succeeded"
+        );
     }
     else {
-        LOGT_ERROR("MCP3427_Device(%02X) begin FAILED: %s",i2cAddr,strerror(errno));
+        LOGT_ERROR("MCP3427_Device(%02X) begin FAILED: %s",i2cAddr,strerror(error));
        _state = INS_INVALID;
         _deviceState = DEVICE_STATE_ERROR;
+
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _resultKey,
+            nullptr,
+            "MCP3427 begin failed"
+        );
     }
      return status;
 }
@@ -170,6 +188,26 @@ bool MCP3427_Device::getValues( keyValueMap_t &results){
                 results[_resultKey] = to_string(rawData);
                 gettimeofday(&_lastQueryTime, NULL);
                 hasData = true;
+
+                IncidentMgr::shared()->clear(
+                    _deviceID,
+                    "DEVICE_IO_FAILED",
+                    _resultKey,
+                    nullptr,
+                    "MCP3427 analog read succeeded"
+                );
+           }
+           else {
+                LOGT_ERROR("MCP3427_Device(%02X) analogRead FAILED", _device.getDevAddr());
+
+                IncidentMgr::shared()->raise(
+                    _deviceID,
+                    IncidentMgr::Severity::Error,
+                    "DEVICE_IO_FAILED",
+                    _resultKey,
+                    nullptr,
+                    "MCP3427 analog read failed"
+                );
            }
         }
     }

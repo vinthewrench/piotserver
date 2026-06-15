@@ -9,6 +9,9 @@
 #include "TimeStamp.hpp"
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
+#include "IncidentMgr.hpp"
+
+#include <cstring>
 
 /*
 
@@ -112,9 +115,26 @@ bool TCA9534_Device::start(){
     if(status){
 //        _device.allOff();
         _deviceState = DEVICE_STATE_CONNECTED;
+
+        IncidentMgr::shared()->clear(
+            _deviceID,
+            "DEVICE_IO_FAILED",
+            _deviceID,
+            nullptr,
+            "TCA9534 begin succeeded"
+        );
      }
     else {
         LOGT_ERROR("TCA9534_Device begin FAILED: %s",strerror(errno));
+
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _deviceID,
+            nullptr,
+            "TCA9534 begin failed"
+        );
     }
      return status;
 }

@@ -10,6 +10,7 @@
 #include "TimeStamp.hpp"
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
+#include "IncidentMgr.hpp"
 
 #include <iostream>
 #include <filesystem>
@@ -104,6 +105,14 @@ bool W1_Device::start()
     _state = INS_IDLE;
     _deviceState = DEVICE_STATE_CONNECTED;
 
+    IncidentMgr::shared()->clear(
+        _deviceID,
+        "DEVICE_IO_FAILED",
+        _resultKey_temp,
+        nullptr,
+        "W1 device started"
+    );
+
     return true;
 }
 
@@ -188,6 +197,26 @@ bool W1_Device::getValues(keyValueMap_t& results)
                 results[_resultKey_temp] = to_string(tempC);
                 gettimeofday(&_lastQueryTime, NULL);
                 hasData = true;
+
+                IncidentMgr::shared()->clear(
+                    _deviceID,
+                    "DEVICE_IO_FAILED",
+                    _resultKey_temp,
+                    nullptr,
+                    "W1 DS18B20 temperature read succeeded"
+                );
+            }
+            else {
+                LOGT_ERROR("W1_Device(%s) DS18B20 temperature read failed", _deviceID.c_str());
+
+                IncidentMgr::shared()->raise(
+                    _deviceID,
+                    IncidentMgr::Severity::Error,
+                    "DEVICE_IO_FAILED",
+                    _resultKey_temp,
+                    nullptr,
+                    "W1 DS18B20 temperature read failed"
+                );
             }
         }
     }
@@ -233,10 +262,33 @@ bool W1_Device::processDS18B20(double& tempOut)
                 tempOut = temp;
                 didSucceed = true;
             }
+            else {
+                LOGT_ERROR("W1_Device(%s) DS18B20 returned power-on/reset temperature %.3f",
+                           _deviceID.c_str(),
+                           temp);
+            }
+        }
+        else {
+            LOGT_ERROR("W1_Device(%s) failed to open %s",
+                       _deviceID.c_str(),
+                       path.string().c_str());
         }
     }
 
     catch(std::ifstream::failure& err) {
+        LOGT_ERROR("W1_Device(%s) file read exception: %s",
+                   _deviceID.c_str(),
+                   err.what());
+    }
+    catch(std::invalid_argument& err) {
+        LOGT_ERROR("W1_Device(%s) invalid temperature value: %s",
+                   _deviceID.c_str(),
+                   err.what());
+    }
+    catch(std::out_of_range& err) {
+        LOGT_ERROR("W1_Device(%s) temperature value out of range: %s",
+                   _deviceID.c_str(),
+                   err.what());
     }
 
     return didSucceed;

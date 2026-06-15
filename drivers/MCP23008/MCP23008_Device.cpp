@@ -10,6 +10,7 @@
 #include "TimeStamp.hpp"
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
+#include "IncidentMgr.hpp"
 
 constexpr string_view Driver_Version = "1.1.0 dev 0";
 
@@ -82,9 +83,27 @@ bool MCP23008_Device::start(){
 
     LOGT_DEBUG("MCP23008_Device(%02X) begin",i2cAddr);
     if(!_device.begin(i2cAddr, error)){
-        LOGT_ERROR("MCP23008_Device begin FAILED: %s",strerror(errno));
+        LOGT_ERROR("MCP23008_Device begin FAILED: %s",strerror(error));
+
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _deviceID,
+            nullptr,
+            "MCP23008 begin failed"
+        );
+
         return  false;
     }
+
+    IncidentMgr::shared()->clear(
+        _deviceID,
+        "DEVICE_IO_FAILED",
+        _deviceID,
+        nullptr,
+        "MCP23008 begin succeeded"
+    );
 
     // calculate setGPIOdirection mask
     uint16_t iomask = 0xFF;
@@ -102,8 +121,26 @@ bool MCP23008_Device::start(){
 
     if(!status){
         LOGT_DEBUG("MCP23008_Device(%s) setGPIOdirection(%02X) Failed ",address.c_str(), iomask);
+
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _deviceID,
+            nullptr,
+            "MCP23008 setGPIOdirection failed"
+        );
+
         return  false;
     }
+
+    IncidentMgr::shared()->clear(
+        _deviceID,
+        "DEVICE_IO_FAILED",
+        _deviceID,
+        nullptr,
+        "MCP23008 setGPIOdirection succeeded"
+    );
 
     if(status){
 
@@ -114,6 +151,15 @@ bool MCP23008_Device::start(){
     }
     else {
         LOGT_ERROR("MCP23008_Device begin FAILED: %s",strerror(errno));
+
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _deviceID,
+            nullptr,
+            "MCP23008 begin failed"
+        );
     }
     return status;
 }
@@ -126,7 +172,26 @@ void MCP23008_Device::stop(){
     LOGT_DEBUG("MCP23008_Device  stop");
 
     if(_device.isOpen()){
-        _device.allOff();
+        if(_device.allOff()){
+            IncidentMgr::shared()->clear(
+                _deviceID,
+                "DEVICE_IO_FAILED",
+                _deviceID,
+                nullptr,
+                "MCP23008 allOff succeeded during stop"
+            );
+        }
+        else {
+            IncidentMgr::shared()->raise(
+                _deviceID,
+                IncidentMgr::Severity::Error,
+                "DEVICE_IO_FAILED",
+                _deviceID,
+                nullptr,
+                "MCP23008 allOff failed during stop"
+            );
+        }
+
         {
             std::lock_guard<std::mutex> lock(_mutex);
             _pinDidChange = true;
@@ -168,6 +233,26 @@ bool MCP23008_Device::allOff(){
 
     if(_device.isOpen()){
         status = _device.allOff();
+
+        if(status){
+            IncidentMgr::shared()->clear(
+                _deviceID,
+                "DEVICE_IO_FAILED",
+                _deviceID,
+                nullptr,
+                "MCP23008 allOff succeeded"
+            );
+        }
+        else {
+            IncidentMgr::shared()->raise(
+                _deviceID,
+                IncidentMgr::Severity::Error,
+                "DEVICE_IO_FAILED",
+                _deviceID,
+                nullptr,
+                "MCP23008 allOff failed"
+            );
+        }
     }
     {
         std::lock_guard<std::mutex> lock(_mutex);
@@ -208,7 +293,47 @@ bool MCP23008_Device::setValues(keyValueMap_t kv){
             _pinDidChange = true;
         }
 
-        return _device.setRelayStates(ps);
+        bool status = _device.setRelayStates(ps);
+
+        if(status){
+            for(const auto& [pin, state] : ps){
+                (void)state;
+
+                for(const auto& [key, line] : _lines){
+                    if(pin == line.lineNo){
+                        IncidentMgr::shared()->clear(
+                            _deviceID,
+                            "DEVICE_IO_FAILED",
+                            key,
+                            nullptr,
+                            "MCP23008 setRelayStates succeeded"
+                        );
+                        break;
+                    }
+                }
+            }
+        }
+        else {
+            for(const auto& [pin, state] : ps){
+                (void)state;
+
+                for(const auto& [key, line] : _lines){
+                    if(pin == line.lineNo){
+                        IncidentMgr::shared()->raise(
+                            _deviceID,
+                            IncidentMgr::Severity::Error,
+                            "DEVICE_IO_FAILED",
+                            key,
+                            nullptr,
+                            "MCP23008 setRelayStates failed"
+                        );
+                        break;
+                    }
+                }
+            }
+        }
+
+        return status;
     }
 
     return false;
@@ -232,6 +357,14 @@ bool MCP23008_Device::getValues (keyValueMap_t &results){
     MCP23008::pinStates_t ps ;
 
     if( _device.getGPIOstates(ps)){
+        IncidentMgr::shared()->clear(
+            _deviceID,
+            "DEVICE_IO_FAILED",
+            _deviceID,
+            nullptr,
+            "MCP23008 getGPIOstates succeeded"
+        );
+
         for(const auto& [relay, state] : ps) {
             for(auto p : _lines){
                 if(relay == p.second.lineNo){
@@ -240,6 +373,16 @@ bool MCP23008_Device::getValues (keyValueMap_t &results){
             }
         }
         hasData = true;
+    }
+    else {
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _deviceID,
+            nullptr,
+            "MCP23008 getGPIOstates failed"
+        );
     }
 
     return hasData;

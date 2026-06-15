@@ -9,6 +9,7 @@
 #include "TimeStamp.hpp"
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
+#include "IncidentMgr.hpp"
 
 
 constexpr string_view Driver_Version = "1.1.0 dev 0";
@@ -95,9 +96,19 @@ bool SHT30_Device::start(){
     status = _device.begin(i2cAddr, error);
 
     if(!status){
-        LOGT_ERROR("SHT30_Device(%02X) begin FAILED: %s",i2cAddr,strerror(errno));
+        LOGT_ERROR("SHT30_Device(%02X) begin FAILED: %s",i2cAddr,strerror(error));
         _state = INS_INVALID;
         _deviceState = DEVICE_STATE_ERROR;
+
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _resultKey_temperature,
+            nullptr,
+            "SHT30 begin failed"
+        );
+
         return false;
     }
 
@@ -108,6 +119,16 @@ bool SHT30_Device::start(){
         LOGT_ERROR("SHT30_Device(%02X) readSerialNumber FAILED: %s",i2cAddr,strerror(errno));
         _state = INS_INVALID;
         _deviceState = DEVICE_STATE_ERROR;
+
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _resultKey_serialNo,
+            nullptr,
+            "SHT30 serial number read failed"
+        );
+
         return false;
     }
 
@@ -116,6 +137,22 @@ bool SHT30_Device::start(){
     _deviceState = DEVICE_STATE_CONNECTED;
 
     _serialNo = hexString(serialNo, sizeof(serialNo));
+
+    IncidentMgr::shared()->clear(
+        _deviceID,
+        "DEVICE_IO_FAILED",
+        _resultKey_temperature,
+        nullptr,
+        "SHT30 begin succeeded"
+    );
+
+    IncidentMgr::shared()->clear(
+        _deviceID,
+        "DEVICE_IO_FAILED",
+        _resultKey_serialNo,
+        nullptr,
+        "SHT30 serial number read succeeded"
+    );
 
     return true;
 }
@@ -195,6 +232,43 @@ bool SHT30_Device::getValues( keyValueMap_t &results){
                 results[_resultKey_serialNo] = _serialNo;
                 gettimeofday(&_lastQueryTime, NULL);
                 hasData = true;
+
+                IncidentMgr::shared()->clear(
+                    _deviceID,
+                    "DEVICE_IO_FAILED",
+                    _resultKey_temperature,
+                    nullptr,
+                    "SHT30 sensor read succeeded"
+                );
+
+                IncidentMgr::shared()->clear(
+                    _deviceID,
+                    "DEVICE_IO_FAILED",
+                    _resultKey_humidity,
+                    nullptr,
+                    "SHT30 sensor read succeeded"
+                );
+           }
+           else {
+                LOGT_ERROR("SHT30_Device(%02X) readSensor FAILED: %s", _device.getDevAddr(), strerror(errno));
+
+                IncidentMgr::shared()->raise(
+                    _deviceID,
+                    IncidentMgr::Severity::Error,
+                    "DEVICE_IO_FAILED",
+                    _resultKey_temperature,
+                    nullptr,
+                    "SHT30 sensor read failed"
+                );
+
+                IncidentMgr::shared()->raise(
+                    _deviceID,
+                    IncidentMgr::Severity::Error,
+                    "DEVICE_IO_FAILED",
+                    _resultKey_humidity,
+                    nullptr,
+                    "SHT30 sensor read failed"
+                );
            }
         }
     }

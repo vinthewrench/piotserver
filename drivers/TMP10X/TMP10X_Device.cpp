@@ -9,7 +9,9 @@
 #include "TimeStamp.hpp"
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
+#include "IncidentMgr.hpp"
 
+#include <cstring>
 
 constexpr string_view Driver_Version = "1.1.0 dev 0";
 
@@ -35,12 +37,11 @@ TMP10X_Device::TMP10X_Device(string devID, string driverName){
      };
 
     setProperties(j);
-
 }
 
 TMP10X_Device::~TMP10X_Device(){
     stop();
- }
+}
 
 bool TMP10X_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
 
@@ -49,7 +50,7 @@ bool TMP10X_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
             _resultKey_temperature = key;
             _queryDelay = entry.queryDelay != UINT64_MAX? entry.queryDelay : default_queryDelay;
             _isSetup = true;
-             return true;
+            return true;
         }
     }
 
@@ -63,13 +64,13 @@ bool TMP10X_Device::start(){
     int error = 0;
 
     if(!_deviceProperties[PROP_ADDRESS].is_string()){
-        LOGT_DEBUG("TMP10X_Device begin called with no %s property",string(PROP_ADDRESS).c_str());;
+        LOGT_DEBUG("TMP10X_Device begin called with no %s property",string(PROP_ADDRESS).c_str());
         return false;
     }
 
     if(_deviceID.size() == 0){
         LOGT_DEBUG("TMP10X_Device has no deviceID");
-        return  false;
+        return false;
     }
 
     string address  = _deviceProperties[PROP_ADDRESS];
@@ -77,7 +78,7 @@ bool TMP10X_Device::start(){
 
     if(!_isSetup){
         LOGT_DEBUG("TMP10X_Device(%s) begin called before initWithKey ",address.c_str());
-        return  false;
+        return false;
     }
 
     LOGT_DEBUG("TMP10X_Device(%02X) begin %s",i2cAddr, _resultKey_temperature.c_str());
@@ -87,13 +88,32 @@ bool TMP10X_Device::start(){
         _lastQueryTime = {0,0};
         _state = INS_IDLE;
         _deviceState = DEVICE_STATE_CONNECTED;
+
+        IncidentMgr::shared()->clear(
+            _deviceID,
+            "DEVICE_IO_FAILED",
+            _resultKey_temperature,
+            nullptr,
+            "TMP10X begin succeeded"
+        );
     }
     else {
-        LOGT_ERROR("TMP10X_Device(%02X) begin FAILED: %s",i2cAddr,strerror(errno));
-       _state = INS_INVALID;
+        LOGT_ERROR("TMP10X_Device(%02X) begin FAILED: %s",i2cAddr,strerror(error));
+
+        _state = INS_INVALID;
         _deviceState = DEVICE_STATE_ERROR;
+
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _resultKey_temperature,
+            nullptr,
+            "TMP10X begin failed"
+        );
     }
-     return status;
+
+    return status;
 }
 
 void TMP10X_Device::stop(){
@@ -106,6 +126,7 @@ void TMP10X_Device::stop(){
     if(_device.isOpen()){
         _device.stop();
     }
+
     _deviceState = DEVICE_STATE_DISCONNECTED;
 }
 
@@ -126,18 +147,18 @@ bool TMP10X_Device::setEnabled(bool enable){
    }
 
    _isEnabled = false;
+
    if(_deviceState == DEVICE_STATE_CONNECTED){
        stop();
    }
+
    return true;
 }
-
 
 bool TMP10X_Device::isConnected(){
 
     return _device.isOpen();
 }
-
 
 bool TMP10X_Device::getValues( keyValueMap_t &results){
 
@@ -167,12 +188,34 @@ bool TMP10X_Device::getValues( keyValueMap_t &results){
         if(shouldQuery){
 
             float tempC = 0;
-            if( _device.readTempC(tempC)){
+
+            if(_device.readTempC(tempC)){
                 results[_resultKey_temperature] = to_string(tempC);
                 gettimeofday(&_lastQueryTime, NULL);
                 hasData = true;
-           }
+
+                IncidentMgr::shared()->clear(
+                    _deviceID,
+                    "DEVICE_IO_FAILED",
+                    _resultKey_temperature,
+                    nullptr,
+                    "TMP10X temperature read succeeded"
+                );
+            }
+            else {
+                LOGT_ERROR("TMP10X_Device(%02X) readTempC FAILED", _device.getDevAddr());
+
+                IncidentMgr::shared()->raise(
+                    _deviceID,
+                    IncidentMgr::Severity::Error,
+                    "DEVICE_IO_FAILED",
+                    _resultKey_temperature,
+                    nullptr,
+                    "TMP10X temperature read failed"
+                );
+            }
         }
     }
+
     return hasData;
 }

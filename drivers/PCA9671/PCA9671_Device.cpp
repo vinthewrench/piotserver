@@ -10,13 +10,14 @@
 #include "TimeStamp.hpp"
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
+#include "IncidentMgr.hpp"
 
 /*
-    
+
 https://www.iascaled.com/store/Qwiic/QwiicInputOutput/I2C-RELAY16-QWIIC
- 
+
  https://www.sainsmart.com/products/16-channel-12v-relay-module
- 
+
 https://www.nxp.com/products/interfaces/ic-spi-i3c-interface-devices/general-purpose-i-o-gpio/remote-16-bit-i-o-expander-for-fm-plus-ic-bus-with-reset:PCA9671
 
 */
@@ -31,7 +32,7 @@ bool PCA9671_Device::getVersion(string &str){
 }
 
 PCA9671_Device::PCA9671_Device(string devID) :PCA9671_Device(devID, string()){};
- 
+
 PCA9671_Device::PCA9671_Device(string devID, string driverName){
     setDeviceID(devID, driverName);
      _isSetup = false;
@@ -43,7 +44,7 @@ PCA9671_Device::PCA9671_Device(string devID, string driverName){
          { PROP_DEVICE_MFG_PART, "Remote 16-Bit I/O Expander for I²C-Bus"},
      };
     setProperties(j);
-  
+
     _deviceState = DEVICE_STATE_UNKNOWN;
 
 }
@@ -53,11 +54,11 @@ PCA9671_Device::~PCA9671_Device(){
  }
 
 bool PCA9671_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
-  
+
     for(const auto& [key, entry] : deviceSchema) {
          _pinMap[key] = entry.pinNo;
     }
-    
+
     _isSetup = true;
     _deviceState = DEVICE_STATE_DISCONNECTED;
 
@@ -67,12 +68,12 @@ bool PCA9671_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
 bool PCA9671_Device::start(){
     bool status = false;
     int error = 0;
-    
+
     if(!_deviceProperties[PROP_ADDRESS].is_string()){
         LOGT_DEBUG("PCA9671_Device begin called with no %s property",string(PROP_ADDRESS).c_str());;
         return false;
     }
-    
+
     if(_deviceID.size() == 0){
         LOGT_DEBUG("PCA9671_Device has no deviceID");
         return  false;
@@ -80,62 +81,98 @@ bool PCA9671_Device::start(){
 
     string address  = _deviceProperties[PROP_ADDRESS];
     uint8_t i2cAddr = std::stoi(address.c_str(), 0, 16);
-    
+
     if(!_isSetup){
         LOGT_DEBUG("PCA9671_Device(%s) begin called before initWithKey ",address.c_str());
         return  false;
     }
-    
+
     LOGT_DEBUG("PCA9671_Device(%02X) begin",i2cAddr);
     status = _device.begin(i2cAddr, error);
-    
+
     if(status){
         _device.allOff();
         _pinDidChange = true;
         _deviceState = DEVICE_STATE_CONNECTED;
+
+        IncidentMgr::shared()->clear(
+            _deviceID,
+            "DEVICE_IO_FAILED",
+            _deviceID,
+            nullptr,
+            "PCA9671 begin succeeded"
+        );
     }
     else {
-        LOGT_ERROR("PCA9671_Device begin FAILED: %s",strerror(errno));
+        LOGT_ERROR("PCA9671_Device begin FAILED: %s",strerror(error));
+
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _deviceID,
+            nullptr,
+            "PCA9671 begin failed"
+        );
     }
     return status;
 }
- 
 
 
-  
+
+
 void PCA9671_Device::stop(){
-    
+
     LOGT_DEBUG("PCA9671_Device  stop");
-  
+
     if(_device.isOpen()){
-        _device.allOff();
+        if(_device.allOff()){
+            IncidentMgr::shared()->clear(
+                _deviceID,
+                "DEVICE_IO_FAILED",
+                _deviceID,
+                nullptr,
+                "PCA9671 allOff succeeded during stop"
+            );
+        }
+        else {
+            IncidentMgr::shared()->raise(
+                _deviceID,
+                IncidentMgr::Severity::Error,
+                "DEVICE_IO_FAILED",
+                _deviceID,
+                nullptr,
+                "PCA9671 allOff failed during stop"
+            );
+        }
+
         {
             std::lock_guard<std::mutex> lock(_mutex);
             _pinDidChange = true;
        }
         _device.stop();
     }
-    
+
     _deviceState = DEVICE_STATE_DISCONNECTED;
 
  }
 
 bool PCA9671_Device::setEnabled(bool enable){
-   
+
    if(enable){
        _isEnabled = true;
-       
+
        if( _deviceState == DEVICE_STATE_CONNECTED){
            return true;
        }
-       
+
        // force restart
        stop();
-       
+
        bool success = start();
        return success;
    }
-   
+
    _isEnabled = false;
    if(_deviceState == DEVICE_STATE_CONNECTED){
        stop();
@@ -145,41 +182,61 @@ bool PCA9671_Device::setEnabled(bool enable){
 
 
 bool PCA9671_Device::allOff(){
-   
+
     bool status = false;
- 
+
     if(_device.isOpen()){
         status = _device.allOff();
+
+        if(status){
+            IncidentMgr::shared()->clear(
+                _deviceID,
+                "DEVICE_IO_FAILED",
+                _deviceID,
+                nullptr,
+                "PCA9671 allOff succeeded"
+            );
+        }
+        else {
+            IncidentMgr::shared()->raise(
+                _deviceID,
+                IncidentMgr::Severity::Error,
+                "DEVICE_IO_FAILED",
+                _deviceID,
+                nullptr,
+                "PCA9671 allOff failed"
+            );
+        }
     }
     {
         std::lock_guard<std::mutex> lock(_mutex);
         _pinDidChange = true;
     }
- 
+
     return status;
 }
 
 bool PCA9671_Device::isConnected(){
-  
+
     return _device.isOpen();
 }
- 
+
 bool PCA9671_Device::setValues(keyValueMap_t kv){
-    
+
     if(!isConnected())
         return false;
-    
+
     PCA9671::pinStates_t ps ;
-    
+
     for(const auto& [key, valStr] : kv){
-        
+
         if(_pinMap.count(key)){
             uint8_t pin = _pinMap[key];
             bool state = false;
             bool isBool = false;
-            
+
             isBool =  stringToBool(valStr,state);
- 
+
             if(!isBool) return false;
             ps.push_back( make_pair(pin,state));
         }
@@ -189,16 +246,56 @@ bool PCA9671_Device::setValues(keyValueMap_t kv){
             std::lock_guard<std::mutex> lock(_mutex);
             _pinDidChange = true;
         }
-  
-        return _device.setRelayStates(ps);
+
+        bool status = _device.setRelayStates(ps);
+
+        if(status){
+            for(const auto& [pin, state] : ps){
+                (void)state;
+
+                for(const auto& [key, mappedPin] : _pinMap){
+                    if(pin == mappedPin){
+                        IncidentMgr::shared()->clear(
+                            _deviceID,
+                            "DEVICE_IO_FAILED",
+                            key,
+                            nullptr,
+                            "PCA9671 setRelayStates succeeded"
+                        );
+                        break;
+                    }
+                }
+            }
+        }
+        else {
+            for(const auto& [pin, state] : ps){
+                (void)state;
+
+                for(const auto& [key, mappedPin] : _pinMap){
+                    if(pin == mappedPin){
+                        IncidentMgr::shared()->raise(
+                            _deviceID,
+                            IncidentMgr::Severity::Error,
+                            "DEVICE_IO_FAILED",
+                            key,
+                            nullptr,
+                            "PCA9671 setRelayStates failed"
+                        );
+                        break;
+                    }
+                }
+            }
+        }
+
+        return status;
     }
-    
+
     return false;
 }
 
 
 bool PCA9671_Device::getValues (keyValueMap_t &results){
-    
+
     std::lock_guard<std::mutex> lock(_mutex);
      bool hasData = false;
     _pinDidChange = false;
@@ -210,10 +307,18 @@ bool PCA9671_Device::getValues (keyValueMap_t &results){
             }
         return true;
      }
- 
+
     PCA9671::pinStates_t ps ;
-    
+
     if( _device.getRelayStates(ps)){
+        IncidentMgr::shared()->clear(
+            _deviceID,
+            "DEVICE_IO_FAILED",
+            _deviceID,
+            nullptr,
+            "PCA9671 getRelayStates succeeded"
+        );
+
         for(const auto& [relay, state] : ps) {
             for(auto p : _pinMap){
                 if(relay == p.second){
@@ -223,13 +328,23 @@ bool PCA9671_Device::getValues (keyValueMap_t &results){
         }
         hasData = true;
     }
-        
+    else {
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _deviceID,
+            nullptr,
+            "PCA9671 getRelayStates failed"
+        );
+    }
+
     return hasData;
 }
 
- 
+
 bool PCA9671_Device::hasUpdates(){
     std::lock_guard<std::mutex> lock(_mutex);
-    
+
     return _pinDidChange;
 }

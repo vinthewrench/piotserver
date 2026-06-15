@@ -10,6 +10,7 @@
 #include "TimeStamp.hpp"
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
+#include "IncidentMgr.hpp"
 
 
 constexpr string_view Driver_Version = "1.1.0 dev 0";
@@ -93,11 +94,28 @@ bool QwiicButton_Device::start(){
         _state = INS_IDLE;
         _deviceState = DEVICE_STATE_CONNECTED;
         _device.LEDoff();
+
+        IncidentMgr::shared()->clear(
+            _deviceID,
+            "DEVICE_IO_FAILED",
+            _buttonState,
+            nullptr,
+            "QwiicButton begin succeeded"
+        );
     }
     else {
-        LOGT_ERROR("QwiicButton_Device(%02X) begin FAILED: %s",i2cAddr,strerror(errno));
+        LOGT_ERROR("QwiicButton_Device(%02X) begin FAILED: %s",i2cAddr,strerror(error));
        _state = INS_INVALID;
         _deviceState = DEVICE_STATE_ERROR;
+
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _buttonState,
+            nullptr,
+            "QwiicButton begin failed"
+        );
     }
      return status;
 }
@@ -213,6 +231,27 @@ bool QwiicButton_Device::setValues(keyValueMap_t kv){
                     success = _device.LEDon();
                 else
                     success =_device.LEDoff();
+
+                if(success){
+                    IncidentMgr::shared()->clear(
+                        _deviceID,
+                        "DEVICE_IO_FAILED",
+                        _ledState,
+                        nullptr,
+                        "QwiicButton LED write succeeded"
+                    );
+                }
+                else {
+                    IncidentMgr::shared()->raise(
+                        _deviceID,
+                        IncidentMgr::Severity::Error,
+                        "DEVICE_IO_FAILED",
+                        _ledState,
+                        nullptr,
+                        "QwiicButton LED write failed"
+                    );
+                }
+
                 continue;
             }
             else  if (isNumberString(valStr)){
@@ -224,6 +263,27 @@ bool QwiicButton_Device::setValues(keyValueMap_t kv){
                     if(number > 100) number = 100;
                     uint8_t bright =  255 * (number/100);
                     success =_device.LEDon(bright);
+
+                    if(success){
+                        IncidentMgr::shared()->clear(
+                            _deviceID,
+                            "DEVICE_IO_FAILED",
+                            _ledState,
+                            nullptr,
+                            "QwiicButton LED write succeeded"
+                        );
+                    }
+                    else {
+                        IncidentMgr::shared()->raise(
+                            _deviceID,
+                            IncidentMgr::Severity::Error,
+                            "DEVICE_IO_FAILED",
+                            _ledState,
+                            nullptr,
+                            "QwiicButton LED write failed"
+                        );
+                    }
+
                     continue;
                 }
             }
@@ -239,6 +299,27 @@ bool QwiicButton_Device::setValues(keyValueMap_t kv){
 
                     uint8_t bright =  255 * ( (double) brightness/100);
                     success =_device.LEDconfig(bright, cycleTime, offTime );
+
+                    if(success){
+                        IncidentMgr::shared()->clear(
+                            _deviceID,
+                            "DEVICE_IO_FAILED",
+                            _ledState,
+                            nullptr,
+                            "QwiicButton LED config succeeded"
+                        );
+                    }
+                    else {
+                        IncidentMgr::shared()->raise(
+                            _deviceID,
+                            IncidentMgr::Severity::Error,
+                            "DEVICE_IO_FAILED",
+                            _ledState,
+                            nullptr,
+                            "QwiicButton LED config failed"
+                        );
+                    }
+
                     continue;
 
                 }

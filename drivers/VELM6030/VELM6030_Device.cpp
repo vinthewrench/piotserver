@@ -12,6 +12,9 @@
 #include "PropValKeys.hpp"
 #include "croncpp.hpp"
 #include "EventAction.hpp"
+#include "IncidentMgr.hpp"
+
+#include <cstring>
 
 
 constexpr string_view Driver_Version = "1.1.0 dev 0";
@@ -111,11 +114,29 @@ bool VELM6030_Device::start()
         _lastQueryTime = {0, 0};
         _state = INS_IDLE;
         _deviceState = DEVICE_STATE_CONNECTED;
+
+        IncidentMgr::shared()->clear(
+            _deviceID,
+            "DEVICE_IO_FAILED",
+            _resultKey_lux,
+            nullptr,
+            "VEML6030 begin succeeded"
+        );
     }
     else {
-        LOGT_ERROR("VELM6030_Device(%02X) begin FAILED: %s", i2cAddr, strerror(errno));
+        LOGT_ERROR("VELM6030_Device(%02X) begin FAILED: %s", i2cAddr, strerror(error));
+
         _state = INS_INVALID;
         _deviceState = DEVICE_STATE_ERROR;
+
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "DEVICE_IO_FAILED",
+            _resultKey_lux,
+            nullptr,
+            "VEML6030 begin failed"
+        );
     }
 
     return status;
@@ -201,6 +222,7 @@ bool VELM6030_Device::getValues(keyValueMap_t& results)
         if(shouldQuery) {
             uint32_t lux = 0;
             uint32_t wLux = 0;
+            bool readLightOK = false;
 
             if(_fvAvgAvail) {
 
@@ -226,7 +248,9 @@ bool VELM6030_Device::getValues(keyValueMap_t& results)
                 hasData = true;
             }
 
-            if(_device.readLight(lux)) {
+            readLightOK = _device.readLight(lux);
+
+            if(readLightOK) {
 
                 results[_resultKey_lux] = to_string(lux);
 
@@ -235,6 +259,26 @@ bool VELM6030_Device::getValues(keyValueMap_t& results)
                 _fcAvg = (fc + lux) / 2;
 
                 hasData = true;
+
+                IncidentMgr::shared()->clear(
+                    _deviceID,
+                    "DEVICE_IO_FAILED",
+                    _resultKey_lux,
+                    nullptr,
+                    "VEML6030 lux read succeeded"
+                );
+            }
+            else {
+                LOGT_ERROR("VELM6030_Device(%02X) readLight FAILED", _device.getDevAddr());
+
+                IncidentMgr::shared()->raise(
+                    _deviceID,
+                    IncidentMgr::Severity::Error,
+                    "DEVICE_IO_FAILED",
+                    _resultKey_lux,
+                    nullptr,
+                    "VEML6030 lux read failed"
+                );
             }
 
             if(_device.readWhiteLight(wLux)) {
