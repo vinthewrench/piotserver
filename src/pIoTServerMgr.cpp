@@ -22,6 +22,7 @@
 #include <ranges>
 
 #include "pIoTServerMgr.hpp"
+#include "IncidentMgr.hpp"
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
 #include "Utils.hpp"
@@ -36,7 +37,7 @@
 using namespace nlohmann;
 
 #ifndef PIOTSERVER_VERSION
-#define PIOTSERVER_VERSION "1.2.0 dev 0"
+#define PIOTSERVER_VERSION "1.2.1 dev 0"
 #endif
 
 const char* pIoTServerMgr::pIoTServerMgr_Version = PIOTSERVER_VERSION;
@@ -613,11 +614,18 @@ void pIoTServerMgr::start(){
         initDataBase();
         loadGlobalValues();
 
+        IncidentMgr::shared()->begin(&_db);
+
+        IncidentMgr::shared()->notice(
+               "SYSTEM",
+               "SERVER_START",
+               "piotserver"
+           );
+
         LOGT_DEBUG("Start pIoTServer");
         startDevices();
         setupDeviceNotifications();
 
-        _db.logAlert(ALERT_START );
         _valuesUpdated.notify_all();
 
         // the pIoTServerMgr is the data collection thread.
@@ -625,6 +633,7 @@ void pIoTServerMgr::start(){
 
         _running = true;
         _thread = std::thread(&pIoTServerMgr::serverThread, this);
+
     }
     catch ( const pIoTServerException& e)  {
 
@@ -680,8 +689,6 @@ void pIoTServerMgr::stop()
 
     LOGT_INFO("Stop pIoTServerMgr");
 
-    _db.logAlert(ALERT_SHUTDOWN);
-
     /*
      * Stop the background thread first.
      *
@@ -713,6 +720,12 @@ void pIoTServerMgr::stop()
     if(!stopDevices()) {
         LOGT_ERROR("One or more devices failed during shutdown");
     }
+
+    IncidentMgr::shared()->notice(
+        "SYSTEM",
+        "SERVER_STOP",
+        "piotserver"
+    );
 
     LOGT_INFO("pIoTServerMgr stopped");
 }
@@ -926,18 +939,20 @@ void pIoTServerMgr::startDevices(){
                         // device must have a non null deviceID
                         string deviceID;
 
-                        if( entry.contains(PROP_DEVICE_ID)){
-                            vector<string>deviceIDs;
-                            for(deviceEntry_t e : _devices)
+                        if(entry.contains(PROP_DEVICE_ID)){
+                            vector<string> deviceIDs;
+                            for(deviceEntry_t e : _devices) {
                                 deviceIDs.push_back(e.deviceID);
+                            }
 
-                            deviceID = to_string(entry[PROP_DEVICE_ID]);
+                            deviceID = JSON_value_toString(entry[PROP_DEVICE_ID]);
 
-                            if (find(deviceIDs.begin(), deviceIDs.end(), deviceID) != deviceIDs.end()){
+                            if(find(deviceIDs.begin(), deviceIDs.end(), deviceID) != deviceIDs.end()){
                                 LOGT_DEBUG("Device ID %s is already being used ", deviceID.c_str());
                                 break;
                             }
-                        }else {
+                        }
+                        else {
                             deviceID = createUniqueDeviceID();
                         }
 
@@ -1244,37 +1259,53 @@ bool pIoTServerMgr::setDeviceProperties(string deviceID, json &j){
     for(deviceEntry_t e : _devices){
         if(deviceID == e.deviceID){
 
-            for(auto it =  j.begin(); it != j.end(); ++it) {
+            for(auto it = j.begin(); it != j.end(); ++it) {
                 string key = Utils::trim(it.key());
 
                 // special properties
                 if(key == JSON_ARG_ENABLE) {
                     if(it.value().is_boolean()){
-                        bool shouldEnable  = it.value();
-                        didUpdate =  e.device->setEnabled(shouldEnable);
-                        if(didUpdate) changedProps[key] = it.value();
+                        bool shouldEnable = it.value();
+                        didUpdate = e.device->setEnabled(shouldEnable);
+                        if(didUpdate) {
+                            changedProps[key] = it.value();
+                        }
                     }
                 }
 
                 // OTHER PROPERTIES REQUIRE UPDATING THE JSON.PROPS FILE
-                // DONt try and be everthing to everybody
+                // Don't try and be everything to everybody.
             }
             break;
         }
     }
 
-    if(changedProps.size() ){
+    if(changedProps.size()){
         json deviceProps;
-        if(_db.getJSONProperty(string(JSON_ARG_DEVICES),&deviceProps)){
-            for(auto &entry: deviceProps){
 
-                // device must have a non null deviceID
-                string devID =  to_string(entry[PROP_DEVICE_ID]);
-                if(devID != deviceID)continue;
+        if(_db.getJSONProperty(string(JSON_ARG_DEVICES), &deviceProps)
+           && deviceProps.is_array()){
 
-                for(auto it =  changedProps.begin(); it != changedProps.end(); ++it) {
+            for(auto &entry : deviceProps){
+
+                if(!entry.is_object()) {
+                    continue;
+                }
+
+                if(!entry.contains(PROP_DEVICE_ID)) {
+                    continue;
+                }
+
+                string devID = JSON_value_toString(entry[PROP_DEVICE_ID]);
+
+                if(devID != deviceID) {
+                    continue;
+                }
+
+                for(auto it = changedProps.begin(); it != changedProps.end(); ++it) {
                     entry[it.key()] = it.value();
                 }
+
                 _db.setProperty(string(JSON_ARG_DEVICES), deviceProps);
                 _db.saveProperties();
 
@@ -1282,9 +1313,9 @@ bool pIoTServerMgr::setDeviceProperties(string deviceID, json &j){
             }
         }
     }
-    return didUpdate;
-};
 
+    return didUpdate;
+}
 
 pIoTServerDevice* pIoTServerMgr::deviceForKey(string key){
     pIoTServerDevice* device = NULL;
@@ -1636,8 +1667,6 @@ bool pIoTServerMgr::processEvents(){
                 string msg = "ABORTED SEQUENCE " + SequenceID_to_string(sid)
                 +  " \"" + name  +  "\" condition: \"  " + condition +  "\"";
 
-                _db.logAlert(ALERT_MESSAGE, msg);
-
                 LOGT_INFO(msg.c_str());
 
 
@@ -1869,9 +1898,15 @@ bool pIoTServerMgr::runAbortActions(sequenceID_t sid){
                 }
             }
         }
-        else if(action.cmd() == Action::JSON_CMD_LOG){
+         else if(action.cmd() == Action::JSON_CMD_LOG){
             string detail = action.value();
-            success =  _db.logAlert(ALERT_MESSAGE, detail);
+
+            IncidentMgr::shared()->notice(
+                "SYSTEM",
+                "LOG_MESSAGE",
+                "piotserver",
+                detail.empty() ? nullptr : detail.c_str()
+            );
         }
         else if((action.cmd() == Action::JSON_CMD_CALLBACK)
                 && action.isCallBack()){
@@ -1969,7 +2004,14 @@ bool pIoTServerMgr::runSequenceStep(sequenceID_t sid, uint stepNo,
         }
         else if(action.cmd() == Action::JSON_CMD_LOG){
             string detail = action.value();
-            success =  _db.logAlert(ALERT_MESSAGE, detail);
+
+            IncidentMgr::shared()->notice(
+                "SYSTEM",
+                "LOG_MESSAGE",
+                "piotserver",
+                detail.empty() ? nullptr : detail.c_str()
+            );
+
         }
         else if((action.cmd() == Action::JSON_CMD_CALLBACK)
                 && action.isCallBack()){
@@ -2032,33 +2074,44 @@ bool pIoTServerMgr::abortSequence(sequenceID_t sid){
             string msg = "ABORTED SEQUENCE " + SequenceID_to_string(sid)
             +  " \"" + name  +  "\"";
 
-            _db.logAlert(ALERT_MESSAGE, msg);
-
             LOGT_INFO(msg.c_str());
 
-              // check if we are in the middle of a sequence.
             uint stepNo = 0;
             _db.sequenceNextStepNumberToRun(sid,stepNo);
 
             _db.sequenceStartAbort(sid);
 
-            // reset the sequence
             _db.sequenceReset(sid);
             _db.sequenceSetLastRunTime(sid, localNow);
 
-            // if we already started a sequence,  run abort
             if(stepNo > 0){
                 runAbortActions(sid);
             }
 
-             _db.sequenceSetRunning(sid, false);
+            _db.sequenceSetRunning(sid, false);
+
+            string details = "sid=" + SequenceID_to_string(sid)
+            + " name=\"" + name + "\""
+            + " step=" + to_string(stepNo);
+
+            if(!condition.empty()){
+                details += " condition=\"" + condition + "\"";
+            }
+
+            IncidentMgr::shared()->notice(
+                "SYSTEM",
+                "SEQUENCE_ABORTED",
+                SequenceID_to_string(sid),
+                msg.c_str(),
+                details.c_str()
+            );
+
             success = true;
         }
-      }
+    }
 
     return success;
 }
-
 
 
 // MARK: -   EsyBox Pump

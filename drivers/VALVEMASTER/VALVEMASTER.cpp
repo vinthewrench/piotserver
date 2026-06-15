@@ -196,8 +196,8 @@ bool VALVEMASTER::begin(uint8_t deviceAddress, int &error)
 
     _isSetup = _i2cPort.begin(deviceAddress, error);
 
-    LOGT_DEBUG("VALVEMASTER(%02x) begin: %s",
-               deviceAddress, _isSetup ? "OK" : "FAIL");
+    // LOGT_DEBUG("VALVEMASTER(%02x) begin: %s",
+    //            deviceAddress, _isSetup ? "OK" : "FAIL");
 
     if (!_isSetup) {
         LOGT_ERROR("VALVEMASTER(%02X) begin failed: %s",
@@ -216,18 +216,18 @@ bool VALVEMASTER::begin(uint8_t deviceAddress, int &error)
         return false;
     }
 
-    LOGT_DEBUG("VALVEMASTER(%02x) status: 0x%02X",
-               deviceAddress, status);
+    // LOGT_DEBUG("VALVEMASTER(%02x) status: 0x%02X",
+    //            deviceAddress, status);
 
-    LOGT_DEBUG("VALVEMASTER(%02x) starting action thread",
-               deviceAddress);
+    // LOGT_DEBUG("VALVEMASTER(%02x) starting action thread",
+    //            deviceAddress);
 
     _running = true;
     _stateChanged = false;
     _thread = std::thread(&VALVEMASTER::actionThread, this);
 
-    LOGT_DEBUG("VALVEMASTER(%02x) action thread started",
-               deviceAddress);
+    // LOGT_DEBUG("VALVEMASTER(%02x) action thread started",
+    //            deviceAddress);
 
     return true;
 }
@@ -238,7 +238,7 @@ void VALVEMASTER::stop()
     std::deque<queuedCommand_t> stoppedCommands;
 
     if (_isSetup) {
-        LOGT_DEBUG("VALVEMASTER(%02x) stop", _i2cPort.getDevAddr());
+ //       LOGT_DEBUG("VALVEMASTER(%02x) stop", _i2cPort.getDevAddr());
     }
 
     {
@@ -277,14 +277,14 @@ void VALVEMASTER::stop()
     }
 
     if (_thread.joinable()) {
-        LOGT_DEBUG("VALVEMASTER(%02x) joining action thread",
-                   _i2cPort.getDevAddr());
+        // LOGT_DEBUG("VALVEMASTER(%02x) joining action thread",
+        //            _i2cPort.getDevAddr());
 
         _thread.join();
 
-        LOGT_DEBUG("VALVEMASTER(%02x) action thread joined",
-                   _i2cPort.getDevAddr());
-    }
+    //     LOGT_DEBUG("VALVEMASTER(%02x) action thread joined",
+    //                _i2cPort.getDevAddr());
+      }
 
     if (_isSetup) {
         _isSetup = false;
@@ -330,7 +330,7 @@ bool VALVEMASTER::getVersion(std::string& version)
         return false;
     }
 
-    LOGT_DEBUG("VALVEMASTER(%02x) getVersion", _i2cPort.getDevAddr());
+ //   LOGT_DEBUG("VALVEMASTER(%02x) getVersion", _i2cPort.getDevAddr());
 
     success = _i2cPort.readByte(VALVEMASTER_REG_VERSION_HI, versionHi);
 
@@ -351,8 +351,8 @@ bool VALVEMASTER::getVersion(std::string& version)
     snprintf(str, sizeof(str), "%u.%02u", versionHi, versionLo);
     version = str;
 
-    LOGT_DEBUG("VALVEMASTER(%02x) version: %s",
-               _i2cPort.getDevAddr(), version.c_str());
+    // LOGT_DEBUG("VALVEMASTER(%02x) version: %s",
+    //            _i2cPort.getDevAddr(), version.c_str());
 
     return true;
 }
@@ -685,7 +685,7 @@ bool VALVEMASTER::flushQueue()
 {
     std::deque<queuedCommand_t> flushedCommands;
 
-    LOGT_DEBUG("VALVEMASTER(%02x) flushQueue", _i2cPort.getDevAddr());
+  //  LOGT_DEBUG("VALVEMASTER(%02x) flushQueue", _i2cPort.getDevAddr());
 
     {
         std::lock_guard<std::mutex> lock(_mtx);
@@ -725,9 +725,9 @@ bool VALVEMASTER::flushQueue()
     }
 
     if (!flushedCommands.empty()) {
-        LOGT_DEBUG("VALVEMASTER(%02x) flushed %zu queued command(s)",
-                   _i2cPort.getDevAddr(),
-                   flushedCommands.size());
+        // LOGT_DEBUG("VALVEMASTER(%02x) flushed %zu queued command(s)",
+        //            _i2cPort.getDevAddr(),
+        //            flushedCommands.size());
     }
 
     return true;
@@ -814,7 +814,7 @@ bool VALVEMASTER::readStatus(uint8_t &status)
 
     status = 0;
 
-    LOGT_DEBUG("VALVEMASTER(%02x) readStatus", _i2cPort.getDevAddr());
+//    LOGT_DEBUG("VALVEMASTER(%02x) readStatus", _i2cPort.getDevAddr());
 
     success = _i2cPort.readByte(VALVEMASTER_REG_STATUS, status);
 
@@ -840,12 +840,12 @@ bool VALVEMASTER::queueCommand(uint8_t command,
                                VALVEMASTERValveStatusCompletion valveStatusCompletion,
                                VALVEMASTERNodeVersionCompletion nodeVersionCompletion)
 {
-    LOGT_DEBUG("VALVEMASTER(%02x) queueCommand cmd=0x%02X arg0=0x%02X arg1=0x%02X arg2=0x%02X",
-               _i2cPort.getDevAddr(),
-               command,
-               arg0,
-               arg1,
-               arg2);
+    // LOGT_DEBUG("VALVEMASTER(%02x) queueCommand cmd=0x%02X arg0=0x%02X arg1=0x%02X arg2=0x%02X",
+    //            _i2cPort.getDevAddr(),
+    //            command,
+    //            arg0,
+    //            arg1,
+    //            arg2);
 
     if (!_isSetup) {
         LOGT_ERROR("VALVEMASTER(%02X) queueCommand failed: device is not setup",
@@ -1085,9 +1085,9 @@ bool VALVEMASTER::runCommandOnce(queuedCommand_t item,
         commandOk = (status & VALVEMASTER_STATUS_POWER_ON) != 0;
 
         if (commandOk) {
-            LOGT_DEBUG("VALVEMASTER(%02x) waiting %u ms for valve nodes to settle",
-                       _i2cPort.getDevAddr(),
-                       VALVEMASTER_NODE_SETTLE_MS);
+            // LOGT_DEBUG("VALVEMASTER(%02x) waiting %u ms for valve nodes to settle",
+            //            _i2cPort.getDevAddr(),
+            //            VALVEMASTER_NODE_SETTLE_MS);
 
             std::this_thread::sleep_for(
                 std::chrono::milliseconds(VALVEMASTER_NODE_SETTLE_MS));
@@ -1162,12 +1162,12 @@ bool VALVEMASTER::runCommandOnce(queuedCommand_t item,
             completionChannel = replyArg0;
             completionOpen = parsedOpen;
 
-            LOGT_DEBUG("VALVEMASTER(%02x) channel status reply node=0x%02X channel=0x%02X state=0x%02X open=%u",
-                       _i2cPort.getDevAddr(),
-                       replyNode,
-                       replyArg0,
-                       replyArg1,
-                       completionOpen ? 1 : 0);
+            // LOGT_DEBUG("VALVEMASTER(%02x) channel status reply node=0x%02X channel=0x%02X state=0x%02X open=%u",
+            //            _i2cPort.getDevAddr(),
+            //            replyNode,
+            //            replyArg0,
+            //            replyArg1,
+            //            completionOpen ? 1 : 0);
         }
     }
 
@@ -1227,8 +1227,8 @@ bool VALVEMASTER::runCommandOnce(queuedCommand_t item,
 
 void VALVEMASTER::actionThread()
 {
-    LOGT_DEBUG("VALVEMASTER(%02x) actionThread entered",
-               _i2cPort.getDevAddr());
+    // LOGT_DEBUG("VALVEMASTER(%02x) actionThread entered",
+    //            _i2cPort.getDevAddr());
 
     for (;;) {
         queuedCommand_t item = {
@@ -1279,9 +1279,9 @@ void VALVEMASTER::actionThread()
         uint8_t completionVersionHi = 0;
         uint8_t completionVersionLo = 0;
 
-        LOGT_DEBUG("VALVEMASTER(%02x) running queued command 0x%02X",
-                   _i2cPort.getDevAddr(),
-                   item.command);
+        // LOGT_DEBUG("VALVEMASTER(%02x) running queued command 0x%02X",
+        //            _i2cPort.getDevAddr(),
+        //            item.command);
 
         for (uint8_t attempt = 1; attempt <= VALVEMASTER_COMMAND_RETRY_COUNT; attempt++) {
             bool runOk = false;
@@ -1360,9 +1360,9 @@ void VALVEMASTER::actionThread()
         }
 
         if (commandOk) {
-            LOGT_DEBUG("VALVEMASTER(%02x) command 0x%02X complete OK",
-                       _i2cPort.getDevAddr(),
-                       item.command);
+            // LOGT_DEBUG("VALVEMASTER(%02x) command 0x%02X complete OK",
+            //            _i2cPort.getDevAddr(),
+            //            item.command);
         } else {
             LOGT_ERROR("VALVEMASTER(%02X) command 0x%02X failed result=0x%02X status=0x%02X",
                        _i2cPort.getDevAddr(),
@@ -1372,15 +1372,15 @@ void VALVEMASTER::actionThread()
         }
 
         if (VALVEMASTER_commandUsesRS485(item.command)) {
-            LOGT_DEBUG("VALVEMASTER(%02x) waiting %u ms after RS485 command",
-                       _i2cPort.getDevAddr(),
-                       VALVEMASTER_RS485_COMMAND_GAP_MS);
+            // LOGT_DEBUG("VALVEMASTER(%02x) waiting %u ms after RS485 command",
+            //            _i2cPort.getDevAddr(),
+            //            VALVEMASTER_RS485_COMMAND_GAP_MS);
 
             std::this_thread::sleep_for(
                 std::chrono::milliseconds(VALVEMASTER_RS485_COMMAND_GAP_MS));
         }
     }
 
-    LOGT_DEBUG("VALVEMASTER(%02x) actionThread exiting",
-               _i2cPort.getDevAddr());
+    // LOGT_DEBUG("VALVEMASTER(%02x) actionThread exiting",
+    //            _i2cPort.getDevAddr());
 }

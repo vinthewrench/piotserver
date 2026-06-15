@@ -9,6 +9,7 @@
 
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
+#include "IncidentMgr.hpp"
 
 #include <errno.h>
 #include <string.h>
@@ -37,6 +38,9 @@ POWERCONTROL_Device::POWERCONTROL_Device(string devID, string driverName)
     _state = INS_UNKNOWN;
     _lastQueryTime = {0,0};
 
+    _hasLastAcOK = false;
+    _lastAcOK = false;
+
     json j = {
         { PROP_DEVICE_MFG_PART, "ATmega88PB Power Controller" },
         { PROP_DESCRIPTION, "Read-only I2C power controller status interface, one-byte protocol." },
@@ -60,6 +64,8 @@ POWERCONTROL_Device::POWERCONTROL_Device(string devID, string driverName)
     _deviceState = DEVICE_STATE_UNKNOWN;
     _isSetup = false;
 }
+
+
 
 POWERCONTROL_Device::~POWERCONTROL_Device()
 {
@@ -135,25 +141,23 @@ bool POWERCONTROL_Device::start()
     }
 
     /*
-     * Do not perform an immediate I2C status read here.
+     * Do not perform an I2C status read directly inside start().
      *
-     * Startup is the worst time to add extra bus traffic. The manager is
-     * starting all configured I2C devices, and VALVEMASTER may also start its
-     * action thread. The first POWERCONTROL status read should happen later,
-     * after the configured query interval has elapsed.
+     * Startup is still a busy time for the shared I2C bus. However, the first
+     * POWERCONTROL poll should happen on the first manager read pass, not after
+     * the normal interval delay. Leaving _lastQueryTime at zero causes
+     * getValues() to read immediately the first time it is called.
      *
      * This plugin is read-only during normal operation. It must never send
      * shutdown, cancel, wake preset, LED, relay, reset, sleep, or all-off
      * commands to the AVR from start().
      */
-    gettimeofday(&_lastQueryTime, NULL);
+    _lastQueryTime = {0,0};
+    _hasLastAcOK = false;
+    _lastAcOK = false;
 
     _state = INS_IDLE;
     _deviceState = DEVICE_STATE_CONNECTED;
-
-    LOGT_INFO("POWERCONTROL_Device(%02X) started read-only, first poll in %llu second(s)",
-              i2cAddr,
-              static_cast<unsigned long long>(_queryDelay));
 
     return true;
 }
@@ -263,6 +267,70 @@ bool POWERCONTROL_Device::getValues(keyValueMap_t &results)
     POWERCONTROL::POWERCONTROL_data data = {};
 
     if(_device.readStatus(data)) {
+
+        // LOGT_DEBUG("POWERCONTROL_Device(%02X) AC_OK sample: hasLast=%d last=%d current=%d status=0x%02X",
+        //            _device.getDevAddr(),
+        //            _hasLastAcOK ? 1 : 0,
+        //            _lastAcOK ? 1 : 0,
+        //            data.acOK ? 1 : 0,
+        //            data.statusByte);
+
+        /*
+         * First good read establishes the baseline.
+         *
+         * If the first observed AC_OK state is false, raise the fault. That is
+         * not a recovery/noise problem; it means the first confirmed live power
+         * state is already "on battery / AC failed".
+         */
+        if(!_hasLastAcOK) {
+            _hasLastAcOK = true;
+            _lastAcOK = data.acOK;
+
+            if(!data.acOK) {
+                // LOGT_INFO("POWERCONTROL_Device(%02X) AC_OK initial fault: current=0 status=0x%02X",
+                //           _device.getDevAddr(),
+                //           data.statusByte);
+
+                IncidentMgr::shared()->raise(
+                    _deviceID,
+                    IncidentMgr::Severity::Critical,
+                    "AC_POWER_FAILED",
+                    KEY_POWER_AC_OK,
+                    nullptr,
+                    "POWERCONTROL first AC_OK sample was false"
+                );
+            }
+        }
+        else if(_lastAcOK != data.acOK) {
+
+            // LOGT_INFO("POWERCONTROL_Device(%02X) AC_OK transition: %d -> %d status=0x%02X",
+            //           _device.getDevAddr(),
+            //           _lastAcOK ? 1 : 0,
+            //           data.acOK ? 1 : 0,
+            //           data.statusByte);
+
+            if(data.acOK) {
+                IncidentMgr::shared()->clear(
+                    _deviceID,
+                    "AC_POWER_FAILED",
+                    KEY_POWER_AC_OK,
+                    nullptr,
+                    "POWERCONTROL AC_OK bit returned true"
+                );
+            }
+            else {
+                IncidentMgr::shared()->raise(
+                    _deviceID,
+                    IncidentMgr::Severity::Critical,
+                    "AC_POWER_FAILED",
+                    KEY_POWER_AC_OK,
+                    nullptr,
+                    "POWERCONTROL AC_OK bit returned false"
+                );
+            }
+
+            _lastAcOK = data.acOK;
+        }
 
         if(!_resultKey_acOK.empty()) {
             results[_resultKey_acOK] = data.acOK ? "true" : "false";

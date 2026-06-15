@@ -116,6 +116,7 @@ CPP_SOURCES := \
 	$(SRC_DIR)/pIoTServerAPISecretMgr.cpp \
 	$(SRC_DIR)/pIoTServerDB.cpp \
 	$(SRC_DIR)/pIoTServerMgr.cpp \
+	$(SRC_DIR)/IncidentMgr.cpp \
 	$(SRC_DIR)/pIoTServerEvaluator.cpp \
 	$(SRC_DIR)/EventTrigger.cpp \
 	$(SRC_DIR)/Sequence.cpp \

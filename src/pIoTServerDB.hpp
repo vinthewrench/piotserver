@@ -237,15 +237,6 @@ class pIoTServerDB  {
     bool      createValueSnapshot(vector<numericValueSnapshot_t> *snapshot,
                                   keyValueMap_t kv = {});
 
-    // MARK: - History Alerts
-    bool logAlert(alert_t evt, string details = "", time_t when = 0);
-    bool historyForAlerts( historicAlerts_t &alerts,
-                          float days = 0.0, int limit = 0,  int offset = 0);
-    bool removehistoryForAlerts(float days);
-    bool countHistoryForAlerts(int &count);
-
-    static string displayStringForAlert(alert_t evt);
-
 
     // MARK: -  Sequence
     bool sequenceIDIsValid(sequenceID_t sequenceID);
@@ -321,6 +312,45 @@ class pIoTServerDB  {
     vector<sequenceGroupID_t> allSequenceGroupIDs();
     void reconcileSequenceGroup(const solarTimes_t &solar, time_t localNow);
 
+    // IncidentMgr functions
+    bool initIncidentTables();
+
+    bool noticeIncident(const std::string& source,
+                        const std::string& code,
+                        const std::string& key,
+                        const char* message = nullptr,
+                        const char* details = nullptr);
+
+    bool raiseIncident(const std::string& source,
+                       int severity,
+                       const std::string& code,
+                       const std::string& key,
+                       const char* message = nullptr,
+                       const char* details = nullptr);
+
+    bool clearIncident(const std::string& source,
+                       const std::string& code,
+                       const std::string& key,
+                       const char* message = nullptr,
+                       const char* details = nullptr);
+
+    typedef std::tuple<int64_t, std::string, std::string, std::string, int, bool, time_t, time_t, time_t, int, int64_t, std::string, std::string> historicIncident_t;
+    typedef std::vector<historicIncident_t> historicIncidents_t;
+
+    bool incidentGetEtag(int64_t &etagOut);
+
+    bool historyForIncidents(historicIncidents_t &incidentsOut,
+                             float days = 0,
+                             int limit = 0,
+                             int offset = 0,
+                             bool activeOnly = false,
+                             int64_t sinceEtag = 0);
+
+    bool countHistoryForIncidents(int &countOut,
+                                  bool activeOnly = false);
+
+    bool removeHistoryForIncidents(float days = 0,
+                                   bool inactiveOnly = true);
 
     // MARK: - utility
 
@@ -387,4 +417,6 @@ class pIoTServerDB  {
 
     void setupDatabasePeriodicTasks();
     void runDailyTask();
+
+    bool nextIncidentEtagLocked(int64_t &etagOut);
  };

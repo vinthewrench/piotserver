@@ -204,7 +204,7 @@
         {
             "address": "0x09",
             "description": "Valve Master I2C to RS-485 irrigation controller",
-            "deviceID": 4000,
+            "deviceID": "VALVEMASTER_1",
             "device_type": "VALVEMASTER",
             "interval": 5,
             "key": "VALVEMASTER_1",
@@ -372,8 +372,8 @@
         "SPRK_9"
     ],
     "prop.file.version": {
-        "file.etag": 542,
-        "last_write": 1781387920
+        "file.etag": 643,
+        "last_write": 1781558094
     },
     "sequence": [
         {
@@ -584,8 +584,7 @@
                 }
             ],
             "trigger": {
-                "offset": 10,
-                "timeBase": "civil sunrise"
+                "cron": "@10minute"
             }
         },
         {
@@ -725,8 +724,7 @@
                 }
             ],
             "trigger": {
-                "offset": 10,
-                "timeBase": "civil sunrise"
+                "cron": "0 */5 * * * ?"
             }
         },
         {

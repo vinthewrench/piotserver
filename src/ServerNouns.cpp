@@ -38,6 +38,7 @@
 
 #include "ServerCmdValidators.hpp"
 #include "pIoTServerMgr.hpp"
+#include "IncidentMgr.hpp"
 #include "TimeStamp.hpp"
 #include "PropValKeys.hpp"
 #include "LogMgr.hpp"
@@ -343,209 +344,6 @@ static void History_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
             //
         case HTTP_DELETE:
             isValidURL = History_NounHandler_DELETE(cmdQueue,url,cInfo, completion);
-            break;
-
-        default:
-            (completion) (reply, STATUS_INVALID_METHOD);
-            return;
-    }
-
-    if(!isValidURL) {
-        (completion) (reply, STATUS_NOT_FOUND);
-    }
-};
-
-// MARK: -  ALERTS NOUN HANDLER
-
-static bool Alerts_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
-                                   REST_URL url,
-                                   [[maybe_unused]] TCPClientInfo cInfo,
-                                   ServerCmdQueue::cmdCallback_t completion) {
-    using namespace rest;
-    json reply;
-    ServerCmdArgValidator v1;
-    auto path = url.path();
-
-    auto pIoTServer = pIoTServerMgr::shared();
-    auto db = pIoTServer->getDB();
-
-    size_t pathsize = path.size();
-
-    if(pathsize == 1){
-        pIoTServerDB::historicAlerts_t alerts;
-        string str;
-
-        float days = 0;
-        int limit = 0;
-        int offset = 0;
-
-        if(v1.getStringFromMap(JSON_HDR_LIMIT, url.headers(), str)){
-            char* p;
-            limit = (int) strtol(str.c_str(), &p, 10);
-            //           if(*p != 0) days = 0;
-        }
-
-        if(v1.getStringFromMap(JSON_HDR_DAYS, url.headers(), str)){
-            char* p;
-            days =  strtof(str.c_str(), &p);
-            //         if(*p != 0) days = 0;
-        }
-        if(v1.getStringFromMap(JSON_HDR_OFFSET, url.headers(), str)){
-            char* p;
-            offset = (int) strtol(str.c_str(), &p, 10);
-            //       if(*p != 0) days = 0;
-        }
-
-        if(db->historyForAlerts(alerts, days, limit, offset)){
-
-            json j;
-            for (auto &entry : alerts) {
-                json j1;
-
-                alert_t alertID = get<1>(entry);
-                string details = get<2>(entry);
-
-                j1[JSON_ARG_TIME]           = get<0>(entry);
-                j1[JSON_ARG_ALERT_STRING]   = pIoTServerDB::displayStringForAlert(alertID);
-                if(details.size())
-                    j1[JSON_ARG_ALERT_DETAILS]  = details;
-
-                j.push_back(j1);
-            }
-
-            reply[string(JSON_ARG_ALERT)] = j;
-        }
-    }
-    else if(pathsize == 2){
-        string subpath =  path.at(1);
-
-        if( subpath == SUBPATH_COUNT){
-
-            int count;
-
-            if(db->countHistoryForAlerts(count)){
-                reply[JSON_ARG_COUNT] = count;
-            }
-        }
-    }
-    else
-    {
-        makeStatusJSON(reply, STATUS_BAD_REQUEST,
-                       "URL Invalid",
-                       "The request takes no arguments",
-                       url.pathString());
-
-        (completion) (reply, STATUS_BAD_REQUEST);
-        return true;
-    }
-
-    makeStatusJSON(reply,STATUS_OK);
-    (completion) (reply, STATUS_OK);
-    return true;
-}
-
-static bool Alerts_NounHandler_PATCH([[maybe_unused]] ServerCmdQueue* cmdQueue,
-                                   REST_URL url,
-                                   [[maybe_unused]] TCPClientInfo cInfo,
-                                   ServerCmdQueue::cmdCallback_t completion) {
-    using namespace rest;
-    json reply;
-    ServerCmdArgValidator v1;
-    auto path = url.path();
-
-    auto pIoTServer = pIoTServerMgr::shared();
-    auto db = pIoTServer->getDB();
-
-    string str;
-
-    if(v1.getStringFromJSON(JSON_ARG_MESSAGE, url.body(), str)){
-
-        db->logAlert(ALERT_MESSAGE, str);
-
-        makeStatusJSON(reply,STATUS_OK);
-        (completion) (reply, STATUS_OK);
-        return true;
-    }
-
-    return false;
-}
-
-
-static bool Alerts_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQueue,
-                                      REST_URL url,
-                                      [[maybe_unused]] TCPClientInfo cInfo,
-                                      ServerCmdQueue::cmdCallback_t completion) {
-    using namespace rest;
-    json reply;
-    ServerCmdArgValidator v1;
-    string str;
-
-    auto path = url.path();
-    string noun;
-
-    if(path.size() > 0) {
-        noun = path.at(0);
-    }
-
-    auto pIoTServer = pIoTServerMgr::shared();
-    auto db = pIoTServer->getDB();
-
-    // CHECK sub paths
-    float days = 0;
-
-    if(v1.getStringFromMap(JSON_HDR_DAYS, url.headers(), str)){
-        char* p;
-        days =  strtof(str.c_str(), &p);
-        if(*p != 0) days = 0;
-    }
-
-    if(db->removehistoryForAlerts(days)){
-        makeStatusJSON(reply,STATUS_NO_CONTENT);
-        (completion) (reply, STATUS_NO_CONTENT);
-        return true;
-    }
-
-    return false;
-}
-
-static void Alerts_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
-                               REST_URL url,
-                               [[maybe_unused]] TCPClientInfo cInfo,
-                               ServerCmdQueue::cmdCallback_t completion) {
-
-    using namespace rest;
-    json reply;
-
-    auto path = url.path();
-    auto queries = url.queries();
-    auto headers = url.headers();
-    string noun;
-
-    bool isValidURL = false;
-
-    if(path.size() > 0) {
-        noun = path.at(0);
-    }
-
-    switch(url.method()){
-        case HTTP_GET:
-            isValidURL = Alerts_NounHandler_GET(cmdQueue,url,cInfo, completion);
-            break;
-
-            //        case HTTP_PUT:
-            //            isValidURL = Alerts_NounHandler_PUT(cmdQueue,url,cInfo, completion);
-            //            break;
-
-                    case HTTP_PATCH:
-                        isValidURL = Alerts_NounHandler_PATCH(cmdQueue,url,cInfo, completion);
-                        break;
-
-    //                    case HTTP_POST:
-    //                        isValidURL = Alerts_NounHandler_POST(cmdQueue,url,cInfo, completion);
-    //                        break;
-
-        case HTTP_DELETE:
-            isValidURL = Alerts_NounHandler_DELETE(cmdQueue,url,cInfo, completion);
             break;
 
         default:
@@ -2740,7 +2538,330 @@ static void Test_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
 }
 
 
+// MARK: -  INCIDENTS  NOUN HANDLERS
 
+// MARK: -  INCIDENTS NOUN HANDLER
+
+static bool Incidents_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                                      REST_URL url,
+                                      [[maybe_unused]] TCPClientInfo cInfo,
+                                      ServerCmdQueue::cmdCallback_t completion) {
+    using namespace rest;
+
+    json reply;
+    ServerCmdArgValidator v1;
+    auto path = url.path();
+
+    auto pIoTServer = pIoTServerMgr::shared();
+    auto db = pIoTServer->getDB();
+
+    size_t pathsize = path.size();
+
+    if(pathsize == 1){
+        pIoTServerDB::historicIncidents_t incidents;
+        string str;
+
+        float days = 0;
+        int limit = 0;
+        int offset = 0;
+        int64_t sinceEtag = 0;
+        bool activeOnly = false;
+
+        if(v1.getStringFromMap(JSON_HDR_LIMIT, url.headers(), str)){
+            char* p;
+            limit = (int) strtol(str.c_str(), &p, 10);
+            if(*p != 0) limit = 0;
+        }
+
+        if(v1.getStringFromMap(JSON_HDR_DAYS, url.headers(), str)){
+            char* p;
+            days = strtof(str.c_str(), &p);
+            if(*p != 0) days = 0;
+        }
+
+        if(v1.getStringFromMap(JSON_HDR_OFFSET, url.headers(), str)){
+            char* p;
+            offset = (int) strtol(str.c_str(), &p, 10);
+            if(*p != 0) offset = 0;
+        }
+
+        if(v1.getStringFromMap("etag", url.headers(), str)){
+            char* p;
+            sinceEtag = strtoll(str.c_str(), &p, 10);
+            if(*p != 0) sinceEtag = 0;
+        }
+
+        if(v1.getStringFromMap("active", url.headers(), str)){
+            bool b = false;
+            if(stringToBool(str, b)) {
+                activeOnly = b;
+            }
+        }
+
+        int64_t currentEtag = 0;
+        if(db->incidentGetEtag(currentEtag)) {
+            reply["etag"] = currentEtag;
+        }
+
+        if(db->historyForIncidents(incidents, days, limit, offset, activeOnly, sinceEtag)){
+
+            json j = json::array();
+
+            for(auto &entry : incidents) {
+                json j1;
+
+                j1["id"]            = get<0>(entry);
+                j1["source"]        = get<1>(entry);
+                j1["code"]          = get<2>(entry);
+                j1["key"]           = get<3>(entry);
+                j1["severity"]      = get<4>(entry);
+                j1["active"]        = get<5>(entry);
+                j1["first_time"]    = get<6>(entry);
+                j1["last_time"]     = get<7>(entry);
+                j1["cleared_time"]  = get<8>(entry);
+                j1["count"]         = get<9>(entry);
+                j1["etag"]          = get<10>(entry);
+
+                string message = get<11>(entry);
+                string details = get<12>(entry);
+
+                if(message.size()) {
+                    j1["message"] = message;
+                }
+
+                if(details.size()) {
+                    j1["details"] = details;
+                }
+
+                j.push_back(j1);
+            }
+
+            reply["incidents"] = j;
+        }
+    }
+    else if(pathsize == 2){
+        string subpath = path.at(1);
+
+        if(subpath == SUBPATH_COUNT){
+
+            string str;
+            bool activeOnly = false;
+
+            if(v1.getStringFromMap("active", url.headers(), str)){
+                bool b = false;
+                if(stringToBool(str, b)) {
+                    activeOnly = b;
+                }
+            }
+
+            int count = 0;
+
+            if(db->countHistoryForIncidents(count, activeOnly)){
+                reply[JSON_ARG_COUNT] = count;
+            }
+        }
+        else if(subpath == "etag"){
+
+            int64_t etag = 0;
+
+            if(db->incidentGetEtag(etag)){
+                reply["etag"] = etag;
+            }
+        }
+        else if(subpath == "active"){
+
+            pIoTServerDB::historicIncidents_t incidents;
+            int64_t currentEtag = 0;
+
+            if(db->incidentGetEtag(currentEtag)) {
+                reply["etag"] = currentEtag;
+            }
+
+            if(db->historyForIncidents(incidents, 0, 0, 0, true, 0)){
+
+                json j = json::array();
+
+                for(auto &entry : incidents) {
+                    json j1;
+
+                    j1["id"]            = get<0>(entry);
+                    j1["source"]        = get<1>(entry);
+                    j1["code"]          = get<2>(entry);
+                    j1["key"]           = get<3>(entry);
+                    j1["severity"]      = get<4>(entry);
+                    j1["active"]        = get<5>(entry);
+                    j1["first_time"]    = get<6>(entry);
+                    j1["last_time"]     = get<7>(entry);
+                    j1["cleared_time"]  = get<8>(entry);
+                    j1["count"]         = get<9>(entry);
+                    j1["etag"]          = get<10>(entry);
+
+                    string message = get<11>(entry);
+                    string details = get<12>(entry);
+
+                    if(message.size()) {
+                        j1["message"] = message;
+                    }
+
+                    if(details.size()) {
+                        j1["details"] = details;
+                    }
+
+                    j.push_back(j1);
+                }
+
+                reply["incidents"] = j;
+            }
+        }
+        else
+        {
+            makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                           "URL Invalid",
+                           "Unknown incidents subpath",
+                           url.pathString());
+
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
+    }
+    else
+    {
+        makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                       "URL Invalid",
+                       "The request takes no arguments",
+                       url.pathString());
+
+        (completion)(reply, STATUS_BAD_REQUEST);
+        return true;
+    }
+
+    makeStatusJSON(reply, STATUS_OK);
+    (completion)(reply, STATUS_OK);
+    return true;
+}
+
+static bool Incidents_NounHandler_PATCH([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                                        REST_URL url,
+                                        [[maybe_unused]] TCPClientInfo cInfo,
+                                        ServerCmdQueue::cmdCallback_t completion) {
+    using namespace rest;
+
+    json reply;
+    ServerCmdArgValidator v1;
+
+    string message;
+    string source = "SYSTEM";
+    string code = "LOG_MESSAGE";
+    string key = "piotserver";
+    string details;
+
+    if(v1.getStringFromJSON(JSON_ARG_MESSAGE, url.body(), message)){
+
+        v1.getStringFromJSON("source", url.body(), source);
+        v1.getStringFromJSON("code", url.body(), code);
+        v1.getStringFromJSON("key", url.body(), key);
+        v1.getStringFromJSON("details", url.body(), details);
+
+        bool ok = IncidentMgr::shared()->notice(
+            source,
+            code,
+            key,
+            message.empty() ? nullptr : message.c_str(),
+            details.empty() ? nullptr : details.c_str()
+        );
+
+        if(ok) {
+            makeStatusJSON(reply, STATUS_OK);
+            (completion)(reply, STATUS_OK);
+            return true;
+        }
+    }
+
+    makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                   "Invalid Incident",
+                   "PATCH requires a message",
+                   url.pathString());
+
+    (completion)(reply, STATUS_BAD_REQUEST);
+    return true;
+}
+
+static bool Incidents_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                                         REST_URL url,
+                                         [[maybe_unused]] TCPClientInfo cInfo,
+                                         ServerCmdQueue::cmdCallback_t completion) {
+    using namespace rest;
+
+    json reply;
+    ServerCmdArgValidator v1;
+    string str;
+
+    auto pIoTServer = pIoTServerMgr::shared();
+    auto db = pIoTServer->getDB();
+
+    float days = 0;
+    bool inactiveOnly = true;
+
+    if(v1.getStringFromMap(JSON_HDR_DAYS, url.headers(), str)){
+        char* p;
+        days = strtof(str.c_str(), &p);
+        if(*p != 0) days = 0;
+    }
+
+    if(v1.getStringFromMap("inactive_only", url.headers(), str)){
+        bool b = true;
+        if(stringToBool(str, b)) {
+            inactiveOnly = b;
+        }
+    }
+
+    if(db->removeHistoryForIncidents(days, inactiveOnly)){
+        makeStatusJSON(reply, STATUS_NO_CONTENT);
+        (completion)(reply, STATUS_NO_CONTENT);
+        return true;
+    }
+
+    makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                   "Delete Failed",
+                   "Could not remove incident history",
+                   url.pathString());
+
+    (completion)(reply, STATUS_BAD_REQUEST);
+    return true;
+}
+
+static void Incidents_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                                  REST_URL url,
+                                  [[maybe_unused]] TCPClientInfo cInfo,
+                                  ServerCmdQueue::cmdCallback_t completion) {
+
+    using namespace rest;
+
+    json reply;
+    bool isValidURL = false;
+
+    switch(url.method()){
+        case HTTP_GET:
+            isValidURL = Incidents_NounHandler_GET(cmdQueue, url, cInfo, completion);
+            break;
+
+        case HTTP_PATCH:
+            isValidURL = Incidents_NounHandler_PATCH(cmdQueue, url, cInfo, completion);
+            break;
+
+        case HTTP_DELETE:
+            isValidURL = Incidents_NounHandler_DELETE(cmdQueue, url, cInfo, completion);
+            break;
+
+        default:
+            (completion)(reply, STATUS_INVALID_METHOD);
+            return;
+    }
+
+    if(!isValidURL) {
+        (completion)(reply, STATUS_NOT_FOUND);
+    }
+}
 
 // MARK: -  register server nouns
 
@@ -2761,13 +2882,12 @@ void registerServerNouns() {
     cmdQueue->registerNoun(NOUN_PROPERTIES, Properties_NounHandler);
     cmdQueue->registerNoun(NOUN_HISTORY,    History_NounHandler);
 
-    cmdQueue->registerNoun(NOUN_ALERTS,     Alerts_NounHandler);
-
     cmdQueue->registerNoun(NOUN_DEVICES,    Device_NounHandler);
 
     cmdQueue->registerNoun(NOUN_SEQUENCES,      Sequences_NounHandler);
     cmdQueue->registerNoun(NOUN_SEQUENCE_GROUPS,  SequenceGroups_NounHandler);
 
+    cmdQueue->registerNoun(NOUN_INCIDENTS,  Incidents_NounHandler);
 
 
     cmdQueue->registerNoun(NOUN_TEST,  Test_NounHandler);

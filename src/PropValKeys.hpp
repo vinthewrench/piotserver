@@ -21,11 +21,11 @@ constexpr string_view NOUN_SCHEMA                   = "schema";
 constexpr string_view NOUN_VALUES                   = "values";
 constexpr string_view NOUN_PROPERTIES               = "props";
 constexpr string_view NOUN_HISTORY                  = "history";
+constexpr string_view NOUN_INCIDENTS                = "incidents";
 
 constexpr string_view NOUN_RANGE                  = "range";
 
 constexpr string_view NOUN_LOG                       = "log";
-constexpr string_view NOUN_ALERTS                   = "alerts";
 constexpr string_view NOUN_DEVICES                  = "devices";
 constexpr string_view NOUN_SEQUENCES              = "sequences";
 constexpr string_view NOUN_SEQUENCE_GROUPS        = "sequence.groups";

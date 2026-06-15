@@ -91,6 +91,9 @@ private:
     in_state_t      _state;
     timeval         _lastQueryTime;
     uint64_t        _queryDelay;
+
+    bool            _hasLastAcOK;
+    bool            _lastAcOK;
 };
 
 #endif /* POWERCONTROL_Device_hpp */

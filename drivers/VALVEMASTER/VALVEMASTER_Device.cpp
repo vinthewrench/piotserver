@@ -28,7 +28,9 @@
 //      power was off or state trust was invalidated.
 //    - power_hold_sec is a post-close field-power hold timer.
 //    - retry_count / retry_delay_ms protect command-level transient failures.
-//    - queued valve set actions are coalesced by key.
+//    - IncidentMgr records durable faults/recoveries for meaningful runtime
+//      failures such as valve command failure, valve read failure, field power
+//      failure, and reset all_off failure.//    - queued valve set actions are coalesced by key.
 //    - all_off removes queued future valve set actions because it is a
 //      superseding safety action.
 //    - stop() cancels idle timer, stops queued work, allOffs if water risk
@@ -48,6 +50,7 @@
 
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
+#include "IncidentMgr.hpp"
 
 #include <errno.h>
 #include <string.h>
@@ -328,8 +331,9 @@ VALVEMASTER_Device::VALVEMASTER_Device(string devID, string driverName)
             { "start_policy", "open local I2C, detect inherited field power, sync valves only if field power is already on" },
             { "getvalues_policy", "cache drain only" },
             { "deviceaction_policy", "bounded runtime commands only; no provisioning" },
-            { "setvalues_policy", "configured valve writes use SET_CHANNEL acknowledgement as success; status reads are reserved for sync/diagnostic/audit paths" },         { "runtime_start_power_on", "disabled" },
-            { "runtime_start_who", "disabled" },
+            { "setvalues_policy", "configured valve writes use SET_CHANNEL acknowledgement as success; status reads are reserved for sync/diagnostic/audit paths" },
+            { "incident_policy", "durable incidents are raised only for meaningful runtime faults; retry recovery is logged as notice" },
+            { "runtime_start_power_on", "disabled" },         { "runtime_start_who", "disabled" },
             { "runtime_start_valve_sync", "enabled only if inherited field power is already on" },
             { "runtime_power_on_reset", "enabled before trusted valve commands when commanded-state trust is invalid" },
             { "runtime_power_hold_sec", "post-command field-power hold timer; not a valve hold timer" },
@@ -491,10 +495,10 @@ bool VALVEMASTER_Device::initWithSchema(deviceSchemaMap_t deviceSchema)
                     if(entry.queryDelay < delay) delay = entry.queryDelay;
                     _isSetup = true;
 
-                    LOGT_DEBUG("VALVEMASTER_Device registered valve key \"%s\" node=%d channel=%d",
-                               key.c_str(),
-                               node,
-                               channel);
+                    // LOGT_DEBUG("VALVEMASTER_Device registered valve key \"%s\" node=%d channel=%d",
+                    //            key.c_str(),
+                    //            node,
+                    //            channel);
                 } else {
                     LOGT_ERROR("VALVEMASTER_Device ignored valve key \"%s\": invalid node=%d channel=%d",
                                key.c_str(),
@@ -537,10 +541,11 @@ bool VALVEMASTER_Device::initWithSchema(deviceSchemaMap_t deviceSchema)
  *   pIoTServer manager immediately inserts requested values after setValues()
  *   returns true.
  *
- *   Later, the action thread verifies actual hardware truth. If actual truth
- *   matches the requested value, the cached value is the same, but the verified
- *   value still needs to be reported as hardware-confirmed truth.
- *
+ *   Later, the action thread reports command-completed state. For normal
+ *   runtime SET_CHANNEL, success means the controller accepted the command and
+ *   received an acceptable node acknowledgement. This is commanded/logical
+ *   state, not physical valve-position truth.
+ *  *
  * @param key pIoTServer value key.
  * @param value String value.
  * @param markPending Whether the value should be reported.
@@ -770,8 +775,8 @@ void VALVEMASTER_Device::detectStartupFieldPowerState()
             _anyValveMayBeOpen = true;
             _needPowerOnValveReset = true;
 
-            LOGT_DEBUG("VALVEMASTER_Device startup detected inherited field power ON using power-state register value=0x%02X",
-                       static_cast<unsigned int>(powerState));
+            // LOGT_DEBUG("VALVEMASTER_Device startup detected inherited field power ON using power-state register value=0x%02X",
+            //            static_cast<unsigned int>(powerState));
         } else {
             _startupFieldPowerWasOn = false;
 
@@ -788,8 +793,8 @@ void VALVEMASTER_Device::detectStartupFieldPowerState()
             _anyValveMayBeOpen = false;
             _needPowerOnValveReset = true;
 
-            LOGT_DEBUG("VALVEMASTER_Device startup detected field power OFF using power-state register value=0x%02X; power-on valve reset required before next trusted command",
-                       static_cast<unsigned int>(powerState));
+            // LOGT_DEBUG("VALVEMASTER_Device startup detected field power OFF using power-state register value=0x%02X; power-on valve reset required before next trusted command",
+            //            static_cast<unsigned int>(powerState));
         }
 
         return;
@@ -814,8 +819,8 @@ void VALVEMASTER_Device::detectStartupFieldPowerState()
             _anyValveMayBeOpen = true;
             _needPowerOnValveReset = true;
 
-            LOGT_DEBUG("VALVEMASTER_Device startup detected inherited field power ON using status=0x%02X",
-                       static_cast<unsigned int>(status));
+            // LOGT_DEBUG("VALVEMASTER_Device startup detected inherited field power ON using status=0x%02X",
+            //            static_cast<unsigned int>(status));
         } else {
             _startupFieldPowerWasOn = false;
 
@@ -824,8 +829,8 @@ void VALVEMASTER_Device::detectStartupFieldPowerState()
             _anyValveMayBeOpen = false;
             _needPowerOnValveReset = true;
 
-            LOGT_DEBUG("VALVEMASTER_Device startup detected field power OFF using status=0x%02X; power-on valve reset required before next trusted command",
-                       static_cast<unsigned int>(status));
+            // LOGT_DEBUG("VALVEMASTER_Device startup detected field power OFF using status=0x%02X; power-on valve reset required before next trusted command",
+            //            static_cast<unsigned int>(status));
         }
 
         return;
@@ -948,6 +953,11 @@ bool VALVEMASTER_Device::runQueuedCommandAndWait(
  *
  * retry_count is total attempts, not retries-after-first.
  *
+ *
+ * If a command succeeds after one or more failed attempts, this records a
+ * COMMAND_RETRY_RECOVERED notice. Final command-specific fault raising is left
+ * to the caller so the incident code/key can describe the real failure.
+ *
  * @param commandName Human-readable command name.
  * @param submit Function that queues the wrapper action.
  * @param timeoutMs Per-attempt timeout.
@@ -974,6 +984,19 @@ bool VALVEMASTER_Device::runQueuedCommandWithRetries(
 
         if(ok) {
             if(attempt > 1) {
+                string details =
+                    "command=" + commandName +
+                    " attempts=" + std::to_string(attempt) +
+                    " max_attempts=" + std::to_string(attempts);
+
+                IncidentMgr::shared()->notice(
+                    _deviceID,
+                    "COMMAND_RETRY_RECOVERED",
+                    commandName,
+                    nullptr,
+                    details.c_str()
+                );
+
                 LOGT_DEBUG("VALVEMASTER_Device command \"%s\" succeeded on attempt %u/%u",
                            commandName.c_str(),
                            static_cast<unsigned int>(attempt),
@@ -997,7 +1020,6 @@ bool VALVEMASTER_Device::runQueuedCommandWithRetries(
     return false;
 }
 
-
 /**
  * @brief Read one valve with retry policy.
  *
@@ -1007,7 +1029,14 @@ bool VALVEMASTER_Device::runQueuedCommandWithRetries(
  * This function validates that the reply node/channel match the requested
  * node/channel before accepting the read.
  *
+ *
+ * Incident behavior:
+ *
+ *   - success after retry records VALVE_READ_RETRY_RECOVERED notice
+ *   - final failure raises VALVE_READ_FAILED for the valve key
+ *   - success clears any active VALVE_READ_FAILED for the valve key
  * @param reason Human-readable reason for logs.
+ *
  * @param key pIoTServer key.
  * @param node Node address.
  * @param channel Valve channel.
@@ -1112,12 +1141,34 @@ bool VALVEMASTER_Device::readValveWithRetries(const string& reason,
                 reportedOpen = valveOpen;
 
                 if(attempt > 1) {
+                    string details =
+                        "reason=" + reason +
+                        " key=" + key +
+                        " node=" + std::to_string(static_cast<unsigned int>(node)) +
+                        " channel=" + std::to_string(static_cast<unsigned int>(channel)) +
+                        " attempts=" + std::to_string(attempt) +
+                        " max_attempts=" + std::to_string(attempts);
+
+                    IncidentMgr::shared()->notice(
+                        _deviceID,
+                        "VALVE_READ_RETRY_RECOVERED",
+                        key,
+                        nullptr,
+                        details.c_str()
+                    );
+
                     LOGT_DEBUG("VALVEMASTER_Device %s read valve key=\"%s\" succeeded on attempt %u/%u",
                                reason.c_str(),
                                key.c_str(),
                                static_cast<unsigned int>(attempt),
                                static_cast<unsigned int>(attempts));
                 }
+
+                IncidentMgr::shared()->clear(
+                    _deviceID,
+                    "VALVE_READ_FAILED",
+                    key
+                );
 
                 return true;
             }
@@ -1129,9 +1180,26 @@ bool VALVEMASTER_Device::readValveWithRetries(const string& reason,
         }
     }
 
+    {
+        string details =
+            "reason=" + reason +
+            " key=" + key +
+            " node=" + std::to_string(static_cast<unsigned int>(node)) +
+            " channel=" + std::to_string(static_cast<unsigned int>(channel)) +
+            " attempts=" + std::to_string(attempts);
+
+        IncidentMgr::shared()->raise(
+            _deviceID,
+            IncidentMgr::Severity::Error,
+            "VALVE_READ_FAILED",
+            key,
+            nullptr,
+            details.c_str()
+        );
+    }
+
     return false;
 }
-
 
 /**
  * @brief Read all configured valve states from hardware and sync cache.
@@ -1161,8 +1229,8 @@ bool VALVEMASTER_Device::readValveWithRetries(const string& reason,
 bool VALVEMASTER_Device::syncConfiguredValveStatesFromHardware(const string& reason)
 {
     if(_valveBindings.empty()) {
-        LOGT_DEBUG("VALVEMASTER_Device valve sync skipped for \"%s\": no valve bindings",
-                   reason.c_str());
+        // LOGT_DEBUG("VALVEMASTER_Device valve sync skipped for \"%s\": no valve bindings",
+        //            reason.c_str());
 
         _valveStateKnown = true;
         _anyValveKnownOpen = false;
@@ -1183,9 +1251,9 @@ bool VALVEMASTER_Device::syncConfiguredValveStatesFromHardware(const string& rea
         return false;
     }
 
-    LOGT_DEBUG("VALVEMASTER_Device valve sync \"%s\" reading %zu configured valve(s)",
-               reason.c_str(),
-               _valveBindings.size());
+    // LOGT_DEBUG("VALVEMASTER_Device valve sync \"%s\" reading %zu configured valve(s)",
+    //            reason.c_str(),
+    //            _valveBindings.size());
 
     bool allReadsOK = true;
     bool anyOpen = false;
@@ -1208,12 +1276,12 @@ bool VALVEMASTER_Device::syncConfiguredValveStatesFromHardware(const string& rea
             anyOpen = true;
         }
 
-        LOGT_DEBUG("VALVEMASTER_Device valve sync \"%s\" key \"%s\" node=%u channel=%u reported=%s",
-                   reason.c_str(),
-                   key.c_str(),
-                   static_cast<unsigned int>(binding.node),
-                   static_cast<unsigned int>(binding.channel),
-                   valveOpen ? "open" : "closed");
+        // LOGT_DEBUG("VALVEMASTER_Device valve sync \"%s\" key \"%s\" node=%u channel=%u reported=%s",
+        //            reason.c_str(),
+        //            key.c_str(),
+        //            static_cast<unsigned int>(binding.node),
+        //            static_cast<unsigned int>(binding.channel),
+        //            valveOpen ? "open" : "closed");
     }
 
     if(allReadsOK) {
@@ -1259,6 +1327,13 @@ bool VALVEMASTER_Device::syncConfiguredValveStatesFromHardware(const string& rea
  * all configured valves are cached as "0", water risk is cleared, and the
  * reset requirement is cleared.
  *
+ * Incident behavior:
+ *
+ *   - field power-on failure raises FIELD_POWER_ON_FAILED
+ *   - successful later power-on clears FIELD_POWER_ON_FAILED
+ *   - reset all_off failure raises FIELD_RESET_ALL_OFF_FAILED
+ *   - successful later reset all_off clears FIELD_RESET_ALL_OFF_FAILED
+ *
  * @param reason Human-readable reason for logging/result context.
  * @return true if field power is on and commanded-state trust is established.
  */
@@ -1269,9 +1344,6 @@ bool VALVEMASTER_Device::ensurePoweredAndResetIfNeeded(const string& reason)
     bool poweredOnThisCall = false;
 
     if(!_fieldPowerKnown || !_fieldPowerOn) {
-        LOGT_DEBUG("VALVEMASTER_Device %s: powering field bus before trusted valve command",
-                   reason.c_str());
-
         bool powerOK = runQueuedCommandWithRetries(
             reason + "_power_on",
             [this](VALVEMASTERCompletion completion) {
@@ -1287,12 +1359,34 @@ bool VALVEMASTER_Device::ensurePoweredAndResetIfNeeded(const string& reason)
             _anyValveMayBeOpen = true;
             _needPowerOnValveReset = true;
 
+            {
+                string details =
+                    "reason=" + reason +
+                    " command=power_on" +
+                    " attempts=" + std::to_string(std::max<uint32_t>(1, _retryCount));
+
+                IncidentMgr::shared()->raise(
+                    _deviceID,
+                    IncidentMgr::Severity::Error,
+                    "FIELD_POWER_ON_FAILED",
+                    "VALVEMASTER_POWER",
+                    nullptr,
+                    details.c_str()
+                );
+            }
+
             if(!_resultKey.empty()) {
                 setCachedValue(_resultKey, "power-reset-power-on-failed", true);
             }
 
             return false;
         }
+
+        IncidentMgr::shared()->clear(
+            _deviceID,
+            "FIELD_POWER_ON_FAILED",
+            "VALVEMASTER_POWER"
+        );
 
         _fieldPowerKnown = true;
         _fieldPowerOn = true;
@@ -1304,10 +1398,6 @@ bool VALVEMASTER_Device::ensurePoweredAndResetIfNeeded(const string& reason)
     }
 
     if(poweredOnThisCall) {
-        LOGT_DEBUG("VALVEMASTER_Device %s: waiting %u ms for node stabilization",
-                   reason.c_str(),
-                   FIELD_BUS_NODE_STABILIZE_MS);
-
         std::this_thread::sleep_for(
             std::chrono::milliseconds(FIELD_BUS_NODE_STABILIZE_MS));
     }
@@ -1315,9 +1405,6 @@ bool VALVEMASTER_Device::ensurePoweredAndResetIfNeeded(const string& reason)
     if(!_needPowerOnValveReset) {
         return true;
     }
-
-    LOGT_DEBUG("VALVEMASTER_Device %s: running power-on valve reset allOff",
-               reason.c_str());
 
     bool allOffOK = runQueuedCommandWithRetries(
         reason + "_reset_all_off",
@@ -1331,12 +1418,34 @@ bool VALVEMASTER_Device::ensurePoweredAndResetIfNeeded(const string& reason)
         _anyValveMayBeOpen = true;
         _needPowerOnValveReset = true;
 
+        {
+            string details =
+                "reason=" + reason +
+                " command=all_off" +
+                " attempts=" + std::to_string(std::max<uint32_t>(1, _retryCount));
+
+            IncidentMgr::shared()->raise(
+                _deviceID,
+                IncidentMgr::Severity::Error,
+                "FIELD_RESET_ALL_OFF_FAILED",
+                "VALVEMASTER_POWER",
+                nullptr,
+                details.c_str()
+            );
+        }
+
         if(!_resultKey.empty()) {
             setCachedValue(_resultKey, "power-reset-all-off-failed", true);
         }
 
         return false;
     }
+
+    IncidentMgr::shared()->clear(
+        _deviceID,
+        "FIELD_RESET_ALL_OFF_FAILED",
+        "VALVEMASTER_POWER"
+    );
 
     _valveStateKnown = true;
     _anyValveKnownOpen = false;
@@ -1354,7 +1463,6 @@ bool VALVEMASTER_Device::ensurePoweredAndResetIfNeeded(const string& reason)
 
     return true;
 }
-
 
 /**
  * @brief Arm the post-command field-power hold timer.
@@ -1387,8 +1495,8 @@ void VALVEMASTER_Device::armIdlePowerOff()
 
     _actionCv.notify_all();
 
-    LOGT_DEBUG("VALVEMASTER_Device armed field-power hold timer for %u second(s)",
-               static_cast<unsigned int>(_powerHoldSec));
+    // LOGT_DEBUG("VALVEMASTER_Device armed field-power hold timer for %u second(s)",
+    //            static_cast<unsigned int>(_powerHoldSec));
 }
 
 /**
@@ -1420,25 +1528,6 @@ bool VALVEMASTER_Device::idlePowerOffDueLocked() const
 }
 
 
-/**
- * @brief Run post-command field-power-off if the hold timer expires.
- *
- * This function is called only by the action thread after the field-power hold
- * timer expires and no queued action was available.
- *
- * Latching valve rule:
- *
- *   Field-bus power does not hold a valve open or closed.
- *
- * Therefore automatic timer-based power-off is allowed after a verified valve
- * command even if one or more valves are commanded open.
- *
- * Manual ACTION_POWER_OFF remains stricter because a direct user-requested
- * power_off is not a valve command and does not by itself establish commanded
- * valve state.
- *
- * @return true if no fatal driver error occurred.
- */
 /**
  * @brief Run post-command field-power-off if the hold timer expires.
  *
@@ -1489,7 +1578,7 @@ bool VALVEMASTER_Device::runIdlePowerOff()
         return true;
     }
 
-    LOGT_DEBUG("VALVEMASTER_Device field-power hold expired, powering field bus off");
+    // LOGT_DEBUG("VALVEMASTER_Device field-power hold expired, powering field bus off");
 
     bool powerOffOK = runQueuedCommandWithRetries(
         "idle_power_off",
@@ -1579,6 +1668,12 @@ bool VALVEMASTER_Device::runIdlePowerOff()
  *   periodic audit, or explicit manual refresh, but is not required after every
  *   successful SET_CHANNEL.
  *
+ * Incident behavior:
+ *
+ *   - prerequisite power/reset failure raises VALVE_SET_FAILED for the valve key
+ *   - SET_CHANNEL final failure raises VALVE_SET_FAILED for the valve key
+ *   - successful SET_CHANNEL clears VALVE_SET_FAILED for the valve key
+ *
  * @param action ACTION_SET_VALVE record.
  * @return true if the command completed successfully.
  */
@@ -1603,6 +1698,24 @@ bool VALVEMASTER_Device::runSetValveAction(const Action& action)
         LOGT_ERROR("VALVEMASTER_Device set valve key=\"%s\" failed power/reset prerequisite",
                    action.key.c_str());
 
+        {
+            string details =
+                "key=" + action.key +
+                " node=" + std::to_string(static_cast<unsigned int>(action.node)) +
+                " channel=" + std::to_string(static_cast<unsigned int>(action.channel)) +
+                " desired=" + string(action.desiredOpen ? "open" : "closed") +
+                " stage=power_reset";
+
+            IncidentMgr::shared()->raise(
+                _deviceID,
+                IncidentMgr::Severity::Error,
+                "VALVE_SET_FAILED",
+                action.key,
+                nullptr,
+                details.c_str()
+            );
+        }
+
         if(!_resultKey.empty()) {
             setCachedValue(_resultKey, "set-valve-power-reset-failed", true);
         }
@@ -1610,14 +1723,6 @@ bool VALVEMASTER_Device::runSetValveAction(const Action& action)
         return false;
     }
 
-    /*
-     * Send the requested valve command.
-     *
-     * For this protocol, SET_CHANNEL RESULT_OK means the VALVEMASTER controller
-     * accepted the command, sent it to the ValveNode, and received an acceptable
-     * node response. Treat that as the authoritative success condition for the
-     * normal runtime hot path.
-     */
     bool setOK = runQueuedCommandWithRetries(
         "set_valve",
         [this, &action](VALVEMASTERCompletion completion) {
@@ -1635,14 +1740,27 @@ bool VALVEMASTER_Device::runSetValveAction(const Action& action)
                    static_cast<unsigned int>(action.channel),
                    action.desiredOpen ? "open" : "closed");
 
-        /*
-         * A failed SET_CHANNEL means commanded state is not trustworthy.
-         * Stay conservative. The next trusted valve command must re-establish
-         * safe commanded state with power-on reset/allOff.
-         */
         _valveStateKnown = false;
         _anyValveMayBeOpen = true;
         _needPowerOnValveReset = true;
+
+        {
+            string details =
+                "key=" + action.key +
+                " node=" + std::to_string(static_cast<unsigned int>(action.node)) +
+                " channel=" + std::to_string(static_cast<unsigned int>(action.channel)) +
+                " desired=" + string(action.desiredOpen ? "open" : "closed") +
+                " attempts=" + std::to_string(std::max<uint32_t>(1, _retryCount));
+
+            IncidentMgr::shared()->raise(
+                _deviceID,
+                IncidentMgr::Severity::Error,
+                "VALVE_SET_FAILED",
+                action.key,
+                nullptr,
+                details.c_str()
+            );
+        }
 
         if(!_resultKey.empty()) {
             setCachedValue(_resultKey, "set-valve-failed", true);
@@ -1651,20 +1769,14 @@ bool VALVEMASTER_Device::runSetValveAction(const Action& action)
         return false;
     }
 
-    /*
-     * SET_CHANNEL completed successfully. Cache the requested commanded state.
-     *
-     * This is not physical valve position feedback. It is commanded/logical
-     * state based on successful command acknowledgement.
-     */
+    IncidentMgr::shared()->clear(
+        _deviceID,
+        "VALVE_SET_FAILED",
+        action.key
+    );
+
     setCachedValue(action.key, action.desiredOpen ? "1" : "0", true);
 
-    /*
-     * Recompute commanded-state tracking from cached configured valves.
-     *
-     * This is commanded/logical state only. VALVEMASTER nodes do not report
-     * true mechanical valve position.
-     */
     bool anyKnownOpen = false;
     bool allConfiguredKnown = true;
 
@@ -1691,22 +1803,10 @@ bool VALVEMASTER_Device::runSetValveAction(const Action& action)
     _anyValveKnownOpen = anyKnownOpen;
     _anyValveMayBeOpen = anyKnownOpen || !allConfiguredKnown;
 
-    /*
-     * A successful SET_CHANNEL establishes commanded-state trust for this
-     * valve action. Do not require a power-on reset merely because immediate
-     * status verification was skipped.
-     */
     if(allConfiguredKnown) {
         _needPowerOnValveReset = false;
     }
 
-    /*
-     * Latching valve rule:
-     *
-     * Field-bus power is not required to hold the commanded state. Arm the
-     * post-command field-power hold timer after any successful set, whether
-     * the requested state was open or closed.
-     */
     if(_fieldPowerKnown && _fieldPowerOn) {
         armIdlePowerOff();
     }
@@ -1715,15 +1815,8 @@ bool VALVEMASTER_Device::runSetValveAction(const Action& action)
         setCachedValue(_resultKey, "set-valve-ok", true);
     }
 
-    LOGT_DEBUG("VALVEMASTER_Device set valve accepted key=\"%s\" node=%u channel=%u commanded=%s",
-               action.key.c_str(),
-               static_cast<unsigned int>(action.node),
-               static_cast<unsigned int>(action.channel),
-               action.desiredOpen ? "open" : "closed");
-
     return true;
 }
-
 
 /**
  * @brief Start the local action thread.
@@ -1746,7 +1839,7 @@ void VALVEMASTER_Device::startActionThread()
     _actionThread = std::thread(&VALVEMASTER_Device::actionThreadMain, this);
     _actionThreadRunning = true;
 
-    LOGT_DEBUG("VALVEMASTER_Device action thread started");
+    // LOGT_DEBUG("VALVEMASTER_Device action thread started");
 }
 
 
@@ -1788,7 +1881,7 @@ void VALVEMASTER_Device::stopActionThread()
         _idlePowerOffArmed = false;
     }
 
-    LOGT_DEBUG("VALVEMASTER_Device action thread stopped");
+    // LOGT_DEBUG("VALVEMASTER_Device action thread stopped");
 }
 
 
@@ -1891,17 +1984,17 @@ bool VALVEMASTER_Device::enqueueAction(const Action& action)
                 removeQueuedValveActionsForKeyLocked(action.key);
 
             if(removed > 0) {
-                LOGT_DEBUG("VALVEMASTER_Device coalesced %zu queued valve action(s) for key \"%s\"",
-                           removed,
-                           action.key.c_str());
+                // LOGT_DEBUG("VALVEMASTER_Device coalesced %zu queued valve action(s) for key \"%s\"",
+                //            removed,
+                //            action.key.c_str());
             }
         } else if(action.type == ACTION_ALL_OFF) {
             size_t removed = removeAllQueuedValveActionsLocked();
 
             if(removed > 0) {
-                LOGT_DEBUG("VALVEMASTER_Device all_off removed %zu queued valve action(s)",
-                           removed);
-            }
+            //     LOGT_DEBUG("VALVEMASTER_Device all_off removed %zu queued valve action(s)",
+            //                removed);
+             }
         }
 
         _actionQueue.push_back(action);
@@ -1943,7 +2036,7 @@ bool VALVEMASTER_Device::enqueueDelay(const string& name, uint32_t delayMs)
  */
 void VALVEMASTER_Device::actionThreadMain()
 {
-    LOGT_DEBUG("VALVEMASTER_Device action thread main enter");
+  //  LOGT_DEBUG("VALVEMASTER_Device action thread main enter");
 
     for(;;) {
         Action action;
@@ -1995,7 +2088,7 @@ void VALVEMASTER_Device::actionThreadMain()
         switch(action.type) {
 
             case ACTION_NOOP:
-                LOGT_DEBUG("VALVEMASTER_Device action noop");
+ //               LOGT_DEBUG("VALVEMASTER_Device action noop");
 
                 /*
                  * Cache-only path. Proves action queue -> worker -> reporting
@@ -2008,9 +2101,9 @@ void VALVEMASTER_Device::actionThreadMain()
                 break;
 
             case ACTION_DELAY:
-                LOGT_DEBUG("VALVEMASTER_Device action delay \"%s\" %u ms",
-                           action.name.c_str(),
-                           action.delayMs);
+                // LOGT_DEBUG("VALVEMASTER_Device action delay \"%s\" %u ms",
+                //            action.name.c_str(),
+                //            action.delayMs);
 
                 std::this_thread::sleep_for(
                     std::chrono::milliseconds(action.delayMs));
@@ -2028,7 +2121,7 @@ void VALVEMASTER_Device::actionThreadMain()
                 break;
 
             case ACTION_POWER_ON: {
-                LOGT_DEBUG("VALVEMASTER_Device action power_on");
+ //               LOGT_DEBUG("VALVEMASTER_Device action power_on");
 
                 /*
                  * Field-bus power action only.
@@ -2071,7 +2164,7 @@ void VALVEMASTER_Device::actionThreadMain()
             }
 
             case ACTION_POWER_OFF: {
-                LOGT_DEBUG("VALVEMASTER_Device action power_off");
+ //               LOGT_DEBUG("VALVEMASTER_Device action power_off");
 
                 /*
                  * power_off alone is not a water-safety action.
@@ -2121,7 +2214,7 @@ void VALVEMASTER_Device::actionThreadMain()
             }
 
             case ACTION_ALL_OFF: {
-                LOGT_DEBUG("VALVEMASTER_Device action all_off");
+ //               LOGT_DEBUG("VALVEMASTER_Device action all_off");
 
                 /*
                  * Safety primitive.
@@ -2244,17 +2337,17 @@ void VALVEMASTER_Device::actionThreadMain()
             }
 
             case ACTION_SET_VALVE:
-                LOGT_DEBUG("VALVEMASTER_Device action set_valve key=\"%s\" node=%u channel=%u desired=%s",
-                           action.key.c_str(),
-                           static_cast<unsigned int>(action.node),
-                           static_cast<unsigned int>(action.channel),
-                           action.desiredOpen ? "open" : "closed");
+                // LOGT_DEBUG("VALVEMASTER_Device action set_valve key=\"%s\" node=%u channel=%u desired=%s",
+                //            action.key.c_str(),
+                //            static_cast<unsigned int>(action.node),
+                //            static_cast<unsigned int>(action.channel),
+                //            action.desiredOpen ? "open" : "closed");
 
                 (void)runSetValveAction(action);
                 break;
 
             case ACTION_SET_ERROR: {
-                LOGT_DEBUG("VALVEMASTER_Device action set_error");
+                // LOGT_DEBUG("VALVEMASTER_Device action set_error");
 
                 /*
                  * Staged diagnostic action.
@@ -2284,7 +2377,7 @@ void VALVEMASTER_Device::actionThreadMain()
             }
 
             case ACTION_CLEAR_ERROR: {
-                LOGT_DEBUG("VALVEMASTER_Device action clear_error");
+ //               LOGT_DEBUG("VALVEMASTER_Device action clear_error");
 
                 /*
                  * Staged diagnostic recovery action.
@@ -2324,7 +2417,7 @@ void VALVEMASTER_Device::actionThreadMain()
         }
     }
 
-    LOGT_DEBUG("VALVEMASTER_Device action thread main exit");
+//    LOGT_DEBUG("VALVEMASTER_Device action thread main exit");
 }
 
 
@@ -2354,13 +2447,13 @@ bool VALVEMASTER_Device::start()
     int error = 0;
 
     if(!_deviceProperties[PROP_ADDRESS].is_string()) {
-        LOGT_DEBUG("VALVEMASTER_Device begin called with no %s property",
+        LOGT_ERROR("VALVEMASTER_Device begin called with no %s property",
                    string(PROP_ADDRESS).c_str());
         return false;
     }
 
     if(_deviceID.size() == 0) {
-        LOGT_DEBUG("VALVEMASTER_Device has no deviceID");
+        LOGT_ERROR("VALVEMASTER_Device has no deviceID");
         return false;
     }
 
@@ -2370,7 +2463,7 @@ bool VALVEMASTER_Device::start()
     uint8_t i2cAddr = std::stoi(address.c_str(), 0, 16);
 
     if(!_isSetup) {
-        LOGT_DEBUG("VALVEMASTER_Device(%s) begin called before initWithSchema",
+        LOGT_ERROR("VALVEMASTER_Device(%s) begin called before initWithSchema",
                    address.c_str());
         return false;
     }
@@ -2475,7 +2568,7 @@ void VALVEMASTER_Device::stop()
     if(_valveMaster.isOpen()) {
 
         if(_anyValveMayBeOpen) {
-            LOGT_DEBUG("VALVEMASTER_Device stop: water risk exists, running synchronous allOff cleanup");
+            LOGT_INFO("VALVEMASTER_Device stop: water risk exists, running synchronous allOff cleanup");
 
             if(!_fieldPowerKnown || !_fieldPowerOn) {
                 bool powerOK = runQueuedCommandWithRetries(
@@ -2489,8 +2582,8 @@ void VALVEMASTER_Device::stop()
                     _fieldPowerKnown = true;
                     _fieldPowerOn = true;
 
-                    LOGT_DEBUG("VALVEMASTER_Device stop: waiting %u ms for node stabilization",
-                               FIELD_BUS_NODE_STABILIZE_MS);
+                    // LOGT_DEBUG("VALVEMASTER_Device stop: waiting %u ms for node stabilization",
+                    //            FIELD_BUS_NODE_STABILIZE_MS);
 
                     std::this_thread::sleep_for(
                         std::chrono::milliseconds(FIELD_BUS_NODE_STABILIZE_MS));
@@ -2531,7 +2624,7 @@ void VALVEMASTER_Device::stop()
         }
 
         if(_fieldPowerKnown && _fieldPowerOn) {
-            LOGT_DEBUG("VALVEMASTER_Device stop: field power is on, running synchronous powerOff");
+ //           LOGT_DEBUG("VALVEMASTER_Device stop: field power is on, running synchronous powerOff");
 
             bool powerOffOK = runQueuedCommandWithRetries(
                 "shutdown_power_off",
@@ -2563,7 +2656,7 @@ void VALVEMASTER_Device::stop()
                 }
             }
         } else {
-            LOGT_DEBUG("VALVEMASTER_Device stop: field power not known on, skipping shutdown powerOff");
+  //          LOGT_DEBUG("VALVEMASTER_Device stop: field power not known on, skipping shutdown powerOff");
         }
 
         _valveMaster.stop();
@@ -2784,8 +2877,9 @@ bool VALVEMASTER_Device::deviceAction(string cmd)
  *
  *   - returning true means the request was accepted
  *   - manager may immediately insert requested values into the DB
- *   - action thread later verifies node-reported commanded state
- *   - cache is corrected/reported if node report differs
+ *   - action thread later reports command-completed commanded/logical state
+ *   - normal runtime SET_CHANNEL does not perform immediate status-read
+ *     verification because node status only repeats commanded/logical state
  *
  * Queue coalescing:
  *
@@ -2877,8 +2971,8 @@ bool VALVEMASTER_Device::setValues(keyValueMap_t kv)
         }
     }
 
-    LOGT_DEBUG("VALVEMASTER_Device setValues accepted %zu valve request(s)",
-               actions.size());
+    // LOGT_DEBUG("VALVEMASTER_Device setValues accepted %zu valve request(s)",
+    //            actions.size());
 
     return true;
 }
