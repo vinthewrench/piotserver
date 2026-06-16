@@ -2799,23 +2799,85 @@ static bool Incidents_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQue
     auto pIoTServer = pIoTServerMgr::shared();
     auto db = pIoTServer->getDB();
 
-    float days = 0;
-    bool inactiveOnly = true;
+    /*
+     * DELETE /incidents
+     *
+     * Supported cleanup modes:
+     *
+     *   X-PIOT-Incident-Cleanup: previous_runs
+     *      Remove all incident history older than the most recent SERVER_START
+     *      notice. This intentionally removes old active incidents too, because
+     *      they belong to a previous server run and should not survive as
+     *      current-run truth.
+     *
+     *   scope: previous_runs
+     *      Legacy/local fallback for the same behavior.
+     *
+     *   days: N
+     *      Remove inactive incident history older than N days.
+     *
+     *   no headers
+     *      Remove all inactive incident history.
+     *
+     * Normal cleanup never removes active incidents. The previous_runs cleanup
+     * is different: it removes everything before the most recent SERVER_START.
+     */
+    if(v1.getStringFromMap("X-PIOT-Incident-Cleanup", url.headers(), str)
+       || v1.getStringFromMap("scope", url.headers(), str)) {
 
-    if(v1.getStringFromMap(JSON_HDR_DAYS, url.headers(), str)){
-        char* p;
-        days = strtof(str.c_str(), &p);
-        if(*p != 0) days = 0;
+        if(str == "previous_runs") {
+
+            const bool inactiveOnly = false;
+
+            if(db->removeHistoryBeforeLastIncidentStart(inactiveOnly)) {
+                makeStatusJSON(reply, STATUS_NO_CONTENT);
+                (completion)(reply, STATUS_NO_CONTENT);
+                return true;
+            }
+
+            makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                           "Delete Failed",
+                           "Could not remove incident history from previous runs",
+                           url.pathString());
+
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
+
+        makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                       "Invalid Incident Cleanup",
+                       "X-PIOT-Incident-Cleanup must be previous_runs",
+                       url.pathString());
+
+        (completion)(reply, STATUS_BAD_REQUEST);
+        return true;
     }
 
-    if(v1.getStringFromMap("inactive_only", url.headers(), str)){
-        bool b = true;
-        if(stringToBool(str, b)) {
-            inactiveOnly = b;
+    float days = 0.0F;
+
+    if(v1.getStringFromMap(JSON_HDR_DAYS, url.headers(), str)) {
+        char* p = nullptr;
+        days = strtof(str.c_str(), &p);
+
+        if(p == str.c_str() || *p != 0 || days < 0.0F) {
+            makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                           "Invalid Days",
+                           "days must be a positive number or zero",
+                           url.pathString());
+
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
         }
     }
 
-    if(db->removeHistoryForIncidents(days, inactiveOnly)){
+    /*
+     * Normal incident cleanup is always inactive-only from REST.
+     * Active incidents should be cleared by incident recovery logic, not by
+     * generic history cleanup.
+     */
+    const bool inactiveOnly = true;
+
+    if(db->removeHistoryForIncidents(days, inactiveOnly)) {
         makeStatusJSON(reply, STATUS_NO_CONTENT);
         (completion)(reply, STATUS_NO_CONTENT);
         return true;
@@ -2823,7 +2885,7 @@ static bool Incidents_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQue
 
     makeStatusJSON(reply, STATUS_BAD_REQUEST,
                    "Delete Failed",
-                   "Could not remove incident history",
+                   "Could not remove inactive incident history",
                    url.pathString());
 
     (completion)(reply, STATUS_BAD_REQUEST);

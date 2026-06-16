@@ -6,9 +6,9 @@
                 "api_secret": "12345678"
             }
         ],
-        "description": "The Raspberry Pi Irrigation System",
+        "description": "The Stella Porta Irrigation System V3.0",
         "lat_long": "34.465338, -93.362827",
-        "name": "Stella Porta Irrigation V3.0"
+        "name": "Stella Porta Farm"
     },
     "devices": [
         {
@@ -372,8 +372,8 @@
         "SPRK_9"
     ],
     "prop.file.version": {
-        "file.etag": 643,
-        "last_write": 1781558094
+        "file.etag": 704,
+        "last_write": 1781642185
     },
     "sequence": [
         {

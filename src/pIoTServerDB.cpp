@@ -3212,7 +3212,7 @@ bool pIoTServerDB::countHistoryForIncidents(int &countOut,
 }
 
 bool pIoTServerDB::removeHistoryForIncidents(float days,
-                                             bool inactiveOnly){
+                                             bool inactiveOnly) {
 
     std::lock_guard<std::mutex> lock(_mutex);
 
@@ -3235,13 +3235,79 @@ bool pIoTServerDB::removeHistoryForIncidents(float days,
 
     if(days > 0) {
         sql += hasWhere ? "AND " : "WHERE ";
-        sql += "datetime(LAST_DATE, 'auto') > datetime('now', '-" + to_string(days) + " days', 'localtime') ";
+        sql += "datetime(LAST_DATE, 'auto') < datetime('now', '-" + to_string(days) + " days', 'localtime') ";
         hasWhere = true;
     }
 
     sql += ";";
 
-    if(sqlite3_prepare_v2(_sdb, sql.c_str(), -1, &stmt, NULL) == SQLITE_OK){
+    if(sqlite3_prepare_v2(_sdb, sql.c_str(), -1, &stmt, NULL) == SQLITE_OK) {
+
+        if(sqlite3_step(stmt) == SQLITE_DONE) {
+            int count = sqlite3_changes(_sdb);
+            LOGT_DEBUG("sqlite %s\n %d rows affected", sql.c_str(), count);
+            success = true;
+        }
+        else {
+            LOGT_ERROR("sqlite3_step FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb));
+        }
+
+        sqlite3_finalize(stmt);
+    }
+    else {
+        LOGT_ERROR("sqlite3_prepare_v2 FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb));
+    }
+
+    return success;
+}
+
+bool pIoTServerDB::removeHistoryBeforeLastIncidentStart(bool inactiveOnly) {
+
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    bool success = false;
+
+    if(!_sdb) {
+        return false;
+    }
+
+    sqlite3_stmt* stmt = NULL;
+
+    /*
+     * Remove incident history from previous server runs.
+     *
+     * The cutoff is the most recent SERVER_START incident. Anything before
+     * that marker belongs to a previous run.
+     *
+     * Policy:
+     *   inactiveOnly == true
+     *      Remove only inactive incidents before the latest SERVER_START.
+     *
+     *   inactiveOnly == false
+     *      Remove all incidents before the latest SERVER_START.
+     *
+     * For a "clear previous run history" REST action, inactiveOnly = false
+     * is usually the better behavior because stale active incidents from a
+     * previous process lifetime should not survive into the current run.
+     *
+     * Change 'SERVER_START' if the actual startup incident CODE differs.
+     */
+    string sql = "DELETE FROM INCIDENT ";
+    sql += "WHERE datetime(LAST_DATE, 'auto') < (";
+    sql += "SELECT datetime(LAST_DATE, 'auto') ";
+    sql += "FROM INCIDENT ";
+    sql += "WHERE CODE = 'SERVER_START' ";
+    sql += "ORDER BY datetime(LAST_DATE, 'auto') DESC, ID DESC ";
+    sql += "LIMIT 1";
+    sql += ") ";
+
+    if(inactiveOnly) {
+        sql += "AND ACTIVE = 0 ";
+    }
+
+    sql += ";";
+
+    if(sqlite3_prepare_v2(_sdb, sql.c_str(), -1, &stmt, NULL) == SQLITE_OK) {
 
         if(sqlite3_step(stmt) == SQLITE_DONE) {
             int count = sqlite3_changes(_sdb);
