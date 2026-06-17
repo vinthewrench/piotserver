@@ -49,6 +49,112 @@
 
 #include <sys/utsname.h>
 
+
+static bool readDoubleFromFile(const std::string& path, double& valueOut) {
+    std::ifstream ifs(path);
+
+    if (!ifs.is_open()) {
+        return false;
+    }
+
+    double value = 0.0;
+    if (!(ifs >> value)) {
+        return false;
+    }
+
+    valueOut = value;
+    return true;
+}
+
+static bool readUInt8FromFile(const std::string& path, uint8_t& valueOut) {
+    std::ifstream ifs(path);
+
+    if (!ifs.is_open()) {
+        return false;
+    }
+
+    unsigned int value = 0;
+    if (!(ifs >> value)) {
+        return false;
+    }
+
+    if (value > UINT8_MAX) {
+        return false;
+    }
+
+    valueOut = static_cast<uint8_t>(value);
+    return true;
+}
+
+static bool getCPUTemp(double& tempOut) {
+    double milliC = 0.0;
+
+    if (!readDoubleFromFile("/sys/class/thermal/thermal_zone0/temp", milliC)) {
+        return false;
+    }
+
+    tempOut = milliC / 1000.0;
+    return true;
+}
+
+static bool getFanState(uint8_t& stateOut) {
+    return readUInt8FromFile(
+        "/sys/class/thermal/cooling_device0/cur_state",
+        stateOut
+    );
+}
+
+static bool getSystemTimes(uint64_t& systemTimeOut,
+                           uint64_t& systemBootTimeOut,
+                           uint64_t& systemUptimeOut)
+{
+    struct sysinfo info {};
+
+    if (sysinfo(&info) != 0) {
+        return false;
+    }
+
+    time_t now = time(nullptr);
+
+    if (now <= 0 || info.uptime < 0) {
+        return false;
+    }
+
+    systemTimeOut = static_cast<uint64_t>(now);
+    systemUptimeOut = static_cast<uint64_t>(info.uptime);
+    systemBootTimeOut = systemTimeOut - systemUptimeOut;
+
+    return true;
+}
+
+static std::string getOSPrettyName()
+{
+    std::ifstream ifs("/etc/os-release");
+
+    if (!ifs.is_open()) {
+        return "";
+    }
+
+    std::string line;
+    while (std::getline(ifs, line)) {
+        static const std::string key = "PRETTY_NAME=";
+
+        if (line.rfind(key, 0) != 0) {
+            continue;
+        }
+
+        std::string value = line.substr(key.size());
+
+        if (value.size() >= 2 && value.front() == '"' && value.back() == '"') {
+            value = value.substr(1, value.size() - 2);
+        }
+
+        return value;
+    }
+
+    return "";
+}
+
 // MARK: -  SCHEMA NOUN HANDLERS
 
 static void Schema_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
@@ -1391,110 +1497,6 @@ static bool getCPUinfo(map<string,string> &info){
     return didSucceed;
 }
 
-static bool readDoubleFromFile(const std::string& path, double& valueOut) {
-    std::ifstream ifs(path);
-
-    if (!ifs.is_open()) {
-        return false;
-    }
-
-    double value = 0.0;
-    if (!(ifs >> value)) {
-        return false;
-    }
-
-    valueOut = value;
-    return true;
-}
-
-static bool readUInt8FromFile(const std::string& path, uint8_t& valueOut) {
-    std::ifstream ifs(path);
-
-    if (!ifs.is_open()) {
-        return false;
-    }
-
-    unsigned int value = 0;
-    if (!(ifs >> value)) {
-        return false;
-    }
-
-    if (value > UINT8_MAX) {
-        return false;
-    }
-
-    valueOut = static_cast<uint8_t>(value);
-    return true;
-}
-
-static bool getCPUTemp(double& tempOut) {
-    double milliC = 0.0;
-
-    if (!readDoubleFromFile("/sys/class/thermal/thermal_zone0/temp", milliC)) {
-        return false;
-    }
-
-    tempOut = milliC / 1000.0;
-    return true;
-}
-
-static bool getFanState(uint8_t& stateOut) {
-    return readUInt8FromFile(
-        "/sys/class/thermal/cooling_device0/cur_state",
-        stateOut
-    );
-}
-
-static bool getSystemTimes(uint64_t& systemTimeOut,
-                           uint64_t& systemBootTimeOut,
-                           uint64_t& systemUptimeOut)
-{
-    struct sysinfo info {};
-
-    if (sysinfo(&info) != 0) {
-        return false;
-    }
-
-    time_t now = time(nullptr);
-
-    if (now <= 0 || info.uptime < 0) {
-        return false;
-    }
-
-    systemTimeOut = static_cast<uint64_t>(now);
-    systemUptimeOut = static_cast<uint64_t>(info.uptime);
-    systemBootTimeOut = systemTimeOut - systemUptimeOut;
-
-    return true;
-}
-
-static std::string getOSPrettyName()
-{
-    std::ifstream ifs("/etc/os-release");
-
-    if (!ifs.is_open()) {
-        return "";
-    }
-
-    std::string line;
-    while (std::getline(ifs, line)) {
-        static const std::string key = "PRETTY_NAME=";
-
-        if (line.rfind(key, 0) != 0) {
-            continue;
-        }
-
-        std::string value = line.substr(key.size());
-
-        if (value.size() >= 2 && value.front() == '"' && value.back() == '"') {
-            value = value.substr(1, value.size() - 2);
-        }
-
-        return value;
-    }
-
-    return "";
-}
 
 static void Version_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                 REST_URL url,
@@ -2538,7 +2540,62 @@ static void Test_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
 }
 
 
-// MARK: -  INCIDENTS  NOUN HANDLERS
+// MARK: -  PING NOUN HANDLERS
+
+static void Ping_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                             REST_URL url,
+                             [[maybe_unused]] TCPClientInfo cInfo,
+                             ServerCmdQueue::cmdCallback_t completion) {
+    using namespace rest;
+    json reply;
+
+    auto path = url.path();
+    auto queries = url.queries();
+    auto headers = url.headers();
+    string noun;
+
+   auto pIoTServer = pIoTServerMgr::shared();
+
+   bool success = false;
+
+   if(path.size() == 1) {
+       noun = path.at(0);
+
+       uint64_t systemTime = 0;
+       uint64_t systemBootTime = 0;
+       uint64_t systemUptime = 0;
+
+       const uint64_t appUptime =
+           static_cast<uint64_t>(pIoTServer->upTime());
+
+       reply[string(JSON_ARG_UPTIME)] = appUptime;
+
+       if (getSystemTimes(systemTime, systemBootTime, systemUptime)) {
+           reply["system_time"] = systemTime;
+           reply["system_uptime"] = systemUptime;
+       }
+
+       success = true;
+    }
+
+
+
+    if(success) {
+        makeStatusJSON(reply,STATUS_OK);
+        (completion) (reply, STATUS_OK);
+    }
+    else
+    {
+        int error = -5;
+
+        string lastError =  string("Ping Failed, Error: ") + to_string(error);
+        string lastErrorString = string(::strerror(error));
+
+        makeStatusJSON(reply, STATUS_BAD_REQUEST, lastError, lastErrorString );
+        (completion) (reply, STATUS_BAD_REQUEST);
+    }
+
+}
 
 // MARK: -  INCIDENTS NOUN HANDLER
 
@@ -2951,6 +3008,7 @@ void registerServerNouns() {
 
     cmdQueue->registerNoun(NOUN_INCIDENTS,  Incidents_NounHandler);
 
+    cmdQueue->registerNoun(NOUN_PING,      Ping_NounHandler);
 
     cmdQueue->registerNoun(NOUN_TEST,  Test_NounHandler);
 
