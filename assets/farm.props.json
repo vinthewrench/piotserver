@@ -346,6 +346,25 @@
             "retry_count": 5,
             "retry_delay_ms": 300,
             "title": "Valve Master I2C"
+        },
+        {
+            "deviceID": "FAULT_SIG",
+            "device_type": "FAULT_SIG",
+            "enable": true,
+            "interval": 1,
+            "pins": [
+                {
+                    "data_type": "BOOL",
+                    "key": "FAULT_SIG_ACTIVE",
+                    "other.props": {
+                        "active_low": true
+                    },
+                    "read_only": true,
+                    "title": "Fault Signal Active",
+                    "tracking": "track.changes"
+                }
+            ],
+            "title": "Fault Signal"
         }
     ],
     "keys.manual": [
@@ -372,8 +391,8 @@
         "SPRK_9"
     ],
     "prop.file.version": {
-        "file.etag": 704,
-        "last_write": 1781642185
+        "file.etag": 720,
+        "last_write": 1781716098
     },
     "sequence": [
         {
@@ -767,6 +786,46 @@
             ],
             "trigger": {
                 "timeBase": "sunrise"
+            }
+        },
+        {
+            "enable": true,
+            "name": "VALVEMASTER set fault",
+            "override_manualmode": false,
+            "sequenceID": "9000",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "DEVICE_ACTION",
+                            "key": "VALVEMASTER_1",
+                            "value": "set_error"
+                        }
+                    ]
+                }
+            ],
+            "trigger": {
+                "event": "manual"
+            }
+        },
+        {
+            "enable": true,
+            "name": "VALVEMASTER clear fault",
+            "override_manualmode": false,
+            "sequenceID": "9001",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "DEVICE_ACTION",
+                            "key": "VALVEMASTER_1",
+                            "value": "clear_error"
+                        }
+                    ]
+                }
+            ],
+            "trigger": {
+                "event": "manual"
             }
         }
     ],

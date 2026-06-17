@@ -167,7 +167,8 @@ PLUGIN_DIRS := \
 	TCA9534 \
 	TANKDEPTH \
 	VELM6030 \
-	TMP10X
+	TMP10X	\
+	FAULT_SIG
 
 .PHONY: all core app plugins strip strip-app strip-core strip-plugins clean clean-plugins distclean run dirs print $(PLUGIN_DIRS)
 

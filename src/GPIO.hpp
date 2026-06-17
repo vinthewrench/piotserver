@@ -142,6 +142,9 @@ private:
     bool _isSetup;
 };
 
+/*
+  PI has these now
+
 // GPIO v2 flag bits
 #define GPIO_V2_LINE_FLAG_ACTIVE_LOW        0x00000002
 #define GPIO_V2_LINE_FLAG_INPUT             0x00000004
@@ -153,3 +156,4 @@ private:
 #define GPIO_V2_LINE_FLAG_BIAS_PULL_UP      0x00000200
 #define GPIO_V2_LINE_FLAG_BIAS_PULL_DOWN    0x00000400
 #define GPIO_V2_LINE_FLAG_BIAS_DISABLED     0x00000800
+ */
