@@ -77,9 +77,9 @@ EventTrigger::EventTrigger(tod_offset_t timeBase, int16_t timeBaseOffset, dayOfW
     _timeEvent.dayOfWeek        = dayOfWeek;
 }
 
-EventTrigger::EventTrigger(time_t time) { // Ephmeral event
+EventTrigger::EventTrigger(time_t time) { // Ephemeral event
     _eventType                   = EVENT_TYPE_EPHEMERAL;
-    _ephmeralTime               = time;
+    _ephemeralTime               = time;
 }
 
 
@@ -98,7 +98,7 @@ void EventTrigger::copy(const EventTrigger &evt1, EventTrigger *evt2){
                 break;
 
         case EVENT_TYPE_EPHEMERAL:
-            evt2->_ephmeralTime = evt1._ephmeralTime;
+            evt2->_ephemeralTime = evt1._ephemeralTime;
                 break;
 
         case EVENT_TYPE_CRON:
@@ -222,9 +222,9 @@ void EventTrigger::initWithJSON(nlohmann::json j){
         _cronEvent.cronString = "";
         _cronEvent.next = 0;
     }
-    else if(j.contains(JSON_TIME_EPHMERAL)){
-        if(j.at(JSON_TIME_EPHMERAL).is_number()) {
-            _ephmeralTime = j.at(JSON_TIME_EPHMERAL);
+    else if(j.contains(JSON_TIME_EPHEMERAL)){
+        if(j.at(JSON_TIME_EPHEMERAL).is_number()) {
+            _ephemeralTime = j.at(JSON_TIME_EPHEMERAL);
             _eventType = EVENT_TYPE_EPHEMERAL;
          }
     }
@@ -327,7 +327,7 @@ nlohmann::json EventTrigger::JSON(){
     switch(_eventType){
         case EVENT_TYPE_EPHEMERAL:
         {
-            j[JSON_TIME_EPHMERAL] = _ephmeralTime;
+            j[JSON_TIME_EPHEMERAL] = _ephemeralTime;
         }
          break;
 
@@ -591,7 +591,7 @@ bool EventTrigger::shouldTriggerInFuture(const solarTimes_t &solar, time_t local
     }
     else  if(_eventType == EVENT_TYPE_EPHEMERAL){
         time_t now = time(NULL);
-        result = (_ephmeralTime > now);
+        result = (_ephemeralTime > now);
     }
     else  if(_eventType == EVENT_TYPE_CRON){
         time_t now = time(NULL);
@@ -665,8 +665,16 @@ bool EventTrigger::shouldTriggerFromTimeEvent(const solarTimes_t &solar, time_t 
         };
     }
    else  if(_eventType == EVENT_TYPE_EPHEMERAL){
-       time_t now = time(NULL);
-       result = (_ephmeralTime <= now);
+
+       // why is this code so funky --  compiler written by dopes that why
+       const long long now  = static_cast<long long>(time(NULL));
+        const long long then = static_cast<long long>(_ephemeralTime);
+        result = (then <= now);
+
+       // time_t now = time(NULL);
+       // time_t then = _ephemeralTime;
+       // result = (then <= now);
+  //      printf("_ephemeralTime=%ld now=%ld result=%s\n",  then, now, result ? "TRUE" : "FALSE");
    }
    else  if(_eventType == EVENT_TYPE_CRON){
        time_t now = time(NULL);

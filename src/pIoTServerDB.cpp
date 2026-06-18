@@ -3679,7 +3679,7 @@ bool pIoTServerDB::sequenceGetTrigger(sequenceID_t sid, EventTrigger &trig){
  }
 
 
- bool pIoTServerDB::sequenceIsEphmeral(sequenceID_t sid){
+ bool pIoTServerDB::sequenceIsEphemeral(sequenceID_t sid){
 
      std::lock_guard<std::mutex> lock(_mutex);
 

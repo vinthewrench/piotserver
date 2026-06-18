@@ -94,7 +94,8 @@ constexpr string_view JSON_PROP_MAX             = "max";
 constexpr string_view JSON_PROP_MIN             = "min";
 
 //* for triggers */
-constexpr string_view JSON_TIME_EPHMERAL      = "epoch.time";
+//
+constexpr string_view JSON_TIME_EPHEMERAL      = "epoch.time";
 
 constexpr string_view JSON_TIME_BASE            = "timeBase";
 constexpr string_view JSON_TIME_OFFSET          = "offset";

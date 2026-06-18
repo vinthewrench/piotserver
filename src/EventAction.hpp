@@ -179,7 +179,7 @@ public:
 
     EventTrigger(tod_offset_t timeBase, int16_t timeBaseOffset = 0 );
     EventTrigger(tod_offset_t timeBase, int16_t timeBaseOffset, dayOfWeek_t dayOfWeek);
-    EventTrigger(time_t time); // Ephmeral event.
+    EventTrigger(time_t time); // Ephemeral event.
 
     EventTrigger(std::string);
     EventTrigger(nlohmann::json j);
@@ -226,7 +226,7 @@ private:
 
     // C++ can't handle a union with a c++ class  (cron_event_t) in it..
  //   union{
-        time_t                 _ephmeralTime;
+        time_t                 _ephemeralTime;
         timeEventInfo_t        _timeEvent;
         app_event_t            _appEvent;
         cron_event_t          _cronEvent;

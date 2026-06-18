@@ -252,7 +252,7 @@ class pIoTServerDB  {
     bool sequenceShouldIgnoreLog(sequenceID_t sid);
     bool sequenceShouldIgnoreManualMode(sequenceID_t sid);
     bool sequenceIsRunning(sequenceID_t sid);
-    bool sequenceIsEphmeral(sequenceID_t sid);
+    bool sequenceIsEphemeral(sequenceID_t sid);
 
     bool triggerSequence(sequenceID_t sid);
     string sequenceGetCondition(sequenceID_t sid);

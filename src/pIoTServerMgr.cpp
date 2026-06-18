@@ -1727,7 +1727,7 @@ bool pIoTServerMgr::processEvents(){
                             // we completed..
                             _db.sequenceSetRunning(sid, false);
                             _db.sequenceSetLastRunTime(sid, localNow);
-                            if(_db.sequenceIsEphmeral(sid)){
+                            if(_db.sequenceIsEphemeral(sid)){
                                _db.sequenceDelete(sid);
                             }
 
