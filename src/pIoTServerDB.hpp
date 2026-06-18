@@ -252,6 +252,7 @@ class pIoTServerDB  {
     bool sequenceShouldIgnoreLog(sequenceID_t sid);
     bool sequenceShouldIgnoreManualMode(sequenceID_t sid);
     bool sequenceIsRunning(sequenceID_t sid);
+    bool sequenceIsEphmeral(sequenceID_t sid);
 
     bool triggerSequence(sequenceID_t sid);
     string sequenceGetCondition(sequenceID_t sid);
@@ -296,7 +297,6 @@ class pIoTServerDB  {
     bool allKeysInSequence(sequenceID_t sid, std::set<std::string> &keysfound, bool onlyEnabled = true);
 
     bool allKeysInAllSequences(std::set<std::string> &keysfound, bool onlyEnabled = true);
-
 
     // MARK: -  sequence groups
     bool sequenceGroupIsValid(sequenceGroupID_t seqGroupID);

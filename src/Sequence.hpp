@@ -169,6 +169,8 @@ public:
 
     bool hasCallBackAction();
 
+    bool isEphemeral();
+
     bool hasAbortAction();
 
     bool getAbortActions(vector<Action>& act);

@@ -1652,7 +1652,7 @@ bool pIoTServerMgr::processEvents(){
                     string name = _db.sequenceGetName(sid);
                     string condition = _db.sequenceGetCondition(sid);
 
-                    if(!dontLog)
+                     if(!dontLog)
                         LOGT_INFO("RUN %s SEQUENCE %04x (%d steps) \"%s\"",
                                   trgiStr.c_str(),
                                   sid, count, name.c_str());
@@ -1704,7 +1704,7 @@ bool pIoTServerMgr::processEvents(){
 
                     string name = _db.sequenceGetName(sid);
 
-                    if(!dontLog)
+                   if(!dontLog)
                         LOGT_INFO("RUN %s SEQUENCE %04x, Step %d \"%s\"",
                                   trgiStr.c_str(),
                                   sid, stepNo, name.c_str());
@@ -1721,13 +1721,16 @@ bool pIoTServerMgr::processEvents(){
 
                     if(didSucceed){
                         if(_db.sequenceCompletedStep(sid, stepNo, localNow)){
-                            //                            printf("Sequence: %04x, Step:%d  - completed -\n", sid, stepNo);
+//                                           printf("Sequence: %04x, Step:%d  - completed -\n", sid, stepNo);
                         }
                         else {
                             // we completed..
                             _db.sequenceSetRunning(sid, false);
                             _db.sequenceSetLastRunTime(sid, localNow);
-                            //                           printf("Sequence: %04x, - done -\n\n", sid);
+                            if(_db.sequenceIsEphmeral(sid)){
+                               _db.sequenceDelete(sid);
+                            }
+
                         }
                     }
                 });
@@ -1789,9 +1792,9 @@ void pIoTServerMgr::runSequenceForAppEvent(EventTrigger::app_event_t trig, boolC
                 string trgiStr =  trig.printString();
                 string name = _db.sequenceGetName(sid);
 
-                LOGT_INFO("COMPLETED %s SEQUENCE %04x \"%s\"",
-                          trgiStr.c_str(),
-                          sid, name.c_str());
+                // LOGT_INFO("COMPLETED %s SEQUENCE %04x \"%s\"",
+                //           trgiStr.c_str(),
+                //           sid, name.c_str());
                 cb(true);
             }
         });
@@ -1960,7 +1963,7 @@ bool pIoTServerMgr::runSequenceStep(sequenceID_t sid, uint stepNo,
           LOGT_DEBUG("RUN SEQUENCE %s step %d", SequenceID_to_string(sid).c_str(), stepNo);
 
     for(auto action :actions){
-        if(!dontLog)
+       if(!dontLog)
             LOGT_DEBUG("RUN ACTION: %s", action.printString().c_str());
 
         if(action.cmd() == Action::JSON_CMD_SET){

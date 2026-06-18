@@ -222,6 +222,12 @@ void EventTrigger::initWithJSON(nlohmann::json j){
         _cronEvent.cronString = "";
         _cronEvent.next = 0;
     }
+    else if(j.contains(JSON_TIME_EPHMERAL)){
+        if(j.at(JSON_TIME_EPHMERAL).is_number()) {
+            _ephmeralTime = j.at(JSON_TIME_EPHMERAL);
+            _eventType = EVENT_TYPE_EPHEMERAL;
+         }
+    }
 
     if( j.contains(JSON_TIME_TOD)) {
         if(getMinutesFromMidnightFromJSON(j.at(JSON_TIME_TOD),_timeEvent.timeBaseOffset)){
@@ -661,8 +667,7 @@ bool EventTrigger::shouldTriggerFromTimeEvent(const solarTimes_t &solar, time_t 
    else  if(_eventType == EVENT_TYPE_EPHEMERAL){
        time_t now = time(NULL);
        result = (_ephmeralTime <= now);
-    }
-
+   }
    else  if(_eventType == EVENT_TYPE_CRON){
        time_t now = time(NULL);
        if(_cronEvent.next < now){

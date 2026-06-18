@@ -1820,6 +1820,9 @@ bool pIoTServerDB::saveProperties(){
                 // dont save callback events
                 if(seq->hasCallBackAction()) continue;
 
+                // dont save ephemeral items
+                if(seq->isEphemeral()) continue;
+
                 j.push_back(seq->JSON());
             }
 
@@ -3674,6 +3677,19 @@ bool pIoTServerDB::sequenceGetTrigger(sequenceID_t sid, EventTrigger &trig){
     trig = _sequences[sid]._trigger;
     return true;
  }
+
+
+ bool pIoTServerDB::sequenceIsEphmeral(sequenceID_t sid){
+
+     std::lock_guard<std::mutex> lock(_mutex);
+
+     if(_sequences.count(sid) == 0)
+         return false;
+
+     Sequence* seq =  &_sequences[sid];
+     return seq->isEphemeral();
+ }
+
 
 bool pIoTServerDB::triggerSequence(sequenceID_t sid){
 

@@ -486,6 +486,11 @@ uint64_t Sequence::stepsDuration(){
 }
 
 
+bool Sequence::isEphemeral(){
+    return _trigger.isEphemeral();
+}
+
+
 bool Sequence::hasCallBackAction(){
 
     for(auto e: _steps){
