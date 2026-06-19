@@ -1776,8 +1776,15 @@ static bool Sequence_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
     vector<sequenceID_t> fSIDS  = db->sequencesInTheFuture(solar, localNow);
     vector<sequenceID_t> sids;
 
+    bool justRunning = false;
+
     if(queries.size() == 0){
         sids = db->allSequenceIDs();
+    }
+    else if (queries.size() == 1 &&
+             caseInSensStringCompare(queries.begin()->first, "running")) {
+        sids = db->allSequenceIDs();
+        justRunning = true;
     }
     else {
         for (std::string const& key : std::views::keys(queries)){
@@ -1843,11 +1850,16 @@ static bool Sequence_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
         }
     }
 
-    reply[string(JSON_ARG_SEQUENCE_IDS)] = allSequences;
-    reply[string(JSON_ARG_CRON_SEQUENCES)] = cronSequences;
-    reply[string(JSON_ARG_FUTURE_SEQUENCES)] = futureSequences;
-    reply[string(JSON_ARG_TIMED_SEQUENCES)] = timedSequences;
-    reply[string(JSON_ARG_RUNNING_SEQUENCES)] = runningSequences;
+    if(justRunning){
+        reply[string(JSON_ARG_RUNNING_SEQUENCES)] = runningSequences;
+    }
+    else {
+        reply[string(JSON_ARG_SEQUENCE_IDS)] = allSequences;
+        reply[string(JSON_ARG_CRON_SEQUENCES)] = cronSequences;
+        reply[string(JSON_ARG_FUTURE_SEQUENCES)] = futureSequences;
+        reply[string(JSON_ARG_TIMED_SEQUENCES)] = timedSequences;
+        reply[string(JSON_ARG_RUNNING_SEQUENCES)] = runningSequences;
+    }
 
     makeStatusJSON(reply,STATUS_OK);
     (completion) (reply, STATUS_OK);
