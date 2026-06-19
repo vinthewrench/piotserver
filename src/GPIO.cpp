@@ -18,6 +18,12 @@ GPIO::~GPIO() { stop(); }
 bool GPIO::begin(std::vector<gpio_pin_t> pinsIn, int &error) {
     error = 0;
 
+    /*
+     * Make begin() safe to call more than once on the same GPIO object.
+     * If we already own any line requests, release them first.
+     */
+    stop();
+
     _chipFd = open("/dev/gpiochip0", O_RDWR);
     if (_chipFd < 0) {
         error = errno;
@@ -30,15 +36,14 @@ bool GPIO::begin(std::vector<gpio_pin_t> pinsIn, int &error) {
     if (ioctl(_chipFd, GPIO_GET_CHIPINFO_IOCTL, &cinfo) < 0) {
         error = errno;
         LOGT_ERROR("Failed to query GPIO chip info: %s", strerror(errno));
-        close(_chipFd);
-        _chipFd = -1;
+        stop();
         return false;
     }
 
 #ifndef GPIO_V2_GET_LINE_IOCTL
     LOGT_ERROR("Kernel headers do not define GPIO v2 API — rebuild required");
-    close(_chipFd);
-    _chipFd = -1;
+    error = ENOSYS;
+    stop();
     return false;
 #endif
 
@@ -81,8 +86,7 @@ bool GPIO::begin(std::vector<gpio_pin_t> pinsIn, int &error) {
     }
 
     if (_lines.empty()) {
-        close(_chipFd);
-        _chipFd = -1;
+        stop();
         return false;
     }
 
@@ -91,21 +95,23 @@ bool GPIO::begin(std::vector<gpio_pin_t> pinsIn, int &error) {
 }
 
 void GPIO::stop() {
-    if (!_isSetup)
-        return;
-
     for (auto &l : _lines) {
-        if (l.fd >= 0)
+        if (l.fd >= 0) {
             close(l.fd);
+            l.fd = -1;
+        }
     }
+
     _lines.clear();
 
-    if (_chipFd >= 0)
+    if (_chipFd >= 0) {
         close(_chipFd);
+        _chipFd = -1;
+    }
 
-    _chipFd = -1;
     _isSetup = false;
 }
+
 
 bool GPIO::isAvailable() {
     return _isSetup;
