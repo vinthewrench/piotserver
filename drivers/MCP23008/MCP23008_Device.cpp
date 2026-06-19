@@ -14,6 +14,24 @@
 
 constexpr string_view Driver_Version = "1.1.0 dev 0";
 
+static string quoteIncidentDetailValue(const string& value)
+{
+    string quoted = "\"";
+
+    for(char c : value) {
+        if(c == '"' || c == '\\') {
+            quoted += '\\';
+        }
+
+        quoted += c;
+    }
+
+    quoted += "\"";
+
+    return quoted;
+}
+
+
 bool MCP23008_Device::getVersion(string &str){
     str = string(Driver_Version);
     return true;
@@ -41,23 +59,24 @@ MCP23008_Device::~MCP23008_Device(){
     stop();
  }
 
-bool MCP23008_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
+ bool MCP23008_Device::initWithSchema(deviceSchemaMap_t deviceSchema){
 
-    for(const auto& [key, entry] : deviceSchema) {
+     for(const auto& [key, entry] : deviceSchema) {
 
-        _lines[key] = {
-            .lineNo  = entry.pinNo,
-            .direction = entry.readOnly
-            ?DIRECTION_INPUT
-            :DIRECTION_OUTPUT
-        };
-    }
+         _lines[key] = {
+             .lineNo    = entry.pinNo,
+             .direction = entry.readOnly
+                 ? DIRECTION_INPUT
+                 : DIRECTION_OUTPUT,
+             .title     = entry.title
+         };
+     }
 
-    _isSetup = true;
-    _deviceState = DEVICE_STATE_DISCONNECTED;
+     _isSetup = true;
+     _deviceState = DEVICE_STATE_DISCONNECTED;
 
-    return _isSetup;
-}
+     return _isSetup;
+ }
 
 bool MCP23008_Device::start(){
     bool status = false;
@@ -272,7 +291,7 @@ bool MCP23008_Device::setValues(keyValueMap_t kv){
     if(!isConnected())
         return false;
 
-    MCP23008::pinStates_t ps ;
+    MCP23008::pinStates_t ps;
 
     for(const auto& [key, valStr] : kv){
 
@@ -281,12 +300,13 @@ bool MCP23008_Device::setValues(keyValueMap_t kv){
             bool state = false;
             bool isBool = false;
 
-            isBool =  stringToBool(valStr,state);
+            isBool = stringToBool(valStr, state);
             if(!isBool) return false;
 
-            ps.push_back( make_pair(pin.lineNo,state));
+            ps.push_back(make_pair(pin.lineNo, state));
         }
     }
+
     if(ps.size()){
         {
             std::lock_guard<std::mutex> lock(_mutex);
@@ -295,41 +315,43 @@ bool MCP23008_Device::setValues(keyValueMap_t kv){
 
         bool status = _device.setRelayStates(ps);
 
-        if(status){
-            for(const auto& [pin, state] : ps){
-                (void)state;
+        for(const auto& [pin, state] : ps){
 
-                for(const auto& [key, line] : _lines){
-                    if(pin == line.lineNo){
-                        IncidentMgr::shared()->clear(
-                            _deviceID,
-                            "DEVICE_IO_FAILED",
-                            key,
-                            nullptr,
-                            "MCP23008 setRelayStates succeeded"
-                        );
-                        break;
-                    }
+            for(const auto& [key, line] : _lines){
+                if(pin != line.lineNo){
+                    continue;
                 }
-            }
-        }
-        else {
-            for(const auto& [pin, state] : ps){
-                (void)state;
 
-                for(const auto& [key, line] : _lines){
-                    if(pin == line.lineNo){
-                        IncidentMgr::shared()->raise(
-                            _deviceID,
-                            IncidentMgr::Severity::Error,
-                            "DEVICE_IO_FAILED",
-                            key,
-                            nullptr,
-                            "MCP23008 setRelayStates failed"
-                        );
-                        break;
-                    }
+                string details =
+                    "key=" + key +
+                    (line.title.empty()
+                        ? ""
+                        : " title=" + quoteIncidentDetailValue(line.title)) +
+                    " pin=" + std::to_string(static_cast<unsigned int>(line.lineNo)) +
+                    " desired=" + string(state ? "on" : "off") +
+                    " action=setRelayStates";
+
+                if(status){
+                    IncidentMgr::shared()->clear(
+                        _deviceID,
+                        "DEVICE_IO_FAILED",
+                        key,
+                        nullptr,
+                        details.c_str()
+                    );
                 }
+                else {
+                    IncidentMgr::shared()->raise(
+                        _deviceID,
+                        IncidentMgr::Severity::Error,
+                        "DEVICE_IO_FAILED",
+                        key,
+                        nullptr,
+                        details.c_str()
+                    );
+                }
+
+                break;
             }
         }
 

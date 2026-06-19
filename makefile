@@ -14,8 +14,9 @@
 # Useful commands:
 #
 #     make -j4              Build app, shared core, and plugins in parallel, then strip products.
+#     make -j4 nostrip      Build app, shared core, and plugins without stripping products.
 #     make -j4 core         Build only shared core library.
-#     make -j4 app          Build only app and shared core library.
+#     make -j4 app          Build only app and shared core library without stripping the app.
 #     make -j4 plugins      Build only plugins in parallel.
 #     make strip            Strip app, shared core, and plugins.
 #     make clean            Remove app, shared core, app objects, plugin objects, and plugin products.
@@ -170,9 +171,11 @@ PLUGIN_DIRS := \
 	TMP10X	\
 	FAULT_SIG
 
-.PHONY: all core app plugins strip strip-app strip-core strip-plugins clean clean-plugins distclean run dirs print $(PLUGIN_DIRS)
+.PHONY: all nostrip core app plugins strip strip-app strip-core strip-plugins clean clean-plugins distclean run dirs print $(PLUGIN_DIRS)
 
 all: core app plugins strip
+
+nostrip: core app plugins
 
 core: $(CORE_LIB)
 
@@ -196,9 +199,6 @@ $(CORE_LIB): $(CORE_OBJECTS)
 
 $(APP_NAME): $(OBJECTS) $(CORE_LIB)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS) -L$(LIB_DIR) -lpiotcore $(LDLIBS)
-ifneq ($(UNAME_S),Darwin)
-	strip $@
-endif
 
 $(BUILD_DIR)/core/%.o: %.cpp
 	@mkdir -p $(dir $@)
@@ -231,7 +231,7 @@ ifneq ($(UNAME_S),Darwin)
 	fi
 endif
 
-run: all
+run: nostrip
 	./$(APP_NAME)
 
 clean: clean-plugins

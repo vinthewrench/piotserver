@@ -263,6 +263,7 @@ private:
      *   SPRK_1 -> node 1, channel 1
      */
     struct ValveBinding {
+        string  title;
         uint8_t node = 0;
         uint8_t channel = 0;
     };
@@ -459,19 +460,31 @@ private:
                                  std::function<bool(VALVEMASTERCompletion)> submit,
                                  uint32_t timeoutMs = 10000);
 
-    /**
+   /**
      * @brief Run one queued command with retry policy.
      *
      * retry_count is the total number of attempts including the first attempt.
      *
+     * If the command succeeds after one or more failed attempts, a
+     * COMMAND_RETRY_RECOVERED notice is recorded. The optional incidentDetails
+     * string is appended to that notice so callers can include command-specific
+     * context such as valve key, title, node, channel, and desired state.
+     *
+     * Final command-specific fault raising is left to the caller so the
+     * incident code/key can describe the real failure.
+     *
      * @param commandName Human-readable command name.
      * @param submit Lambda that starts the wrapper command.
      * @param timeoutMs Per-attempt timeout.
+     * @param incidentDetails Optional key=value incident context appended to
+     *                        COMMAND_RETRY_RECOVERED notices.
      * @return true if any attempt succeeded.
      */
-    bool runQueuedCommandWithRetries(const string& commandName,
-                                     std::function<bool(VALVEMASTERCompletion)> submit,
-                                     uint32_t timeoutMs = 10000);
+    bool runQueuedCommandWithRetries(
+            const string& commandName,
+            std::function<bool(VALVEMASTERCompletion)> submit,
+            uint32_t timeoutMs,
+            const string& incidentDetails = "");
 
     /**
      * @brief Read one valve with retry policy.
