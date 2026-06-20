@@ -1674,6 +1674,8 @@ bool pIoTServerMgr::processEvents(){
                 uint stepNo = 0;
                 _db.sequenceNextStepNumberToRun(sid,stepNo);
 
+                bool IsEphemeral =  _db.sequenceIsEphemeral(sid);
+
                 _db.sequenceStartAbort(sid);
 
                 // if we already started a sequence,  run abort
@@ -1685,6 +1687,10 @@ bool pIoTServerMgr::processEvents(){
                 _db.sequenceReset(sid);
                 _db.sequenceSetLastRunTime(sid, localNow);
                 _db.sequenceSetRunning(sid, false);
+
+                if(IsEphemeral){
+                    _db.sequenceDelete(sid);
+                 }
 
                 continue;
             }
@@ -2082,6 +2088,8 @@ bool pIoTServerMgr::abortSequence(sequenceID_t sid){
             uint stepNo = 0;
             _db.sequenceNextStepNumberToRun(sid,stepNo);
 
+            bool IsEphemeral =  _db.sequenceIsEphemeral(sid);
+
             _db.sequenceStartAbort(sid);
 
             _db.sequenceReset(sid);
@@ -2108,6 +2116,10 @@ bool pIoTServerMgr::abortSequence(sequenceID_t sid){
                 msg.c_str(),
                 details.c_str()
             );
+
+            if(IsEphemeral){
+                _db.sequenceDelete(sid);
+             }
 
             success = true;
         }
