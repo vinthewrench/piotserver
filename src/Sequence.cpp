@@ -273,6 +273,7 @@ void Sequence::commonInit(){
     _dontLog = true;
     _isRunning = false;
     _overrideManualMode = false;
+    _wasManuallyTriggered = false;
 }
 
 Sequence::Sequence(){
@@ -439,6 +440,7 @@ void Sequence::copy(const Sequence &seq1, Sequence *seq2){
     seq2->_lastStepRunTime  = seq1._lastStepRunTime;
     seq2->_dontLog           = seq1._dontLog;
     seq2->_overrideManualMode = seq1._overrideManualMode;
+    seq2->_wasManuallyTriggered = seq1._wasManuallyTriggered;
     seq2->_isRunning        = seq1._isRunning;
     seq2->_currentStepNumber        = seq1._currentStepNumber;
   }

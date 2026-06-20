@@ -665,16 +665,9 @@ bool EventTrigger::shouldTriggerFromTimeEvent(const solarTimes_t &solar, time_t 
         };
     }
    else  if(_eventType == EVENT_TYPE_EPHEMERAL){
-
-       // why is this code so funky --  compiler written by dopes that why
-       const long long now  = static_cast<long long>(time(NULL));
-        const long long then = static_cast<long long>(_ephemeralTime);
-        result = (then <= now);
-
-       // time_t now = time(NULL);
-       // time_t then = _ephemeralTime;
-       // result = (then <= now);
-  //      printf("_ephemeralTime=%ld now=%ld result=%s\n",  then, now, result ? "TRUE" : "FALSE");
+       time_t now = time(NULL);
+       time_t then = _ephemeralTime;
+       result = (then <= now);
    }
    else  if(_eventType == EVENT_TYPE_CRON){
        time_t now = time(NULL);
