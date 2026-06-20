@@ -90,6 +90,7 @@
 #define VALVEMASTER_RS485_COMMAND_GAP_MS         500
 #define VALVEMASTER_COMMAND_RETRY_COUNT          3
 #define VALVEMASTER_COMMAND_RETRY_DELAY_MS       150
+#define VALVEMASTER_COMMAND_SUBMIT_SETTLE_MS     50
 #define VALVEMASTER_COMMAND_BUSY_TIMEOUT_MS      5000
 #define VALVEMASTER_WHO_BUSY_TIMEOUT_MS          30000
 #define VALVEMASTER_CLOSE_ALL_BUSY_TIMEOUT_MS    10000
@@ -1019,6 +1020,20 @@ bool VALVEMASTER::runCommandOnce(queuedCommand_t item,
     }
 
     /*
+     * Give the AVR firmware a short window to leave the I2C receive path,
+     * notice the pending command in main(), and set BUSY before the host starts
+     * polling status.
+     *
+     * Without this, a fast host can read STATUS immediately after writing COMMAND
+     * and see the previous idle state before the firmware has actually entered
+     * execute_command().
+     */
+    if (VALVEMASTER_COMMAND_SUBMIT_SETTLE_MS > 0) {
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(VALVEMASTER_COMMAND_SUBMIT_SETTLE_MS));
+    }
+
+    /*
      * Command was submitted.
      *
      * From this point on, do not immediately re-send the command because of a
@@ -1082,6 +1097,25 @@ bool VALVEMASTER::runCommandOnce(queuedCommand_t item,
     commandOk = (result == VALVEMASTER_RESULT_OK);
 
     if (commandOk && item.command == VALVEMASTER_CMD_POWER_ON) {
+        /*
+         * POWER_ON completed with RESULT_OK, but do not fail it solely from the
+         * STATUS byte captured immediately after BUSY cleared.
+         *
+         * Give the VALVEMASTER firmware/register state a short confirmation window,
+         * then re-read STATUS before declaring the field bus still off.
+         */
+        if ((status & VALVEMASTER_STATUS_POWER_ON) == 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+            if (!readCommandRegisterWithRetries(VALVEMASTER_REG_STATUS,
+                                                status,
+                                                "power-on-confirm-status")) {
+                result = VALVEMASTER_RESULT_RS485_BAD_REPLY;
+                commandOk = false;
+                return false;
+            }
+        }
+
         commandOk = (status & VALVEMASTER_STATUS_POWER_ON) != 0;
 
         if (commandOk) {
