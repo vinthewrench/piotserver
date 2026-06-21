@@ -107,32 +107,40 @@ CORE_DEPS    := $(CORE_OBJECTS:.o=.d)
 # They are provided by libpiotcore.
 #
 CPP_SOURCES := \
-	$(SRC_DIR)/main.cpp \
-	$(SRC_DIR)/ServerNouns.cpp \
-	$(SRC_DIR)/RPi_RelayBoardDevice.cpp \
-	$(SRC_DIR)/W1_Device.cpp \
-	$(SRC_DIR)/Actuator_Device.cpp \
-	$(SRC_DIR)/Sprinkler_Device.cpp \
-	$(SRC_DIR)/GPIO.cpp \
-	$(SRC_DIR)/pIoTServerAPISecretMgr.cpp \
-	$(SRC_DIR)/pIoTServerDB.cpp \
-	$(SRC_DIR)/pIoTServerMgr.cpp \
-	$(SRC_DIR)/IncidentMgr.cpp \
-	$(SRC_DIR)/pIoTServerEvaluator.cpp \
-	$(SRC_DIR)/EventTrigger.cpp \
-	$(SRC_DIR)/Sequence.cpp \
 	$(SRC_DIR)/Action.cpp \
-	$(SRC_DIR)/SolarTimeMgr.cpp \
-	$(SRC_DIR)/sunset.cpp \
-	$(SRC_DIR)/lunar.cpp \
+	$(SRC_DIR)/Actuator_Device.cpp \
 	$(SRC_DIR)/base64.cpp \
-	$(SRC_DIR)/RESTutils.cpp \
-	$(SRC_DIR)/ServerCmdQueue.cpp \
-	$(SRC_DIR)/TCPClientInfo.cpp \
-	$(SRC_DIR)/TCPServer.cpp \
+	$(SRC_DIR)/EventTrigger.cpp \
+	$(SRC_DIR)/GPIO.cpp \
+	$(SRC_DIR)/IncidentMgr.cpp \
+	$(SRC_DIR)/lunar.cpp \
+	$(SRC_DIR)/main.cpp \
+	$(SRC_DIR)/pIoTServerAPISecretMgr.cpp \
+	$(SRC_DIR)/pIoTServerDB_Core.cpp \
+	$(SRC_DIR)/pIoTServerDB_APISecrets.cpp \
+	$(SRC_DIR)/pIoTServerDB_Incidents.cpp \
+	$(SRC_DIR)/pIoTServerDB_Properties.cpp \
+	$(SRC_DIR)/pIoTServerDB_Rules.cpp \
+	$(SRC_DIR)/pIoTServerDB_Sequences.cpp \
+	$(SRC_DIR)/pIoTServerDB_SQLValues.cpp \
+	$(SRC_DIR)/pIoTServerDB_Values.cpp \
+	$(SRC_DIR)/pIoTServerEvaluator.cpp \
+	$(SRC_DIR)/pIoTServerMgr.cpp \
 	$(SRC_DIR)/REST_URL.cpp \
 	$(SRC_DIR)/RESTServerConnection.cpp \
+	$(SRC_DIR)/RESTutils.cpp \
+	$(SRC_DIR)/RPi_RelayBoardDevice.cpp \
+	$(SRC_DIR)/Rule.cpp \
+	$(SRC_DIR)/Sequence.cpp \
+	$(SRC_DIR)/ServerCmdQueue.cpp \
+	$(SRC_DIR)/ServerNouns.cpp \
 	$(SRC_DIR)/sha256.cpp \
+	$(SRC_DIR)/SolarTimeMgr.cpp \
+	$(SRC_DIR)/Sprinkler_Device.cpp \
+	$(SRC_DIR)/sunset.cpp \
+	$(SRC_DIR)/TCPClientInfo.cpp \
+	$(SRC_DIR)/TCPServer.cpp \
+	$(SRC_DIR)/W1_Device.cpp \
 	$(PLATFORM_CPP_SOURCES)
 
 C_SOURCES := \

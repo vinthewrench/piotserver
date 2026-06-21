@@ -1,0 +1,80 @@
+{
+    "config": {
+        "description": "The Raspbery Pi Irrigation System",
+        "lat_long": "34.465338, -93.362827",
+        "name": "Rule tests",
+        "rule.eval_interval": "10"
+    },
+    "devices": [
+        {
+            "address": "0x4F",
+            "data_type": "TEMPERATURE",
+            "device_type": "TMP10X",
+            "interval": 30,
+            "key": "GREENHOUSE",
+            "title": "GREENHOUSE Temperature",
+            "tracking": "dont.record"
+        },
+        {
+            "address": "0x41",
+            "device_type": "PCA9536",
+            "pins": [
+                {
+                    "bit": 0,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_1"
+                },
+                {
+                    "bit": 1,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RELAY_2"
+                }
+            ],
+            "title": "Actuator Relays"
+        }
+    ],
+    "prop.file.version": {
+        "file.etag": 56,
+        "last_write": 1782083909
+    },
+    "rule": [
+        {
+            "action": [
+                {
+                    "cmd": "SET",
+                    "key": "RELAY_1",
+                    "value": "on"
+                },
+                {
+                    "cmd": "LOG",
+                    "key": "GREENHOUSE",
+                    "value": "Greenhouse temperature high - fan on"
+                }
+            ],
+            "clear_action": [
+                {
+                    "cmd": "SET",
+                    "key": "RELAY_1",
+                    "value": "off"
+                },
+                {
+                    "cmd": "LOG",
+                    "key": "GREENHOUSE",
+                    "value": "Greenhouse temperature normal - fan off"
+                }
+            ],
+            "clear_condition": "GREENHOUSE < 28.7",
+            "clear_delay": 5,
+            "condition": "GREENHOUSE > 29.0",
+            "description": "Turn fan on when greenhouse temperature is high and turn it off when the greenhouse cools down. ",
+            "enable": true,
+            "name": "Greenhouse fan high temp 1 ",
+            "override_manualmode": false,
+            "ruleID": "5000",
+            "trigger_delay": 2
+        }
+    ],
+    "sequence": null
+}

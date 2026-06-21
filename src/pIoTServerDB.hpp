@@ -32,6 +32,7 @@
 
 #include "EventAction.hpp"
 #include "Sequence.hpp"
+#include "Rule.hpp"
 
 using namespace std;
 using namespace nlohmann;
@@ -238,6 +239,48 @@ class pIoTServerDB  {
                                   keyValueMap_t kv = {});
 
 
+    // MARK: -  Rule
+      bool ruleIDIsValid(ruleID_t rid);
+      bool ruleFind(string name, ruleID_t &rid);
+      bool ruleDelete(ruleID_t rid);
+      bool ruleSave(Rule rule, ruleID_t* ridOut = NULL);
+      bool ruleUpdate(ruleID_t rid, Rule rule);
+      string ruleGetName(ruleID_t rid);
+      bool ruleSetName(ruleID_t rid, string name);
+      bool ruleSetDescription(ruleID_t rid, string desc);
+      bool ruleSetEnable(ruleID_t rid, bool enable);
+      bool ruleIsEnabled(ruleID_t rid);
+
+      bool ruleIsActive(ruleID_t rid);
+      bool ruleSetActive(ruleID_t rid, bool active);
+
+      string ruleGetCondition(ruleID_t rid);
+
+      string ruleGetClearCondition(ruleID_t rid);
+
+      uint64_t ruleGetTriggerDelay(ruleID_t rid);
+      uint64_t ruleGetClearDelay(ruleID_t rid);
+
+      time_t ruleGetConditionTrueSince(ruleID_t rid);
+      bool ruleSetConditionTrueSince(ruleID_t rid, time_t t);
+
+      time_t ruleGetClearTrueSince(ruleID_t rid);
+      bool ruleSetClearTrueSince(ruleID_t rid, time_t t);
+
+      bool ruleSetLastActionTime(ruleID_t rid, time_t t);
+      bool ruleSetLastClearActionTime(ruleID_t rid, time_t t);
+
+      bool ruleGetActions(ruleID_t rid, vector<Action>& actions);
+      bool ruleGetClearActions(ruleID_t rid, vector<Action>& actions);
+
+      bool triggerRule(ruleID_t rid);
+
+      json ruleJSON(ruleID_t rid);
+      vector<ruleID_t> allruleIDs();
+
+
+
+    //
     // MARK: -  Sequence
     bool sequenceIDIsValid(sequenceID_t sequenceID);
     bool sequenceFind(string name, sequenceID_t &sid);
@@ -380,6 +423,8 @@ class pIoTServerDB  {
 
     mt19937                        _rng;
 
+    map<ruleID_t, Rule>            _rules;
+
     map<sequenceID_t, Sequence>   _sequences;
 
     typedef struct {
@@ -404,6 +449,8 @@ class pIoTServerDB  {
 
     sequenceID_t     createUniqueSequenceID();
     sequenceGroupID_t  createUniqueSequenceGroupID();
+    ruleID_t     createUniqueRuleID();
+
     bool restoreSequenceGroupFromJSON(json j);
     bool saveSequenceGroupToJSON(sequenceGroupID_t, json &j );
 

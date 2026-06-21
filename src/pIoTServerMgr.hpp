@@ -152,6 +152,13 @@ public:
 
     bool updateValuesFromSnapShot(vector<pIoTServerDB::numericValueSnapshot_t> & snapshot);
 
+
+    bool triggerRule(ruleID_t rid,
+                        boolCallback_t callback = NULL);
+
+    bool abortRule(ruleID_t sid);
+
+
 private:
 
     static pIoTServerMgr *    _sharedInstance;
@@ -166,6 +173,10 @@ private:
     bool                    _running;                //Flag for starting and terminating the main loop
     std::thread             _thread;                //Internal thread
     std::condition_variable _valuesUpdated;
+
+    static constexpr uint64_t DEFAULT_RULE_EVAL_INTERVAL_SEC = 60;
+    uint64_t                 _evalIntervalSec = DEFAULT_RULE_EVAL_INTERVAL_SEC;
+    time_t                   _nextRuleEvalTime = 0;
 
     bool                    _hasActiveConnections;
 
@@ -184,6 +195,22 @@ private:
 
     bool runAbortActions(sequenceID_t sid);
 
+    bool refreshRuleEvalInterval();
+    bool evaluateRulesIfNeeded(time_t localNow);
+    bool evaluateRules(time_t localNow);
+
+    void evaluateRuleTriggerSide(ruleID_t rid, time_t localNow);
+    void evaluateRuleClearSide(ruleID_t rid, time_t localNow);
+
+    bool evaluateRuleExpression(string expression, bool &isTrue);
+    bool runRuleActions(ruleID_t rid);
+    bool  runRuleClearActions(ruleID_t rid);
+
+    bool runActionList(const vector<Action>& actions,
+                                      bool ignoreManualMode,
+                                      bool dontLog,
+                                      const string& ownerLabel,
+                                      EventTrigger* callbackTrigger);
 
     pIoTServerDB                       _db;
     mutable std::mutex              _deviceMutex;

@@ -628,6 +628,8 @@ void pIoTServerMgr::start(){
 
         _valuesUpdated.notify_all();
 
+        refreshRuleEvalInterval();
+
         // the pIoTServerMgr is the data collection thread.
         //  it can be delayed without effecting the REST thread
 
@@ -1631,6 +1633,8 @@ bool pIoTServerMgr::processEvents(){
             _shouldReconcileEvents = false;
         }
 
+        evaluateRulesIfNeeded(localNow);
+
         auto sids = _db.sequencesThatNeedToRunNow(solar, localNow);
         for (auto sid : sids) {
 
@@ -1743,6 +1747,7 @@ bool pIoTServerMgr::processEvents(){
             }
 
         };
+
     }
     return ranEvents > 0;;
 }
@@ -1949,111 +1954,157 @@ bool pIoTServerMgr::runAbortActions(sequenceID_t sid){
     return success;
 };
 
-bool pIoTServerMgr::runSequenceStep(sequenceID_t sid, uint stepNo,
-                                    boolCallback_t cb){
+// bool pIoTServerMgr::runSequenceStep(sequenceID_t sid, uint stepNo,
+//                                     boolCallback_t cb){
 
-    bool success = true;
+//     bool success = true;
+//     bool dontLog = _db.sequenceShouldIgnoreLog(sid);
+//     bool ignoreManualMode = _db.sequenceShouldIgnoreManualMode(sid);
+//     Step step;
+
+//     if(!_db.sequenceGetStep(sid, stepNo, step))
+//         return false;
+
+//     vector<Action> actions;
+//     step.getActions(actions);
+
+//     _db.sequenceSetCurrentStep(sid, stepNo);
+
+//     if(!dontLog)
+//           LOGT_DEBUG("RUN SEQUENCE %s step %d", SequenceID_to_string(sid).c_str(), stepNo);
+
+//     for(auto action :actions){
+//        if(!dontLog)
+//             LOGT_DEBUG("RUN ACTION: %s", action.printString().c_str());
+
+//         if(action.cmd() == Action::JSON_CMD_SET){
+//             string key = action.key();
+//             string value = action.value();
+
+//             if(!ignoreManualMode && _db.isKeyInManualMode(key)){
+//                 LOGT_ERROR("Sequence: (%s, %d) Could not set key \"%s\" to %s. Manual mode only",
+//                            SequenceID_to_string(sid).c_str(), stepNo,
+//                            key.c_str(), value.c_str());
+//                 continue;
+//             }
+//             keyValueMap_t   kv;
+//             kv[key] = value;
+//             if(!setValues(kv))  {
+//                 LOGT_ERROR("FAILED TO SET %s = %s @runSequenceStep line %d",
+//                            key.c_str(), value.c_str(), __LINE__);
+//             }
+//         }
+//         else if(action.cmd() == Action::JSON_CMD_RUN_SEQ){
+//             string str = action.key();
+//             sequenceID_t sid;
+
+//             if( str_to_SequenceID(str.c_str(), &sid) && _db.sequenceIDIsValid(sid)){
+//                 success = startRunningSequence(sid);
+//             }
+//             else
+//                 success = false;
+//         }
+//         else if(action.cmd() == Action::JSON_CMD_EVAL){
+//             string expression = action.expression();
+
+//             vector<pIoTServerDB::numericValueSnapshot_t> vars;
+
+//             if( _db.createValueSnapshot(&vars)){
+//                 double result = 0;
+//                 if(evaluateExpression(expression, vars, result)) {
+//                     success = updateValuesFromSnapShot(vars);
+//                 }
+//             }
+//         }
+//         else if(action.cmd() == Action::JSON_CMD_LOG){
+//             string detail = action.value();
+
+//             IncidentMgr::shared()->notice(
+//                 "SYSTEM",
+//                 "LOG_MESSAGE",
+//                 "piotserver",
+//                 detail.empty() ? nullptr : detail.c_str()
+//             );
+
+//         }
+//         else if((action.cmd() == Action::JSON_CMD_CALLBACK)
+//                 && action.isCallBack()){
+
+//             EventTrigger trig;
+//             _db.sequenceGetTrigger(sid,trig);
+//             success =  action.invokeCallBack(trig);
+//         }
+//         else if(action.cmd() == Action::JSON_CMD_DEVICE_ACTION){
+//             string key = action.key();
+//             string value = action.value();
+
+//             pIoTServerDevice* device = deviceForActionKey(key);
+
+//             if(device == nullptr){
+//                 LOGT_ERROR("DEVICE_ACTION failed: no device found for key \"%s\"",
+//                            key.c_str());
+//                 continue;
+//             }
+
+//             if(!device->deviceAction(value)){
+//                 LOGT_ERROR("DEVICE_ACTION failed: key \"%s\" value \"%s\"",
+//                            key.c_str(),
+//                            value.c_str());
+//              }
+//         }
+
+//     }
+
+//     if(cb) (cb)(success);
+//     return true;
+// }
+
+bool pIoTServerMgr::runSequenceStep(sequenceID_t sid,
+                                    uint stepNo,
+                                    boolCallback_t cb) {
+
     bool dontLog = _db.sequenceShouldIgnoreLog(sid);
     bool ignoreManualMode = _db.sequenceShouldIgnoreManualMode(sid);
+
     Step step;
 
-    if(!_db.sequenceGetStep(sid, stepNo, step))
+    if(!_db.sequenceGetStep(sid, stepNo, step)) {
         return false;
+    }
 
     vector<Action> actions;
     step.getActions(actions);
 
     _db.sequenceSetCurrentStep(sid, stepNo);
 
-    if(!dontLog)
-          LOGT_DEBUG("RUN SEQUENCE %s step %d", SequenceID_to_string(sid).c_str(), stepNo);
-
-    for(auto action :actions){
-       if(!dontLog)
-            LOGT_DEBUG("RUN ACTION: %s", action.printString().c_str());
-
-        if(action.cmd() == Action::JSON_CMD_SET){
-            string key = action.key();
-            string value = action.value();
-
-            if(!ignoreManualMode && _db.isKeyInManualMode(key)){
-                LOGT_ERROR("Sequence: (%s, %d) Could not set key \"%s\" to %s. Manual mode only",
-                           SequenceID_to_string(sid).c_str(), stepNo,
-                           key.c_str(), value.c_str());
-                continue;
-            }
-            keyValueMap_t   kv;
-            kv[key] = value;
-            if(!setValues(kv))  {
-                LOGT_ERROR("FAILED TO SET %s = %s @runSequenceStep line %d",
-                           key.c_str(), value.c_str(), __LINE__);
-            }
-        }
-        else if(action.cmd() == Action::JSON_CMD_RUN_SEQ){
-            string str = action.key();
-            sequenceID_t sid;
-
-            if( str_to_SequenceID(str.c_str(), &sid) && _db.sequenceIDIsValid(sid)){
-                success = startRunningSequence(sid);
-            }
-            else
-                success = false;
-        }
-        else if(action.cmd() == Action::JSON_CMD_EVAL){
-            string expression = action.expression();
-
-            vector<pIoTServerDB::numericValueSnapshot_t> vars;
-
-            if( _db.createValueSnapshot(&vars)){
-                double result = 0;
-                if(evaluateExpression(expression, vars, result)) {
-                    success = updateValuesFromSnapShot(vars);
-                }
-            }
-        }
-        else if(action.cmd() == Action::JSON_CMD_LOG){
-            string detail = action.value();
-
-            IncidentMgr::shared()->notice(
-                "SYSTEM",
-                "LOG_MESSAGE",
-                "piotserver",
-                detail.empty() ? nullptr : detail.c_str()
-            );
-
-        }
-        else if((action.cmd() == Action::JSON_CMD_CALLBACK)
-                && action.isCallBack()){
-
-            EventTrigger trig;
-            _db.sequenceGetTrigger(sid,trig);
-            success =  action.invokeCallBack(trig);
-        }
-        else if(action.cmd() == Action::JSON_CMD_DEVICE_ACTION){
-            string key = action.key();
-            string value = action.value();
-
-            pIoTServerDevice* device = deviceForActionKey(key);
-
-            if(device == nullptr){
-                LOGT_ERROR("DEVICE_ACTION failed: no device found for key \"%s\"",
-                           key.c_str());
-                continue;
-            }
-
-            if(!device->deviceAction(value)){
-                LOGT_ERROR("DEVICE_ACTION failed: key \"%s\" value \"%s\"",
-                           key.c_str(),
-                           value.c_str());
-             }
-        }
-
+    if(!dontLog) {
+        LOGT_DEBUG("RUN SEQUENCE %s step %d",
+                   SequenceID_to_string(sid).c_str(),
+                   stepNo);
     }
 
-    if(cb) (cb)(success);
+    EventTrigger trig;
+    EventTrigger* trigPtr = nullptr;
+
+    if(_db.sequenceGetTrigger(sid, trig)) {
+        trigPtr = &trig;
+    }
+
+    string ownerLabel = "Sequence: (" + SequenceID_to_string(sid)
+                      + ", " + std::to_string(stepNo) + ")";
+
+    bool success = runActionList(actions,
+                                 ignoreManualMode,
+                                 dontLog,
+                                 ownerLabel,
+                                 trigPtr);
+
+    if(cb) {
+        (cb)(success);
+    }
+
     return true;
 }
-
 
 
 // sequence
@@ -2128,6 +2179,534 @@ bool pIoTServerMgr::abortSequence(sequenceID_t sid){
     return success;
 }
 
+
+// Rules
+//
+//
+ bool pIoTServerMgr::triggerRule(ruleID_t rid,
+                                         boolCallback_t cb){
+    bool success = _db.triggerRule(rid);
+    if(cb) (cb)(success);
+    return success;
+}
+
+bool pIoTServerMgr::abortRule(ruleID_t rid) {
+
+    /*
+     * Rule abort/clear policy is not wired yet.
+     */
+    (void)rid;
+
+    return true;
+}
+
+
+bool pIoTServerMgr::refreshRuleEvalInterval(){
+
+    string str;
+    bool success = false;
+
+    _evalIntervalSec = DEFAULT_RULE_EVAL_INTERVAL_SEC;
+
+    success = _db.getConfigProperty(string(PROP_CONFIG_RULE_EVAL_INTERVAL), str);
+    if(success && !str.empty()) {
+
+        try {
+            size_t idx = 0;
+            uint64_t val = std::stoull(str, &idx, 10);
+
+            /*
+                * Reject partial parses like "10abc".
+                */
+            if(idx != str.length()) {
+                LOGT_ERROR("Invalid %s value \"%s\"", PROP_CONFIG_RULE_EVAL_INTERVAL, str.c_str());
+                return false;
+            }
+
+            /*
+                * 0 disables rule evaluation.
+                * Anything else is seconds between rule evaluation passes.
+                */
+            _evalIntervalSec = val;
+            return true;
+        }
+        catch(const std::exception& e) {
+            LOGT_ERROR("Invalid %s value \"%s\": %s",
+                        PROP_CONFIG_RULE_EVAL_INTERVAL,
+                        str.c_str(),
+                        e.what());
+            return false;
+        }
+    }
+
+    return false;
+}
+
+
+bool pIoTServerMgr::evaluateRulesIfNeeded(time_t localNow) {
+
+    /*
+     * _evalIntervalSec is the global RuleMgr evaluation interval.
+     *
+     * 0 disables rule evaluation.
+     */
+    if(_evalIntervalSec == 0) {
+        LOGT_DEBUG("RULE eval skipped: disabled");
+        return false;
+    }
+
+    if(localNow < _nextRuleEvalTime) {
+        return false;
+    }
+
+    LOGT_DEBUG("RULE eval pass: localNow=%lld interval=%llu nextWas=%lld",
+               static_cast<long long>(localNow),
+               static_cast<unsigned long long>(_evalIntervalSec),
+               static_cast<long long>(_nextRuleEvalTime));
+
+    _nextRuleEvalTime = localNow + static_cast<time_t>(_evalIntervalSec);
+
+    return evaluateRules(localNow);
+}
+
+
+bool pIoTServerMgr::evaluateRules(time_t localNow) {
+
+    auto rids = _db.allruleIDs();
+
+    if(rids.empty()) {
+        LOGT_DEBUG("RULE eval: no rules configured");
+        return false;
+    }
+
+    bool didEvaluate = false;
+
+    LOGT_DEBUG("RULE eval: checking %zu rule(s)", rids.size());
+
+    for(auto rid : rids) {
+
+        if(!_db.ruleIDIsValid(rid)) {
+            LOGT_DEBUG("RULE %04x skipped: invalid id", rid);
+            continue;
+        }
+
+        if(!_db.ruleIsEnabled(rid)) {
+            LOGT_DEBUG("RULE %04x skipped: disabled", rid);
+            continue;
+        }
+
+        didEvaluate = true;
+
+        string name = _db.ruleGetName(rid);
+        bool active = _db.ruleIsActive(rid);
+
+        // LOGT_DEBUG("RULE %04x \"%s\" evaluating %s side",
+        //            rid,
+        //            name.empty() ? "" : name.c_str(),
+        //            active ? "clear" : "trigger");
+
+        if(active) {
+            evaluateRuleClearSide(rid, localNow);
+        }
+        else {
+            evaluateRuleTriggerSide(rid, localNow);
+        }
+    }
+
+    return didEvaluate;
+}
+
+
+void pIoTServerMgr::evaluateRuleTriggerSide(ruleID_t rid, time_t localNow) {
+
+    string expression = _db.ruleGetCondition(rid);
+
+    LOGT_DEBUG("RULE %04x trigger expr: \"%s\"",
+               rid,
+               expression.c_str());
+
+    bool conditionIsTrue = false;
+
+    if(!evaluateRuleExpression(expression, conditionIsTrue)) {
+        LOGT_DEBUG("RULE %04x trigger eval invalid; reset conditionTrueSince", rid);
+        _db.ruleSetConditionTrueSince(rid, 0);
+        return;
+    }
+
+    LOGT_DEBUG("RULE %04x trigger eval result: %s",
+               rid,
+               conditionIsTrue ? "true" : "false");
+
+    if(!conditionIsTrue) {
+        _db.ruleSetConditionTrueSince(rid, 0);
+        return;
+    }
+
+    time_t trueSince = _db.ruleGetConditionTrueSince(rid);
+
+    if(trueSince == 0) {
+        LOGT_DEBUG("RULE %04x trigger became true; starting trigger timer at %lld",
+                   rid,
+                   static_cast<long long>(localNow));
+
+        _db.ruleSetConditionTrueSince(rid, localNow);
+        return;
+    }
+
+    if(localNow < trueSince) {
+        LOGT_DEBUG("RULE %04x trigger clock moved backwards; restarting trigger timer",
+                   rid);
+
+        _db.ruleSetConditionTrueSince(rid, localNow);
+        return;
+    }
+
+    uint64_t elapsed = static_cast<uint64_t>(localNow - trueSince);
+    uint64_t triggerDelay = _db.ruleGetTriggerDelay(rid);
+
+    // LOGT_DEBUG("RULE %04x trigger true for %llu/%llu sec",
+    //            rid,
+    //            static_cast<unsigned long long>(elapsed),
+    //            static_cast<unsigned long long>(triggerDelay));
+
+    if(elapsed < triggerDelay) {
+        return;
+    }
+
+    LOGT_INFO("RULE %04x TRIGGER qualified; running action[]", rid);
+
+    if(!runRuleActions(rid)) {
+        LOGT_ERROR("RULE %04x action failed; setting rule active anyway", rid);
+    }
+
+    _db.ruleSetActive(rid, true);
+    _db.ruleSetLastActionTime(rid, localNow);
+    _db.ruleSetConditionTrueSince(rid, 0);
+    _db.ruleSetClearTrueSince(rid, 0);
+
+    LOGT_INFO("RULE %04x ACTIVE", rid);
+}
+
+
+bool pIoTServerMgr::runRuleActions(ruleID_t rid) {
+
+    vector<Action> actions;
+
+    if(!_db.ruleGetActions(rid, actions)) {
+        return false;
+    }
+
+    string ownerLabel = "Rule: " + RuleID_to_string(rid);
+
+    /*
+     * Rule manual-mode policy should come from the rule.
+     * If you do not have this accessor yet, either add it or use false
+     * until that field is wired.
+     */
+    bool ignoreManualMode = false;
+    bool dontLog = false;
+
+    return runActionList(actions,
+                         ignoreManualMode,
+                         dontLog,
+                         ownerLabel,
+                         nullptr);
+}
+
+
+void pIoTServerMgr::evaluateRuleClearSide(ruleID_t rid, time_t localNow) {
+
+    string expression = _db.ruleGetClearCondition(rid);
+
+    bool clearIsTrue = false;
+
+    if(!expression.empty()) {
+
+        LOGT_DEBUG("RULE %04x clear expr: \"%s\"",
+                   rid,
+                   expression.c_str());
+
+        if(!evaluateRuleExpression(expression, clearIsTrue)) {
+            LOGT_DEBUG("RULE %04x clear eval invalid; reset clearTrueSince", rid);
+            _db.ruleSetClearTrueSince(rid, 0);
+            return;
+        }
+    }
+    else {
+
+        expression = _db.ruleGetCondition(rid);
+
+        LOGT_DEBUG("RULE %04x clear expr empty; using !condition: \"%s\"",
+                   rid,
+                   expression.c_str());
+
+        bool conditionIsTrue = false;
+
+        if(!evaluateRuleExpression(expression, conditionIsTrue)) {
+            LOGT_DEBUG("RULE %04x clear fallback eval invalid; reset clearTrueSince", rid);
+            _db.ruleSetClearTrueSince(rid, 0);
+            return;
+        }
+
+        clearIsTrue = !conditionIsTrue;
+    }
+
+    // LOGT_DEBUG("RULE %04x clear eval result: %s",
+    //            rid,
+    //            clearIsTrue ? "true" : "false");
+
+    if(!clearIsTrue) {
+        _db.ruleSetClearTrueSince(rid, 0);
+        return;
+    }
+
+    time_t trueSince = _db.ruleGetClearTrueSince(rid);
+
+    if(trueSince == 0) {
+        LOGT_DEBUG("RULE %04x clear became true; starting clear timer at %lld",
+                   rid,
+                   static_cast<long long>(localNow));
+
+        _db.ruleSetClearTrueSince(rid, localNow);
+        return;
+    }
+
+    if(localNow < trueSince) {
+        LOGT_DEBUG("RULE %04x clear clock moved backwards; restarting clear timer",
+                   rid);
+
+        _db.ruleSetClearTrueSince(rid, localNow);
+        return;
+    }
+
+    uint64_t elapsed = static_cast<uint64_t>(localNow - trueSince);
+    uint64_t clearDelay = _db.ruleGetClearDelay(rid);
+
+    LOGT_DEBUG("RULE %04x clear true for %llu/%llu sec",
+               rid,
+               static_cast<unsigned long long>(elapsed),
+               static_cast<unsigned long long>(clearDelay));
+
+    if(elapsed < clearDelay) {
+        return;
+    }
+
+    LOGT_INFO("RULE %04x CLEAR qualified; running clear_action[]", rid);
+
+    if(!runRuleClearActions(rid)) {
+        LOGT_ERROR("RULE %04x clear_action failed; clearing rule latch anyway", rid);
+    }
+
+    _db.ruleSetActive(rid, false);
+    _db.ruleSetLastClearActionTime(rid, localNow);
+    _db.ruleSetConditionTrueSince(rid, 0);
+    _db.ruleSetClearTrueSince(rid, 0);
+
+    LOGT_INFO("RULE %04x INACTIVE", rid);
+}
+
+bool pIoTServerMgr::runRuleClearActions(ruleID_t rid) {
+
+    vector<Action> actions;
+
+    if(!_db.ruleGetClearActions(rid, actions)) {
+        return false;
+    }
+
+    string ownerLabel = "Rule clear: " + RuleID_to_string(rid);
+
+    /*
+     * TODO:
+     * Replace this false with _db.ruleShouldIgnoreManualMode(rid)
+     * when that accessor exists.
+     */
+    bool ignoreManualMode = false;
+    bool dontLog = false;
+
+    return runActionList(actions,
+                         ignoreManualMode,
+                         dontLog,
+                         ownerLabel,
+                         nullptr);
+}
+
+bool pIoTServerMgr::evaluateRuleExpression(string expression, bool &isTrue) {
+
+    isTrue = false;
+
+    if(expression.empty()) {
+        return false;
+    }
+
+    vector<pIoTServerDB::numericValueSnapshot_t> vars;
+
+    if(!_db.createValueSnapshot(&vars)) {
+        return false;
+    }
+
+    double result = 0;
+
+    if(!evaluateExpression(expression, vars, result)) {
+        return false;
+    }
+
+    /*
+     * Rule expressions are tests only.
+     *
+     * Do NOT call updateValuesFromSnapShot(vars) here.
+     * Conditions must not mutate DB/device state as a side effect
+     * of being evaluated.
+     */
+    isTrue = (result != 0);
+
+    return true;
+}
+
+
+bool pIoTServerMgr::runActionList(const vector<Action>& actions,
+                                  bool ignoreManualMode,
+                                  bool dontLog,
+                                  const string& ownerLabel,
+                                  EventTrigger* callbackTrigger) {
+
+    bool success = true;
+
+    for(auto action : actions) {
+
+        if(!dontLog) {
+            LOGT_DEBUG("RUN ACTION: %s", action.printString().c_str());
+        }
+
+        if(action.cmd() == Action::JSON_CMD_SET) {
+
+            string key = action.key();
+            string value = action.value();
+
+            if(!ignoreManualMode && _db.isKeyInManualMode(key)) {
+                LOGT_ERROR("%s Could not set key \"%s\" to %s. Manual mode only",
+                           ownerLabel.c_str(),
+                           key.c_str(),
+                           value.c_str());
+                success = false;
+                continue;
+            }
+
+            keyValueMap_t kv;
+            kv[key] = value;
+
+            if(!setValues(kv)) {
+                LOGT_ERROR("%s FAILED TO SET %s = %s @runActionList line %d",
+                           ownerLabel.c_str(),
+                           key.c_str(),
+                           value.c_str(),
+                           __LINE__);
+                success = false;
+            }
+        }
+        else if(action.cmd() == Action::JSON_CMD_RUN_SEQ) {
+
+            string str = action.key();
+            sequenceID_t sid;
+
+            if(str_to_SequenceID(str.c_str(), &sid) && _db.sequenceIDIsValid(sid)) {
+                if(!startRunningSequence(sid)) {
+                    success = false;
+                }
+            }
+            else {
+                LOGT_ERROR("%s RUN_SEQ failed: invalid sequence \"%s\"",
+                           ownerLabel.c_str(),
+                           str.c_str());
+                success = false;
+            }
+        }
+        else if(action.cmd() == Action::JSON_CMD_EVAL) {
+
+            string expression = action.expression();
+
+            vector<pIoTServerDB::numericValueSnapshot_t> vars;
+
+            if(_db.createValueSnapshot(&vars)) {
+                double result = 0;
+
+                if(evaluateExpression(expression, vars, result)) {
+                    if(!updateValuesFromSnapShot(vars)) {
+                        success = false;
+                    }
+                }
+                else {
+                    success = false;
+                }
+            }
+            else {
+                success = false;
+            }
+        }
+        else if(action.cmd() == Action::JSON_CMD_LOG) {
+
+            string detail = action.value();
+
+            IncidentMgr::shared()->notice(
+                "SYSTEM",
+                "LOG_MESSAGE",
+                "piotserver",
+                detail.empty() ? nullptr : detail.c_str()
+            );
+
+            LOGT_INFO("LOG_MESSAGE \"%s\"", detail.c_str());
+        }
+        else if((action.cmd() == Action::JSON_CMD_CALLBACK)
+                && action.isCallBack()) {
+
+            /*
+             * Sequence callbacks have an EventTrigger.
+             * Rule callbacks probably should not use this path until
+             * we define a Rule callback context.
+             */
+            if(callbackTrigger) {
+                if(!action.invokeCallBack(*callbackTrigger)) {
+                    success = false;
+                }
+            }
+            else {
+                LOGT_ERROR("%s CALLBACK action skipped: no callback trigger context",
+                           ownerLabel.c_str());
+                success = false;
+            }
+        }
+        else if(action.cmd() == Action::JSON_CMD_DEVICE_ACTION) {
+
+            string key = action.key();
+            string value = action.value();
+
+            pIoTServerDevice* device = deviceForActionKey(key);
+
+            if(device == nullptr) {
+                LOGT_ERROR("%s DEVICE_ACTION failed: no device found for key \"%s\"",
+                           ownerLabel.c_str(),
+                           key.c_str());
+                success = false;
+                continue;
+            }
+
+            if(!device->deviceAction(value)) {
+                LOGT_ERROR("%s DEVICE_ACTION failed: key \"%s\" value \"%s\"",
+                           ownerLabel.c_str(),
+                           key.c_str(),
+                           value.c_str());
+                success = false;
+            }
+        }
+        else {
+            LOGT_ERROR("%s Unknown action command \"%s\"",
+                       ownerLabel.c_str(),
+                       action.cmd().c_str());
+            success = false;
+        }
+    }
+
+    return success;
+}
 
 // MARK: -   EsyBox Pump
 

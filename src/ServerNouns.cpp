@@ -2994,6 +2994,354 @@ static void Incidents_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
     }
 }
 
+
+// MARK: -  RULE NOUN HANDLERS
+
+
+
+static bool Rule_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                                     REST_URL url,
+                                     [[maybe_unused]] TCPClientInfo cInfo,
+                                     ServerCmdQueue::cmdCallback_t completion) {
+    using namespace rest;
+
+    auto path = url.path();
+    auto queries = url.queries();
+    auto headers = url.headers();
+    json reply;
+
+    auto pIoTServer = pIoTServerMgr::shared();
+    auto db = pIoTServer->getDB();
+
+     vector<ruleID_t> rids;
+
+     if(queries.size() == 0){
+         rids = db->allruleIDs();
+     }
+     else {
+         for (std::string const& key : std::views::keys(queries)){
+             ruleID_t rid;
+             if(str_to_RuleID(key.c_str(), &rid))
+                 rids.push_back(rid);
+         }
+     }
+
+    json allRules;
+
+    for(auto rid : rids){
+        json js = db->ruleJSON(rid);
+        if(!js.is_null()){
+            string ridStr = to_hex<unsigned short>(rid);
+            allRules[ridStr] = js;
+            }
+    }
+
+
+    reply[string(PROP_ARG_RULE_IDS)] = allRules;
+
+    makeStatusJSON(reply, STATUS_OK);
+    (completion)(reply, STATUS_OK);
+    return false;
+}
+
+
+static bool Rule_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                                        REST_URL url,
+                                        [[maybe_unused]] TCPClientInfo cInfo,
+                                        ServerCmdQueue::cmdCallback_t completion) {
+    using namespace rest;
+    auto path = url.path();
+    auto queries = url.queries();
+    auto headers = url.headers();
+
+    json reply;
+
+    ServerCmdArgValidator v1;
+    auto pIoTServer = pIoTServerMgr::shared();
+    auto db = pIoTServer->getDB();
+
+    ruleID_t rid;
+
+    if( !str_to_RuleID(path.at(1).c_str(), &rid) || !db->ruleIDIsValid(rid))
+        return false;
+
+    if(path.size() == 2) {
+        if(db->ruleDelete(rid)){
+            makeStatusJSON(reply,STATUS_NO_CONTENT);
+            (completion) (reply, STATUS_NO_CONTENT);
+        }
+        else {
+            reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
+            makeStatusJSON(reply, STATUS_BAD_REQUEST, "Delete Failed" );;
+            (completion) (reply, STATUS_BAD_REQUEST);
+        }
+        return true;
+
+    }
+    return false;
+}
+
+
+static bool Rule_NounHandler_POST([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                                      REST_URL url,
+                                      [[maybe_unused]] TCPClientInfo cInfo,
+                                      ServerCmdQueue::cmdCallback_t completion) {
+    using namespace rest;
+    auto path = url.path();
+    auto queries = url.queries();
+    auto headers = url.headers();
+
+    json reply;
+
+    ServerCmdArgValidator v1;
+
+    auto pIoTServer = pIoTServerMgr::shared();
+    auto db = pIoTServer->getDB();
+
+    if(path.size() == 1) {
+        // Create event
+
+        ruleID_t rid;
+
+        Rule rule = Rule(url.body());
+        if(rule.isValid()
+           && db->ruleSave(rule, &rid)) {
+               reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
+               reply[string(JSON_ARG_NAME)] = rule.name();
+               makeStatusJSON(reply,STATUS_OK);
+               (completion) (reply, STATUS_OK);
+            return true;
+        }
+
+        makeStatusJSON(reply, STATUS_BAD_REQUEST, "Create Sequence Failed" );;
+        (completion) (reply, STATUS_BAD_REQUEST);
+        return true;
+    }
+
+    return false;
+}
+
+
+static bool Rule_NounHandler_PATCH([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                                       REST_URL url,
+                                       [[maybe_unused]] TCPClientInfo cInfo,
+                                       ServerCmdQueue::cmdCallback_t completion) {
+    using namespace rest;
+
+    auto path = url.path();
+    auto queries = url.queries();
+    auto headers = url.headers();
+
+    json reply;
+
+    ServerCmdArgValidator v1;
+    auto pIoTServer = pIoTServerMgr::shared();
+     auto db = pIoTServer->getDB();
+
+       if(path.size() == 2) {
+            ruleID_t rid;
+
+            if( !str_to_RuleID(path.at(1).c_str(), &rid)
+                || !db->ruleIDIsValid(rid))
+                  return false;
+
+
+           bool failed = false;
+           bool success = false;
+
+           bool  abort = false;
+           if(v1.getBoolFromJSON(JSON_ARG_ABORT, url.body(), abort)){
+
+               if(pIoTServer->abortRule(rid)){
+                 reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
+                 reply[JSON_ARG_ABORT] = true;
+                success = true;
+               }
+               else
+               {
+                   failed = true;
+               }
+           }
+           else {
+
+               // set name
+               string newName;
+               if(v1.getStringFromJSON(JSON_ARG_NAME, url.body(), newName)){
+                   if(db->ruleSetName(rid, newName)) {
+                       reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
+                       reply[string(JSON_ARG_NAME)] = newName;
+                       success = true;
+                   }
+                   else {
+                       failed = true;
+                   }
+               }
+
+               // set Description
+               string newDescr;
+               if(v1.getStringFromJSON(PROP_DESCRIPTION, url.body(), newDescr)){
+                   if(db->ruleSetDescription(rid, newDescr)) {
+                       reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
+                       reply[string(PROP_DESCRIPTION)] = newDescr;
+                       success = true;
+                   }
+                   else {
+                       failed = true;
+                   }
+               }
+
+               bool  enable = false;
+               if(v1.getBoolFromJSON(JSON_ARG_ENABLE, url.body(), enable)){
+                   if(db->ruleSetEnable(rid, enable)) {
+                        reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
+                        reply[JSON_ARG_ENABLE] = enable;
+                        success = true;
+                   }
+                   else {
+                       failed = true;
+                   }
+               }
+           }
+
+           if(success) {
+               makeStatusJSON(reply,STATUS_OK);
+               (completion) (reply, STATUS_OK);
+               return true;
+           }
+
+           if(failed){
+               reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
+               makeStatusJSON(reply, STATUS_BAD_REQUEST, "Update Failed" );;
+               (completion) (reply, STATUS_BAD_REQUEST);
+               return true;
+           }
+
+           reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
+           makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                          "Body Invalid",
+                          "Body missing argument",
+                          url.pathString());
+           (completion) (reply, STATUS_BAD_REQUEST);
+
+           return true;
+      }
+    return false;
+}
+
+
+static bool Rule_NounHandler_PUT([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                                     REST_URL url,
+                                     [[maybe_unused]] TCPClientInfo cInfo,
+                                     ServerCmdQueue::cmdCallback_t completion) {
+
+        using namespace rest;
+        auto path = url.path();
+        auto queries = url.queries();
+        auto headers = url.headers();
+
+        json reply;
+
+        ServerCmdArgValidator v1;
+        auto pIoTServer = pIoTServerMgr::shared();
+        auto db = pIoTServer->getDB();
+
+        if(path.size() == 1) {
+
+            ruleID_t rid;
+            string str;
+
+            if(v1.getStringFromJSON(PROP_ARG_RULE_ID, url.body(), str)){
+
+                if( !str_to_RuleID(str.c_str(), &rid) || !db->ruleIDIsValid(rid))
+                    return false;
+
+                if(db->ruleIsActive(rid)){
+                    reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
+                    makeStatusJSON(reply, STATUS_CONFLICT, "Conflict", "Rule is already active.");
+                    (completion) (reply, STATUS_CONFLICT);
+                    return true;
+                }
+
+                bool queued = pIoTServer->triggerRule(rid);
+
+                if(queued){
+                    reply[string(JSON_ARG_SEQUENCE_ID)] = RuleID_to_string(rid);
+
+                    makeStatusJSON(reply,STATUS_OK);
+                    (completion) (reply, STATUS_OK);
+                }
+                else{
+                    makeStatusJSON(reply, STATUS_BAD_REQUEST, "URL Invalid", "The value key provided was malformed or null");
+                    (completion) (reply, STATUS_BAD_REQUEST);
+
+                }
+            }
+        }
+
+
+
+    makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                   "Body Invalid",
+                   "Body missing argument",
+                   url.pathString());
+    (completion) (reply, STATUS_BAD_REQUEST);
+
+    return true;
+
+}
+
+
+static void Rule_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                                  REST_URL url,
+                                  [[maybe_unused]] TCPClientInfo cInfo,
+                                  ServerCmdQueue::cmdCallback_t completion) {
+    using namespace rest;
+    json reply;
+
+    auto path = url.path();
+    auto queries = url.queries();
+    auto headers = url.headers();
+    string noun;
+
+    bool isValidURL = false;
+
+    if(path.size() > 0) {
+        noun = path.at(0);
+    }
+
+    switch(url.method()){
+        case HTTP_GET:
+            isValidURL = Rule_NounHandler_GET(cmdQueue,url,cInfo, completion);
+            break;
+
+        case HTTP_PUT:
+            isValidURL = Rule_NounHandler_PUT(cmdQueue,url,cInfo, completion);
+            break;
+
+        case HTTP_PATCH:
+            isValidURL = Rule_NounHandler_PATCH(cmdQueue,url,cInfo, completion);
+            break;
+
+        case HTTP_POST:
+            isValidURL = Rule_NounHandler_POST(cmdQueue,url,cInfo, completion);
+            break;
+
+        case HTTP_DELETE:
+            isValidURL = Rule_NounHandler_DELETE(cmdQueue,url,cInfo, completion);
+            break;
+
+        default:
+            (completion) (reply, STATUS_INVALID_METHOD);
+            return;
+    }
+
+    if(!isValidURL) {
+        (completion) (reply, STATUS_NOT_FOUND);
+    }
+
+}
+
+
 // MARK: -  register server nouns
 
 void registerServerNouns() {
@@ -3021,6 +3369,8 @@ void registerServerNouns() {
     cmdQueue->registerNoun(NOUN_INCIDENTS,  Incidents_NounHandler);
 
     cmdQueue->registerNoun(NOUN_PING,      Ping_NounHandler);
+
+    cmdQueue->registerNoun(NOUN_RULES,  Rule_NounHandler);
 
     cmdQueue->registerNoun(NOUN_TEST,  Test_NounHandler);
 
