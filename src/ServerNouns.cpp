@@ -3113,7 +3113,7 @@ static bool Rule_NounHandler_POST([[maybe_unused]] ServerCmdQueue* cmdQueue,
             return true;
         }
 
-        makeStatusJSON(reply, STATUS_BAD_REQUEST, "Create Sequence Failed" );;
+        makeStatusJSON(reply, STATUS_BAD_REQUEST, "Create Rule Failed" );;
         (completion) (reply, STATUS_BAD_REQUEST);
         return true;
     }
@@ -3249,7 +3249,7 @@ static bool Rule_NounHandler_PUT([[maybe_unused]] ServerCmdQueue* cmdQueue,
                 bool queued = pIoTServer->triggerRule(rid);
 
                 if(queued){
-                    reply[string(JSON_ARG_SEQUENCE_ID)] = RuleID_to_string(rid);
+                    reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
 
                     makeStatusJSON(reply,STATUS_OK);
                     (completion) (reply, STATUS_OK);

@@ -37,7 +37,7 @@
 using namespace nlohmann;
 
 #ifndef PIOTSERVER_VERSION
-#define PIOTSERVER_VERSION "1.2.1 dev 0"
+#define PIOTSERVER_VERSION "1.3.0 "
 #endif
 
 const char* pIoTServerMgr::pIoTServerMgr_Version = PIOTSERVER_VERSION;
