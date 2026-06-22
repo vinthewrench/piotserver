@@ -36,8 +36,8 @@
         }
     ],
     "prop.file.version": {
-        "file.etag": 56,
-        "last_write": 1782083909
+        "file.etag": 63,
+        "last_write": 1782088643
     },
     "rule": [
         {
@@ -65,9 +65,9 @@
                     "value": "Greenhouse temperature normal - fan off"
                 }
             ],
-            "clear_condition": "GREENHOUSE < 28.7",
+            "clear_condition": "c_to_f(GREENHOUSE) < 80",
             "clear_delay": 5,
-            "condition": "GREENHOUSE > 29.0",
+            "condition": "c_to_f(GREENHOUSE) > 81",
             "description": "Turn fan on when greenhouse temperature is high and turn it off when the greenhouse cools down. ",
             "enable": true,
             "name": "Greenhouse fan high temp 1 ",

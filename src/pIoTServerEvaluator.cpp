@@ -4,7 +4,7 @@
 //
 //  Created by vinnie on 1/16/25.
 //
- 
+
 #include "pIoTServerEvaluator.hpp"
 #include "LogMgr.hpp"
 
@@ -13,7 +13,7 @@
 #include <iostream>
 
 using namespace std;
- 
+
 #define exprtk_disable_rtl_io
 #define exprtk_disable_rtl_io_file
 #define exprtk_disable_enhanced_features
@@ -22,60 +22,117 @@ using namespace std;
 
 #include "exprtk.hpp"
 
-bool evaluateExpression(string expr, vector<pIoTServerDB::numericValueSnapshot_t> &vars, double &result){
-    
+/**
+ * Celsius to Fahrenheit converter for ExprTk.
+ *
+ * Usage in expressions:
+ *
+ *   F(GREENHOUSE)
+ *   c_to_f(GREENHOUSE)
+ */
+template <typename T>
+struct c_to_f_function : public exprtk::ifunction<T> {
+
+    c_to_f_function()
+    : exprtk::ifunction<T>(1) {
+    }
+
+    inline T operator()(const T& c) override {
+        return (c * T(9) / T(5)) + T(32);
+    }
+};
+
+/**
+ * Fahrenheit to Celsius converter for ExprTk.
+ *
+ * Usage in expressions:
+ *
+ *   C(81)
+ *   f_to_c(81)
+ */
+template <typename T>
+struct f_to_c_function : public exprtk::ifunction<T> {
+
+    f_to_c_function()
+    : exprtk::ifunction<T>(1) {
+    }
+
+    inline T operator()(const T& f) override {
+        return (f - T(32)) * T(5) / T(9);
+    }
+};
+
+bool evaluateExpression(string expr,
+                        vector<pIoTServerDB::numericValueSnapshot_t> &vars,
+                        double &result) {
+
     bool status = false;
-    
-    using T              = double;
-    
+
+    using T = double;
+
     typedef exprtk::symbol_table<T> symbol_table_t;
     typedef exprtk::expression<T>   expression_t;
     typedef exprtk::parser<T>       parser_t;
-    
+
     symbol_table_t symbol_table;
-    
-    for(auto &s : vars){
+
+    /*
+     * Register pIoTServer numeric values as variables.
+     *
+     * ExprTk binds variables by reference, so mirrorValue must remain valid
+     * until after expression.value() completes.
+     */
+    for(auto &s : vars) {
         s.mirrorValue = s.value;
-        symbol_table.add_variable(s.name , s.value );
+        symbol_table.add_variable(s.name, s.mirrorValue);
     }
+
+    /*
+     * Temperature conversion helper functions.
+     *
+     * These are intentionally small and generic so rules can be written in
+     * human-friendly units while DB/device values remain stored in their
+     * native units.
+     *
+     *   F(x)      Celsius -> Fahrenheit
+     *   C(x)      Fahrenheit -> Celsius
+     *   c_to_f(x) Celsius -> Fahrenheit
+     *   f_to_c(x) Fahrenheit -> Celsius
+     */
+    c_to_f_function<T> c_to_f;
+    f_to_c_function<T> f_to_c;
+
+    symbol_table.add_function("F", c_to_f);
+    symbol_table.add_function("C", f_to_c);
+    symbol_table.add_function("c_to_f", c_to_f);
+    symbol_table.add_function("f_to_c", f_to_c);
+
+    symbol_table.add_constants();
 
     expression_t expression;
     expression.register_symbol_table(symbol_table);
-    
+
     parser_t parser;
-    typedef typename parser_t::dependent_entity_collector::symbol_t symbol_t;
-    std::deque<symbol_t> variable_list;
-     
-    if (!parser.compile(expr, expression))  {
-        
-        LOGT_ERROR("Error: %s  Expression: %s\n",
-                   parser.error().c_str(),
-                   expr.c_str());
-        return false;
-    }
- 
-    auto res =  expression.value();
-    if (!isnan(res)) {
-        result = res;
+
+    if(parser.compile(expr, expression)) {
+        result = expression.value();
         status = true;
     }
-    else if(parser.dec().return_present()){
-        if (expression.return_invoked()){
-            
-            typedef exprtk::results_context<T> results_context_t;
-            const results_context_t& results = expression.results();
-            results.get_scalar(0, result);
+    else {
+        LOGT_ERROR("EXPRTK compile failed: %s", expr.c_str());
 
-//#warning DEBUG  cout << "return "  << result  << endl;
-            status =  true;
+        for(size_t i = 0; i < parser.error_count(); ++i) {
+            typedef exprtk::parser_error::type error_t;
+
+            error_t error = parser.get_error(i);
+
+            LOGT_ERROR("EXPRTK error %zu: position=%zu type=%s diagnostic=%s",
+                       i,
+                       error.token.position,
+                       exprtk::parser_error::to_str(error.mode).c_str(),
+                       error.diagnostic.c_str());
         }
     }
- 
-    if(status){
-        for(auto &e: vars)
-             if(!e.readOnly && (e.value != e.mirrorValue))
-                e.wasUpdated = true;
-    }
-    
+
     return status;
 }

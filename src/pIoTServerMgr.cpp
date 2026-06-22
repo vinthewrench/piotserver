@@ -2259,10 +2259,10 @@ bool pIoTServerMgr::evaluateRulesIfNeeded(time_t localNow) {
         return false;
     }
 
-    LOGT_DEBUG("RULE eval pass: localNow=%lld interval=%llu nextWas=%lld",
-               static_cast<long long>(localNow),
-               static_cast<unsigned long long>(_evalIntervalSec),
-               static_cast<long long>(_nextRuleEvalTime));
+    // LOGT_DEBUG("RULE eval pass: localNow=%lld interval=%llu nextWas=%lld",
+    //            static_cast<long long>(localNow),
+    //            static_cast<unsigned long long>(_evalIntervalSec),
+    //            static_cast<long long>(_nextRuleEvalTime));
 
     _nextRuleEvalTime = localNow + static_cast<time_t>(_evalIntervalSec);
 
@@ -2281,7 +2281,7 @@ bool pIoTServerMgr::evaluateRules(time_t localNow) {
 
     bool didEvaluate = false;
 
-    LOGT_DEBUG("RULE eval: checking %zu rule(s)", rids.size());
+   // LOGT_DEBUG("RULE eval: checking %zu rule(s)", rids.size());
 
     for(auto rid : rids) {
 
@@ -2320,11 +2320,6 @@ bool pIoTServerMgr::evaluateRules(time_t localNow) {
 void pIoTServerMgr::evaluateRuleTriggerSide(ruleID_t rid, time_t localNow) {
 
     string expression = _db.ruleGetCondition(rid);
-
-    LOGT_DEBUG("RULE %04x trigger expr: \"%s\"",
-               rid,
-               expression.c_str());
-
     bool conditionIsTrue = false;
 
     if(!evaluateRuleExpression(expression, conditionIsTrue)) {
@@ -2333,8 +2328,9 @@ void pIoTServerMgr::evaluateRuleTriggerSide(ruleID_t rid, time_t localNow) {
         return;
     }
 
-    LOGT_DEBUG("RULE %04x trigger eval result: %s",
+    LOGT_DEBUG("RULE %04x: \"%s\" =  %s",
                rid,
+               expression.c_str(),
                conditionIsTrue ? "true" : "false");
 
     if(!conditionIsTrue) {
