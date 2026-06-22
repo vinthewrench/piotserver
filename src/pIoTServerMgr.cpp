@@ -2183,22 +2183,6 @@ bool pIoTServerMgr::abortSequence(sequenceID_t sid){
 // Rules
 //
 //
- bool pIoTServerMgr::triggerRule(ruleID_t rid,
-                                         boolCallback_t cb){
-    bool success = _db.triggerRule(rid);
-    if(cb) (cb)(success);
-    return success;
-}
-
-bool pIoTServerMgr::abortRule(ruleID_t rid) {
-
-    /*
-     * Rule abort/clear policy is not wired yet.
-     */
-    (void)rid;
-
-    return true;
-}
 
 
 bool pIoTServerMgr::refreshRuleEvalInterval(){
@@ -2317,7 +2301,8 @@ bool pIoTServerMgr::evaluateRules(time_t localNow) {
 }
 
 
-void pIoTServerMgr::evaluateRuleTriggerSide(ruleID_t rid, time_t localNow) {
+void pIoTServerMgr::evaluateRuleTriggerSide(ruleID_t rid,
+                                            time_t localNow) {
 
     string expression = _db.ruleGetCondition(rid);
     bool conditionIsTrue = false;
@@ -2328,10 +2313,10 @@ void pIoTServerMgr::evaluateRuleTriggerSide(ruleID_t rid, time_t localNow) {
         return;
     }
 
-    LOGT_DEBUG("RULE %04x: \"%s\" =  %s",
-               rid,
-               expression.c_str(),
-               conditionIsTrue ? "true" : "false");
+    // LOGT_DEBUG("RULE %04x: \"%s\" = %s",
+    //            rid,
+    //            expression.c_str(),
+    //            conditionIsTrue ? "true" : "false");
 
     if(!conditionIsTrue) {
         _db.ruleSetConditionTrueSince(rid, 0);
@@ -2360,18 +2345,40 @@ void pIoTServerMgr::evaluateRuleTriggerSide(ruleID_t rid, time_t localNow) {
     uint64_t elapsed = static_cast<uint64_t>(localNow - trueSince);
     uint64_t triggerDelay = _db.ruleGetTriggerDelay(rid);
 
-    // LOGT_DEBUG("RULE %04x trigger true for %llu/%llu sec",
-    //            rid,
-    //            static_cast<unsigned long long>(elapsed),
-    //            static_cast<unsigned long long>(triggerDelay));
-
     if(elapsed < triggerDelay) {
         return;
     }
 
-    LOGT_INFO("RULE %04x TRIGGER qualified; running action[]", rid);
+    fireRule(rid, localNow, false);
+}
 
-    if(!runRuleActions(rid)) {
+bool pIoTServerMgr::fireRule(ruleID_t rid,
+                             time_t localNow,
+                             bool manual) {
+
+    /*
+     * Shared trigger transition.
+     *
+     * Used by:
+     *   - automatic trigger qualification
+     *   - manual trigger
+     *
+     * Manual trigger means the same thing as the trigger condition qualifying:
+     * run action[], latch active, reset timers, and let the normal clear side
+     * handle clear_condition on later evaluation passes.
+     *
+     * Action failure does not prevent the active latch from being set.
+     * Otherwise a failed action can cause the rule to fire repeatedly every
+     * evaluation pass.
+     */
+
+    LOGT_INFO("RULE %04x %sTRIGGER qualified; running action[]",
+              rid,
+              manual ? "MANUAL " : "");
+
+    bool success = runRuleActions(rid);
+
+    if(!success) {
         LOGT_ERROR("RULE %04x action failed; setting rule active anyway", rid);
     }
 
@@ -2381,6 +2388,36 @@ void pIoTServerMgr::evaluateRuleTriggerSide(ruleID_t rid, time_t localNow) {
     _db.ruleSetClearTrueSince(rid, 0);
 
     LOGT_INFO("RULE %04x ACTIVE", rid);
+
+    return success;
+}
+
+bool pIoTServerMgr::triggerRule(ruleID_t rid) {
+
+    /*
+     * Manual trigger means:
+     *
+     *   behave as if the trigger condition qualified right now.
+     *
+     * It does not evaluate condition.
+     * It does not wait for trigger_delay.
+     * It runs action[] and latches the rule active.
+     *
+     * Once active, the normal automatic clear side will evaluate
+     * clear_condition and eventually run clear_action[].
+     */
+
+    if(!_db.ruleIDIsValid(rid)) {
+        LOGT_ERROR("RULE %04x manual trigger failed: invalid rule id", rid);
+        return false;
+    }
+
+    if(!_db.ruleIsEnabled(rid)) {
+        LOGT_ERROR("RULE %04x manual trigger failed: rule disabled", rid);
+        return false;
+    }
+
+    return fireRule(rid, time(nullptr), true);
 }
 
 
@@ -2418,9 +2455,9 @@ void pIoTServerMgr::evaluateRuleClearSide(ruleID_t rid, time_t localNow) {
 
     if(!expression.empty()) {
 
-        LOGT_DEBUG("RULE %04x clear expr: \"%s\"",
-                   rid,
-                   expression.c_str());
+        // LOGT_DEBUG("RULE %04x clear expr: \"%s\"",
+        //            rid,
+        //            expression.c_str());
 
         if(!evaluateRuleExpression(expression, clearIsTrue)) {
             LOGT_DEBUG("RULE %04x clear eval invalid; reset clearTrueSince", rid);
@@ -2478,10 +2515,10 @@ void pIoTServerMgr::evaluateRuleClearSide(ruleID_t rid, time_t localNow) {
     uint64_t elapsed = static_cast<uint64_t>(localNow - trueSince);
     uint64_t clearDelay = _db.ruleGetClearDelay(rid);
 
-    LOGT_DEBUG("RULE %04x clear true for %llu/%llu sec",
-               rid,
-               static_cast<unsigned long long>(elapsed),
-               static_cast<unsigned long long>(clearDelay));
+    // LOGT_DEBUG("RULE %04x clear true for %llu/%llu sec",
+    //            rid,
+    //            static_cast<unsigned long long>(elapsed),
+    //            static_cast<unsigned long long>(clearDelay));
 
     if(elapsed < clearDelay) {
         return;

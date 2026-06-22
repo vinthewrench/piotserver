@@ -3149,57 +3149,41 @@ static bool Rule_NounHandler_PATCH([[maybe_unused]] ServerCmdQueue* cmdQueue,
            bool failed = false;
            bool success = false;
 
-           bool  abort = false;
-           if(v1.getBoolFromJSON(JSON_ARG_ABORT, url.body(), abort)){
-
-               if(pIoTServer->abortRule(rid)){
-                 reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
-                 reply[JSON_ARG_ABORT] = true;
-                success = true;
+           // set name
+           string newName;
+           if(v1.getStringFromJSON(JSON_ARG_NAME, url.body(), newName)){
+               if(db->ruleSetName(rid, newName)) {
+                   reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
+                   reply[string(JSON_ARG_NAME)] = newName;
+                   success = true;
                }
-               else
-               {
+               else {
                    failed = true;
                }
            }
-           else {
 
-               // set name
-               string newName;
-               if(v1.getStringFromJSON(JSON_ARG_NAME, url.body(), newName)){
-                   if(db->ruleSetName(rid, newName)) {
-                       reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
-                       reply[string(JSON_ARG_NAME)] = newName;
-                       success = true;
-                   }
-                   else {
-                       failed = true;
-                   }
+           // set Description
+           string newDescr;
+           if(v1.getStringFromJSON(PROP_DESCRIPTION, url.body(), newDescr)){
+               if(db->ruleSetDescription(rid, newDescr)) {
+                   reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
+                   reply[string(PROP_DESCRIPTION)] = newDescr;
+                   success = true;
                }
-
-               // set Description
-               string newDescr;
-               if(v1.getStringFromJSON(PROP_DESCRIPTION, url.body(), newDescr)){
-                   if(db->ruleSetDescription(rid, newDescr)) {
-                       reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
-                       reply[string(PROP_DESCRIPTION)] = newDescr;
-                       success = true;
-                   }
-                   else {
-                       failed = true;
-                   }
+               else {
+                   failed = true;
                }
+           }
 
-               bool  enable = false;
-               if(v1.getBoolFromJSON(JSON_ARG_ENABLE, url.body(), enable)){
-                   if(db->ruleSetEnable(rid, enable)) {
-                        reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
-                        reply[JSON_ARG_ENABLE] = enable;
-                        success = true;
-                   }
-                   else {
-                       failed = true;
-                   }
+           bool  enable = false;
+           if(v1.getBoolFromJSON(JSON_ARG_ENABLE, url.body(), enable)){
+               if(db->ruleSetEnable(rid, enable)) {
+                    reply[string(PROP_ARG_RULE_ID)] = RuleID_to_string(rid);
+                    reply[JSON_ARG_ENABLE] = enable;
+                    success = true;
+               }
+               else {
+                   failed = true;
                }
            }
 

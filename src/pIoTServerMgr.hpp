@@ -153,10 +153,7 @@ public:
     bool updateValuesFromSnapShot(vector<pIoTServerDB::numericValueSnapshot_t> & snapshot);
 
 
-    bool triggerRule(ruleID_t rid,
-                        boolCallback_t callback = NULL);
-
-    bool abortRule(ruleID_t sid);
+    bool triggerRule(ruleID_t rid);
 
 
 private:
@@ -199,6 +196,7 @@ private:
     bool evaluateRulesIfNeeded(time_t localNow);
     bool evaluateRules(time_t localNow);
 
+    bool fireRule(ruleID_t rid, time_t localNow, bool manual);
     void evaluateRuleTriggerSide(ruleID_t rid, time_t localNow);
     void evaluateRuleClearSide(ruleID_t rid, time_t localNow);
 
