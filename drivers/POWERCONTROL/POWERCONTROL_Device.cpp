@@ -327,6 +327,12 @@ bool POWERCONTROL_Device::getValues(keyValueMap_t &results)
                     nullptr,
                     "POWERCONTROL AC_OK bit returned false"
                 );
+
+                IncidentMgr::shared()->notify(
+                    "Farm Power Alert",
+                    "AC power lost. Farm is running on battery.",
+                    IncidentMgr::Severity::Critical
+                );
             }
 
             _lastAcOK = data.acOK;

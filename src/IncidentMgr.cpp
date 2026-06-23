@@ -4,6 +4,7 @@
 
 #include "IncidentMgr.hpp"
 #include "pIoTServerDB.hpp"
+#include "NotificationMgr.hpp"
 #include "LogMgr.hpp"
 
 IncidentMgr* IncidentMgr::_sharedInstance = nullptr;
@@ -114,4 +115,12 @@ bool IncidentMgr::clear(const std::string& source,
                               key,
                               message,
                               details);
+}
+
+bool IncidentMgr::notify(const std::string& title,
+                         const std::string& message,
+                         Severity severity) {
+    return NotificationMgr::shared()->enqueueNotification(title,
+                                                          message,
+                                                          severity);
 }

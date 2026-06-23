@@ -11,6 +11,12 @@
 #
 #     lib/libpiotcore.so
 #
+# Build dependencies on Raspberry Pi OS / Debian:
+#
+#     sudo apt install clang make git sqlite3 libsqlite3-dev libcurl4-openssl-dev
+#
+# libcurl is required by NotificationMgr for Pushover HTTPS notifications.
+#
 # Useful commands:
 #
 #     make -j4              Build app, shared core, and plugins in parallel, then strip products.
@@ -22,6 +28,8 @@
 #     make clean            Remove app, shared core, app objects, plugin objects, and plugin products.
 #     make clean-plugins    Clean only plugin object directories and plugin products.
 #     make distclean        Remove clean products plus generated auxiliary files.
+#
+
 
 APP_NAME := piotserver
 APP_VERSION := 1.5.0-field
@@ -63,6 +71,7 @@ LDFLAGS :=
 
 LDLIBS := \
 	-lsqlite3 \
+	-lcurl	\
 	-pthread
 
 ifeq ($(UNAME_S),Darwin)
@@ -114,6 +123,7 @@ CPP_SOURCES := \
 	$(SRC_DIR)/GPIO.cpp \
 	$(SRC_DIR)/IncidentMgr.cpp \
 	$(SRC_DIR)/lunar.cpp \
+	$(SRC_DIR)/NotificationMgr.cpp \
 	$(SRC_DIR)/main.cpp \
 	$(SRC_DIR)/pIoTServerAPISecretMgr.cpp \
 	$(SRC_DIR)/pIoTServerDB_Core.cpp \

@@ -37,6 +37,7 @@ public:
     constexpr static string_view JSON_CMD_RUN_SEQ     = "RUN.SEQUENCE";
     constexpr static string_view JSON_CMD_EVAL          = "EVAL";
     constexpr static string_view JSON_CMD_LOG          = "LOG";
+    constexpr static string_view JSON_CMD_NOTIFY        = "NOTIFY";
     constexpr static string_view JSON_CMD_DEVICE_ACTION = "DEVICE_ACTION";
 
     constexpr static string_view JSON_CMD_CALLBACK      = "<callback>";

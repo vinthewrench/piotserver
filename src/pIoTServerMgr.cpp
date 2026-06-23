@@ -23,6 +23,7 @@
 
 #include "pIoTServerMgr.hpp"
 #include "IncidentMgr.hpp"
+#include "NotificationMgr.hpp"
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
 #include "Utils.hpp"
@@ -615,6 +616,7 @@ void pIoTServerMgr::start(){
         loadGlobalValues();
 
         IncidentMgr::shared()->begin(&_db);
+        NotificationMgr::shared()->begin(&_db);
 
         IncidentMgr::shared()->notice(
                "SYSTEM",
@@ -722,6 +724,8 @@ void pIoTServerMgr::stop()
     if(!stopDevices()) {
         LOGT_ERROR("One or more devices failed during shutdown");
     }
+
+    NotificationMgr::shared()->stop();
 
     IncidentMgr::shared()->notice(
         "SYSTEM",
@@ -1721,7 +1725,7 @@ bool pIoTServerMgr::processEvents(){
                 }// DEBUG
 
 
-                runSequenceStep(sid, stepNo, [=, this]( bool didSucceed){
+                runSequenceStep(sid, stepNo, [=, this]( [[maybe_unused]] bool didSucceed){
 
                    _db.sequenceSetRunning(sid, true);
 
@@ -1729,20 +1733,19 @@ bool pIoTServerMgr::processEvents(){
                     struct tm* tm = localtime(&now);
                     time_t localNow  = (now + tm->tm_gmtoff);
 
-                    if(didSucceed){
-                        if(_db.sequenceCompletedStep(sid, stepNo, localNow)){
+                    if(_db.sequenceCompletedStep(sid, stepNo, localNow)){
 //                                           printf("Sequence: %04x, Step:%d  - completed -\n", sid, stepNo);
-                        }
-                        else {
-                            // we completed..
-                            _db.sequenceSetRunning(sid, false);
-                            _db.sequenceSetLastRunTime(sid, localNow);
-                            if(_db.sequenceIsEphemeral(sid)){
-                               _db.sequenceDelete(sid);
-                            }
-
-                        }
                     }
+                    else {
+                        // we completed..
+                        _db.sequenceSetRunning(sid, false);
+                        _db.sequenceSetLastRunTime(sid, localNow);
+                        if(_db.sequenceIsEphemeral(sid)){
+                            _db.sequenceDelete(sid);
+                        }
+
+                    }
+
                 });
             }
 
@@ -2259,7 +2262,7 @@ bool pIoTServerMgr::evaluateRules(time_t localNow) {
     auto rids = _db.allruleIDs();
 
     if(rids.empty()) {
-        LOGT_DEBUG("RULE eval: no rules configured");
+  //      LOGT_DEBUG("RULE eval: no rules configured");
         return false;
     }
 
@@ -2270,12 +2273,12 @@ bool pIoTServerMgr::evaluateRules(time_t localNow) {
     for(auto rid : rids) {
 
         if(!_db.ruleIDIsValid(rid)) {
-            LOGT_DEBUG("RULE %04x skipped: invalid id", rid);
+    //        LOGT_DEBUG("RULE %04x skipped: invalid id", rid);
             continue;
         }
 
         if(!_db.ruleIsEnabled(rid)) {
-            LOGT_DEBUG("RULE %04x skipped: disabled", rid);
+ //           LOGT_DEBUG("RULE %04x skipped: disabled", rid);
             continue;
         }
 
@@ -2687,6 +2690,25 @@ bool pIoTServerMgr::runActionList(const vector<Action>& actions,
             );
 
             LOGT_INFO("LOG_MESSAGE \"%s\"", detail.c_str());
+        }
+
+        else if(action.cmd() == Action::JSON_CMD_NOTIFY) {
+            string title = action.key();
+            string detail = action.value();
+
+            if(title.empty()) {
+                title = "Farm Notification";
+            }
+
+            if(detail.empty()) {
+                detail = "pIoTServer notification";
+            }
+
+            IncidentMgr::shared()->notify(title,
+                                          detail,
+                                          IncidentMgr::Severity::Notice);
+
+            LOGT_INFO("NOTIFY_MESSAGE \"%s\"", detail.c_str());
         }
         else if((action.cmd() == Action::JSON_CMD_CALLBACK)
                 && action.isCallBack()) {

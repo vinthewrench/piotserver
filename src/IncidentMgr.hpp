@@ -45,6 +45,10 @@ public:
                const char* message = nullptr,
                const char* details = nullptr);
 
+    bool notify(const std::string& title,
+                const std::string& message,
+                Severity severity);
+
 private:
     IncidentMgr();
 
