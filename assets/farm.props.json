@@ -8,7 +8,13 @@
         ],
         "description": "The Stella Porta Irrigation System V3.0",
         "lat_long": "34.465338, -93.362827",
-        "name": "Stella Porta Farm"
+        "name": "Stella Porta Farm",
+        "notifications.default_url": "https://farm.stellaporta.cloud/system.html",
+        "notifications.default_url_title": "Open Farm",
+        "notifications.enabled": "true",
+        "notifications.min_severity": "info",
+        "notifications.pushover.token": "akfj5ggreby9f31o8v2fuf7s5bpapv",
+        "notifications.pushover.user": "u2honibns57sf3q1eas7osr23spz3q"
     },
     "devices": [
         {
@@ -391,9 +397,36 @@
         "SPRK_9"
     ],
     "prop.file.version": {
-        "file.etag": 1036,
-        "last_write": 1781993194
+        "file.etag": 1107,
+        "last_write": 1782250657
     },
+    "rule": [
+        {
+            "action": [
+                {
+                    "cmd": "LOG",
+                    "key": "CPU_TEMPERATURE",
+                    "value": "CPU temperature high"
+                }
+            ],
+            "clear_action": [
+                {
+                    "cmd": "LOG",
+                    "key": "CPU_TEMPERATURE",
+                    "value": "CPU temperature normal"
+                }
+            ],
+            "clear_condition": "CPU_TEMPERATURE < 70",
+            "clear_delay": 60,
+            "condition": "CPU_TEMPERATURE > 75",
+            "description": "Log when CPU temperature is too high and log again when it returns to normal.",
+            "enable": true,
+            "name": "CPU temperature high",
+            "override_manualmode": false,
+            "ruleID": "67fb",
+            "trigger_delay": 60
+        }
+    ],
     "sequence": [
         {
             "description": "Runs each Valve Master sprinkler zone in sequence and shuts all zones off on abort.",
@@ -748,7 +781,7 @@
         },
         {
             "description": "Turn relay light on at sunset.",
-            "enable": true,
+            "enable": false,
             "name": "Lights on at sunset",
             "override_manualmode": true,
             "sequenceID": "4100",

@@ -1,0 +1,46 @@
+{
+    "config": {
+        "access_keys": [
+            {
+                "api_key": "test",
+                "api_secret": "12345678"
+            }
+        ],
+        "description": "The Stella Porta Irrigation System V3.0",
+        "lat_long": "34.465338, -93.362827",
+        "name": "Stella Porta Farm",
+        "notifications.default_url": "https://farm.stellaporta.cloud/system.html",
+        "notifications.default_url_title": "Open Farm",
+        "notifications.enabled": "true",
+        "notifications.min_severity": "info",
+        "notifications.pushover.token": "akfj5ggreby9f31o8v2fuf7s5bpapv",
+        "notifications.pushover.user": "u2honibns57sf3q1eas7osr23spz3q"
+    },
+    "prop.file.version": {
+        "file.etag": 71,
+        "last_write": 1782250090
+    },
+    "sequence": [
+        {
+            "description": "Notify a thing",
+            "enable": true,
+            "name": "pester the user",
+            "override_manualmode": false,
+            "sequenceID": "0001",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "NOTIFY",
+                            "key": "StellaPorta Farm System ",
+                            "value": "just a message "
+                        }
+                    ]
+                }
+            ],
+            "trigger": {
+                "event": "manual"
+            }
+        }
+    ]
+}
