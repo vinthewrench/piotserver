@@ -62,13 +62,11 @@ struct f_to_c_function : public exprtk::ifunction<T> {
     }
 };
 
-bool evaluateExpression(string expr,
-                        vector<pIoTServerDB::numericValueSnapshot_t> &vars,
-                        double &result) {
+bool evaluateExpression(string expr, vector<pIoTServerDB::numericValueSnapshot_t> &vars, double &result){
 
     bool status = false;
 
-    using T = double;
+    using T              = double;
 
     typedef exprtk::symbol_table<T> symbol_table_t;
     typedef exprtk::expression<T>   expression_t;
@@ -76,18 +74,12 @@ bool evaluateExpression(string expr,
 
     symbol_table_t symbol_table;
 
-    /*
-     * Register pIoTServer numeric values as variables.
-     *
-     * ExprTk binds variables by reference, so mirrorValue must remain valid
-     * until after expression.value() completes.
-     */
-    for(auto &s : vars) {
+    for(auto &s : vars){
         s.mirrorValue = s.value;
-        symbol_table.add_variable(s.name, s.mirrorValue);
+        symbol_table.add_variable(s.name , s.value );
     }
 
-    /*
+ /*
      * Temperature conversion helper functions.
      *
      * These are intentionally small and generic so rules can be written in
@@ -107,31 +99,42 @@ bool evaluateExpression(string expr,
     symbol_table.add_function("c_to_f", c_to_f);
     symbol_table.add_function("f_to_c", f_to_c);
 
-    symbol_table.add_constants();
-
     expression_t expression;
     expression.register_symbol_table(symbol_table);
 
     parser_t parser;
+    typedef typename parser_t::dependent_entity_collector::symbol_t symbol_t;
+    std::deque<symbol_t> variable_list;
 
-    if(parser.compile(expr, expression)) {
-        result = expression.value();
+    if (!parser.compile(expr, expression))  {
+
+        LOGT_ERROR("Error: %s  Expression: %s\n",
+                   parser.error().c_str(),
+                   expr.c_str());
+        return false;
+    }
+
+    auto res =  expression.value();
+    if (!isnan(res)) {
+        result = res;
         status = true;
     }
-    else {
-        LOGT_ERROR("EXPRTK compile failed: %s", expr.c_str());
+    else if(parser.dec().return_present()){
+        if (expression.return_invoked()){
 
-        for(size_t i = 0; i < parser.error_count(); ++i) {
-            typedef exprtk::parser_error::type error_t;
+            typedef exprtk::results_context<T> results_context_t;
+            const results_context_t& results = expression.results();
+            results.get_scalar(0, result);
 
-            error_t error = parser.get_error(i);
-
-            LOGT_ERROR("EXPRTK error %zu: position=%zu type=%s diagnostic=%s",
-                       i,
-                       error.token.position,
-                       exprtk::parser_error::to_str(error.mode).c_str(),
-                       error.diagnostic.c_str());
+//#warning DEBUG  cout << "return "  << result  << endl;
+            status =  true;
         }
+    }
+
+    if(status){
+        for(auto &e: vars)
+             if(!e.readOnly && (e.value != e.mirrorValue))
+                e.wasUpdated = true;
     }
 
     return status;
