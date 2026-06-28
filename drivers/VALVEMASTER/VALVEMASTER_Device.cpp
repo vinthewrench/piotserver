@@ -61,6 +61,8 @@
 #include <cctype>
 #include <climits>
 #include <cstdint>
+#include <cctype>
+#include <cstdio>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -837,6 +839,86 @@ bool VALVEMASTER_Device::runQueuedCommandWithRetries(
 {
     const uint32_t attempts = std::max<uint32_t>(1, _retryCount);
 
+    auto incidentValueForField = [](const string& details, const string& fieldName) -> string {
+        const string prefix = fieldName + "=";
+
+        size_t pos = details.find(prefix);
+        if(pos == string::npos) {
+            return "";
+        }
+
+        pos += prefix.length();
+
+        while(pos < details.length() &&
+              std::isspace(static_cast<unsigned char>(details[pos]))) {
+            pos++;
+        }
+
+        if(pos >= details.length()) {
+            return "";
+        }
+
+        string value;
+
+        if(details[pos] == '"') {
+            pos++;
+
+            while(pos < details.length()) {
+                char ch = details[pos++];
+
+                if(ch == '\\' && pos < details.length()) {
+                    value.push_back(details[pos++]);
+                    continue;
+                }
+
+                if(ch == '"') {
+                    break;
+                }
+
+                value.push_back(ch);
+            }
+        } else {
+            size_t end = pos;
+
+            while(end < details.length() &&
+                  !std::isspace(static_cast<unsigned char>(details[end]))) {
+                end++;
+            }
+
+            value = details.substr(pos, end - pos);
+        }
+
+        return value;
+    };
+
+    auto recoveredIncidentKey = [&]() -> string {
+        string valveKey = incidentValueForField(incidentDetails, "key");
+
+        if(!valveKey.empty()) {
+            return valveKey;
+        }
+
+        return commandName;
+    };
+
+    auto recoveredIncidentDetails = [&](uint32_t attempt) -> string {
+        string details =
+            "tried=" + std::to_string(attempt) +
+            "/" + std::to_string(attempts);
+
+        string node = incidentValueForField(incidentDetails, "node");
+        string channel = incidentValueForField(incidentDetails, "channel");
+
+        if(!node.empty() && !channel.empty()) {
+            details += " node=";
+            details += node;
+            details += "/";
+            details += channel;
+        }
+
+        return details;
+    };
+
     for(uint32_t attempt = 1; attempt <= attempts; attempt++) {
         if(attempts > 1) {
             LOGT_DEBUG("VALVEMASTER_Device command \"%s\" attempt %u/%u",
@@ -851,28 +933,23 @@ bool VALVEMASTER_Device::runQueuedCommandWithRetries(
 
         if(ok) {
             if(attempt > 1) {
-                string details =
-                    "command=" + commandName +
-                    " attempts=" + std::to_string(attempt) +
-                    " max_attempts=" + std::to_string(attempts);
-
-                if(!incidentDetails.empty()) {
-                    details += " ";
-                    details += incidentDetails;
-                }
+                const string incidentKey = recoveredIncidentKey();
+                const string details = recoveredIncidentDetails(attempt);
 
                 IncidentMgr::shared()->notice(
                     _deviceID,
                     "COMMAND_RETRY_RECOVERED",
-                    commandName,
+                    incidentKey,
                     nullptr,
                     details.c_str()
                 );
 
-                LOGT_DEBUG("VALVEMASTER_Device command \"%s\" recovered on attempt %u/%u",
+                LOGT_DEBUG("VALVEMASTER_Device command \"%s\" recovered on attempt %u/%u key=\"%s\" details=\"%s\"",
                            commandName.c_str(),
                            static_cast<unsigned int>(attempt),
-                           static_cast<unsigned int>(attempts));
+                           static_cast<unsigned int>(attempts),
+                           incidentKey.c_str(),
+                           details.c_str());
             }
 
             return true;
