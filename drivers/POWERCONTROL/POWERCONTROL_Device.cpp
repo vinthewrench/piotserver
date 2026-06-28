@@ -317,6 +317,12 @@ bool POWERCONTROL_Device::getValues(keyValueMap_t &results)
                     nullptr,
                     "POWERCONTROL AC_OK bit returned true"
                 );
+
+                IncidentMgr::shared()->notify(
+                        "Farm Power Alert",
+                        "AC power restored. Farm is back on AC power.",
+                        IncidentMgr::Severity::Notice
+                        );
             }
             else {
                 IncidentMgr::shared()->raise(
