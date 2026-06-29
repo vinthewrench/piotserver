@@ -397,6 +397,8 @@ class pIoTServerDB  {
 
     bool removeHistoryBeforeLastIncidentStart(bool inactiveOnly = true);
 
+    bool removeAllIncidents();
+
     // MARK: - utility
 
     string makeNonce();

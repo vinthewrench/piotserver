@@ -744,3 +744,38 @@ bool pIoTServerDB::removeHistoryBeforeLastIncidentStart(bool inactiveOnly) {
 
     return success;
 }
+
+
+bool pIoTServerDB::removeAllIncidents() {
+
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    bool success = false;
+
+    if(!_sdb) {
+        return false;
+    }
+
+    sqlite3_stmt* stmt = NULL;
+
+    string sql = "DELETE FROM INCIDENT;";
+
+    if(sqlite3_prepare_v2(_sdb, sql.c_str(), -1, &stmt, NULL) == SQLITE_OK) {
+
+        if(sqlite3_step(stmt) == SQLITE_DONE) {
+            int count = sqlite3_changes(_sdb);
+            LOGT_DEBUG("sqlite %s\n %d rows affected", sql.c_str(), count);
+            success = true;
+        }
+        else {
+            LOGT_ERROR("sqlite3_step FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb));
+        }
+
+        sqlite3_finalize(stmt);
+    }
+    else {
+        LOGT_ERROR("sqlite3_prepare_v2 FAILED: %s\n\t%s", sql.c_str(), sqlite3_errmsg(_sdb));
+    }
+
+    return success;
+}

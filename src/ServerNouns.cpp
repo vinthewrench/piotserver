@@ -2864,6 +2864,7 @@ static bool Incidents_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQue
     json reply;
     ServerCmdArgValidator v1;
     string str;
+    string scope;
 
     auto pIoTServer = pIoTServerMgr::shared();
     auto db = pIoTServer->getDB();
@@ -2873,28 +2874,70 @@ static bool Incidents_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQue
      *
      * Supported cleanup modes:
      *
-     *   X-PIOT-Incident-Cleanup: previous_runs
-     *      Remove all incident history older than the most recent SERVER_START
-     *      notice. This intentionally removes old active incidents too, because
-     *      they belong to a previous server run and should not survive as
-     *      current-run truth.
+     *   JSON body:
      *
-     *   scope: previous_runs
-     *      Legacy/local fallback for the same behavior.
+     *      {}
+     *          Remove all inactive incident history.
      *
-     *   days: N
-     *      Remove inactive incident history older than N days.
+     *      { "scope": "previous_runs" }
+     *          Remove all incident rows older than the most recent SERVER_START
+     *          notice. This intentionally removes old active incidents too,
+     *          because they belong to a previous server run and should not
+     *          survive as current-run truth.
      *
-     *   no headers
-     *      Remove all inactive incident history.
+     *      { "scope": "days", "days": N }
+     *          Remove inactive incident history older than N days.
      *
-     * Normal cleanup never removes active incidents. The previous_runs cleanup
-     * is different: it removes everything before the most recent SERVER_START.
+     *      { "scope": "all" }
+     *          Hard delete all incident rows, including active incidents.
+     *          This is a dev/admin cleanup operation.
+     *
+     * Legacy/header fallback:
+     *
+     *      X-PIOT-Incident-Cleanup: previous_runs
+     *      scope: previous_runs
+     *      days: N
+     *
+     * New destructive behavior should be carried in the JSON body because the
+     * request body is covered by the HMAC signature.
      */
-    if(v1.getStringFromMap("X-PIOT-Incident-Cleanup", url.headers(), str)
-       || v1.getStringFromMap("scope", url.headers(), str)) {
 
-        if(str == "previous_runs") {
+    /*
+     * url.body() is already parsed JSON in this REST framework.
+     * Do not convert it to string and do not json::parse() it again.
+     */
+    const json& body = url.body();
+
+    if(!body.is_null() && !body.is_object()) {
+        makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                       "Invalid Incident Cleanup",
+                       "DELETE /incidents body must be a JSON object",
+                       url.pathString());
+
+        (completion)(reply, STATUS_BAD_REQUEST);
+        return true;
+    }
+
+    if(v1.getStringFromJSON("scope", body, scope)) {
+
+        if(scope == "all") {
+
+            if(db->removeAllIncidents()) {
+                makeStatusJSON(reply, STATUS_NO_CONTENT);
+                (completion)(reply, STATUS_NO_CONTENT);
+                return true;
+            }
+
+            makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                           "Delete Failed",
+                           "Could not remove all incidents",
+                           url.pathString());
+
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
+
+        if(scope == "previous_runs") {
 
             const bool inactiveOnly = false;
 
@@ -2913,22 +2956,36 @@ static bool Incidents_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQue
             return true;
         }
 
-        makeStatusJSON(reply, STATUS_BAD_REQUEST,
-                       "Invalid Incident Cleanup",
-                       "X-PIOT-Incident-Cleanup must be previous_runs",
-                       url.pathString());
+        if(scope != "days") {
+            makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                           "Invalid Incident Cleanup",
+                           "scope must be all, previous_runs, or days",
+                           url.pathString());
 
-        (completion)(reply, STATUS_BAD_REQUEST);
-        return true;
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
     }
 
     float days = 0.0F;
 
-    if(v1.getStringFromMap(JSON_HDR_DAYS, url.headers(), str)) {
-        char* p = nullptr;
-        days = strtof(str.c_str(), &p);
+    if(scope == "days") {
 
-        if(p == str.c_str() || *p != 0 || days < 0.0F) {
+        /*
+         * Keeping this manual so we do not depend on a validator helper name
+         * I cannot see from here.
+         */
+        if(!body.contains(JSON_HDR_DAYS)) {
+            makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                           "Invalid Days",
+                           "days is required when scope is days",
+                           url.pathString());
+
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
+
+        if(!body[JSON_HDR_DAYS].is_number()) {
             makeStatusJSON(reply, STATUS_BAD_REQUEST,
                            "Invalid Days",
                            "days must be a positive number or zero",
@@ -2936,6 +2993,71 @@ static bool Incidents_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQue
 
             (completion)(reply, STATUS_BAD_REQUEST);
             return true;
+        }
+
+        days = body[JSON_HDR_DAYS].get<float>();
+
+        if(days < 0.0F) {
+            makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                           "Invalid Days",
+                           "days must be a positive number or zero",
+                           url.pathString());
+
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
+    }
+    else if(scope.empty()) {
+
+        /*
+         * Legacy/local fallback for older clients that still pass cleanup
+         * controls as headers. Keep this for compatibility, but do not add
+         * new destructive modes here.
+         */
+        if(v1.getStringFromMap("X-PIOT-Incident-Cleanup", url.headers(), str)
+           || v1.getStringFromMap("scope", url.headers(), str)) {
+
+            if(str == "previous_runs") {
+
+                const bool inactiveOnly = false;
+
+                if(db->removeHistoryBeforeLastIncidentStart(inactiveOnly)) {
+                    makeStatusJSON(reply, STATUS_NO_CONTENT);
+                    (completion)(reply, STATUS_NO_CONTENT);
+                    return true;
+                }
+
+                makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                               "Delete Failed",
+                               "Could not remove incident history from previous runs",
+                               url.pathString());
+
+                (completion)(reply, STATUS_BAD_REQUEST);
+                return true;
+            }
+
+            makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                           "Invalid Incident Cleanup",
+                           "X-PIOT-Incident-Cleanup must be previous_runs",
+                           url.pathString());
+
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
+
+        if(v1.getStringFromMap(JSON_HDR_DAYS, url.headers(), str)) {
+            char* p = nullptr;
+            days = strtof(str.c_str(), &p);
+
+            if(p == str.c_str() || *p != 0 || days < 0.0F) {
+                makeStatusJSON(reply, STATUS_BAD_REQUEST,
+                               "Invalid Days",
+                               "days must be a positive number or zero",
+                               url.pathString());
+
+                (completion)(reply, STATUS_BAD_REQUEST);
+                return true;
+            }
         }
     }
 
