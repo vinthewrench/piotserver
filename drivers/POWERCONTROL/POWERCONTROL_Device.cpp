@@ -13,12 +13,14 @@
 
 #include <errno.h>
 #include <string.h>
+#include <string_view>
 
-constexpr string_view Driver_Version = "1.0.0 dev 4";
+constexpr string_view Driver_Version = "1.0.0 dev 5";
 
 static constexpr const char* KEY_POWER_AC_OK          = "POWER_AC_OK";
 static constexpr const char* KEY_POWER_STATUS         = "POWER_DIAGNOSTIC_STATUS";
 static constexpr const char* KEY_POWER_WAKE_TIMER_MIN = "POWER_WAKE_TIMER_MIN";
+
 
 bool POWERCONTROL_Device::getVersion(string &str)
 {
@@ -43,17 +45,18 @@ POWERCONTROL_Device::POWERCONTROL_Device(string devID, string driverName)
 
     json j = {
         { PROP_DEVICE_MFG_PART, "ATmega88PB Power Controller" },
-        { PROP_DESCRIPTION, "Read-only I2C power controller status interface, one-byte protocol." },
+        { PROP_DESCRIPTION, "I2C power controller status interface with explicit delayed-shutdown command path." },
         { PROP_OTHER, {
             { "i2c_default_address", "0x08" },
-            { "protocol", "one-byte bare read status" },
+            { "protocol", "one-byte bare read status, one-byte explicit command write" },
             { "status_read", "i2ctransfer -y 1 r1@0x08" },
+            { "delayed_shutdown_command", "one-byte write 'S'" },
             { "register_pointer_reads", "disabled" },
             { "repeated_start_reads", "disabled" },
             { "multi_byte_operations", "disabled" },
             { "wake_timer_source", "decoded from status byte bits 4-6" },
             { "relay_control", "disabled" },
-            { "shutdown_control", "disabled" },
+            { "shutdown_control", "explicit deviceAction only" },
             { "wake_timer_control", "disabled" },
             { "led_control", "disabled" }
         }}
@@ -64,8 +67,6 @@ POWERCONTROL_Device::POWERCONTROL_Device(string devID, string driverName)
     _deviceState = DEVICE_STATE_UNKNOWN;
     _isSetup = false;
 }
-
-
 
 POWERCONTROL_Device::~POWERCONTROL_Device()
 {
@@ -148,9 +149,8 @@ bool POWERCONTROL_Device::start()
      * the normal interval delay. Leaving _lastQueryTime at zero causes
      * getValues() to read immediately the first time it is called.
      *
-     * This plugin is read-only during normal operation. It must never send
-     * shutdown, cancel, wake preset, LED, relay, reset, sleep, or all-off
-     * commands to the AVR from start().
+     * start() must never send shutdown, cancel, wake preset, LED, relay, reset,
+     * sleep, or all-off commands to the AVR.
      */
     _lastQueryTime = {0,0};
     _hasLastAcOK = false;
@@ -174,6 +174,9 @@ void POWERCONTROL_Device::stop()
      *
      * It must not write anything to the AVR. Manager shutdown, sequence abort,
      * generic cleanup, and plugin unload are not permission to cut Pi power.
+     *
+     * The delayed shutdown request is only allowed through the explicit
+     * requestDelayedShutdown() / deviceAction("S") path.
      */
     if(_device.isOpen()) {
         _device.stop();
@@ -212,11 +215,14 @@ bool POWERCONTROL_Device::isConnected()
 bool POWERCONTROL_Device::allOff()
 {
     /*
-     * POWERCONTROL is read-only from this device wrapper.
+     * allOff() must be a no-op.
      *
-     * allOff() must be a no-op. The AVR power controller must never interpret
-     * manager shutdown, sequence abort, global cleanup, or generic allOff()
-     * behavior as permission to turn off the Pi power relay.
+     * The AVR power controller must never interpret manager shutdown, sequence
+     * abort, global cleanup, or generic allOff() behavior as permission to
+     * turn off the Pi power relay.
+     *
+     * The delayed shutdown request is only allowed through the explicit
+     * requestDelayedShutdown() / deviceAction("S") path.
      */
     return true;
 }
@@ -268,13 +274,6 @@ bool POWERCONTROL_Device::getValues(keyValueMap_t &results)
 
     if(_device.readStatus(data)) {
 
-        // LOGT_DEBUG("POWERCONTROL_Device(%02X) AC_OK sample: hasLast=%d last=%d current=%d status=0x%02X",
-        //            _device.getDevAddr(),
-        //            _hasLastAcOK ? 1 : 0,
-        //            _lastAcOK ? 1 : 0,
-        //            data.acOK ? 1 : 0,
-        //            data.statusByte);
-
         /*
          * First good read establishes the baseline.
          *
@@ -287,10 +286,6 @@ bool POWERCONTROL_Device::getValues(keyValueMap_t &results)
             _lastAcOK = data.acOK;
 
             if(!data.acOK) {
-                // LOGT_INFO("POWERCONTROL_Device(%02X) AC_OK initial fault: current=0 status=0x%02X",
-                //           _device.getDevAddr(),
-                //           data.statusByte);
-
                 IncidentMgr::shared()->raise(
                     _deviceID,
                     IncidentMgr::Severity::Critical,
@@ -303,12 +298,6 @@ bool POWERCONTROL_Device::getValues(keyValueMap_t &results)
         }
         else if(_lastAcOK != data.acOK) {
 
-            // LOGT_INFO("POWERCONTROL_Device(%02X) AC_OK transition: %d -> %d status=0x%02X",
-            //           _device.getDevAddr(),
-            //           _lastAcOK ? 1 : 0,
-            //           data.acOK ? 1 : 0,
-            //           data.statusByte);
-
             if(data.acOK) {
                 IncidentMgr::shared()->clear(
                     _deviceID,
@@ -319,10 +308,10 @@ bool POWERCONTROL_Device::getValues(keyValueMap_t &results)
                 );
 
                 IncidentMgr::shared()->notify(
-                        "Farm Power Alert",
-                        "AC power restored. Farm is back on AC power.",
-                        IncidentMgr::Severity::Notice
-                        );
+                    "Farm Power Alert",
+                    "AC power restored. Farm is back on AC power.",
+                    IncidentMgr::Severity::Notice
+                );
             }
             else {
                 IncidentMgr::shared()->raise(
@@ -389,11 +378,86 @@ bool POWERCONTROL_Device::setValues(keyValueMap_t kv)
     (void)kv;
 
     /*
-     * Read-only driver.
+     * POWERCONTROL does not accept normal value writes.
      *
-     * Do not add relay, sleep, shutdown, reset, wake timer, LED, or power-off
-     * writes through setValues().
+     * The delayed shutdown request is only available through the explicit
+     * deviceAction("S") / requestDelayedShutdown() path so generic UI/API
+     * writes cannot accidentally cut Pi power.
      */
-    LOGT_ERROR("POWERCONTROL_Device setValues rejected: device is read-only");
+    LOGT_ERROR("POWERCONTROL_Device setValues rejected: use explicit deviceAction for supported commands");
+    return false;
+}
+
+/**
+ * @brief Request delayed shutdown from the AVR power controller.
+ *
+ * This is the one explicit write action allowed by POWERCONTROL_Device.
+ *
+ * Normal polling remains read-only.
+ * allOff() remains a no-op.
+ * setValues() still rejects writes.
+ * start() and stop() never send this command.
+ *
+ * This function is intended for controlled system shutdown only:
+ *
+ *   BATLOW confirmed
+ *     -> pIoTServerMgr controlled shutdown
+ *     -> POWERCONTROL_Device::requestDelayedShutdown()
+ *     -> AVR receives command 'S'
+ *     -> AVR starts its delayed power-off timer
+ *
+ * @return true if the shutdown command was written successfully.
+ */
+bool POWERCONTROL_Device::requestDelayedShutdown()
+{
+    if(!isEnabled()) {
+        LOGT_ERROR("POWERCONTROL_Device requestDelayedShutdown rejected: device disabled");
+        return false;
+    }
+
+    if(!isConnected()) {
+        LOGT_ERROR("POWERCONTROL_Device requestDelayedShutdown rejected: device not connected");
+        return false;
+    }
+
+    LOGT_DEBUG("POWERCONTROL_Device(%02X) requesting delayed shutdown",
+               _device.getDevAddr());
+
+    if(!_device.requestDelayedShutdown()) {
+        LOGT_ERROR("POWERCONTROL_Device(%02X) delayed shutdown command failed",
+                   _device.getDevAddr());
+        return false;
+    }
+
+    // LOGT_DEBUG("POWERCONTROL_Device(%02X) delayed shutdown command accepted",
+    //            _device.getDevAddr());
+
+    return true;
+}
+
+/**
+ * @brief Handle explicit POWERCONTROL device actions.
+ *
+ * Supported commands:
+ *
+ *   "S"         = request delayed shutdown
+ *   "shutdown"  = request delayed shutdown
+ *   "SHUTDOWN"  = request delayed shutdown
+ *
+ * This function intentionally does not support LED, relay, wake timer, reset,
+ * sleep, cancel, or generic power-off commands.
+ *
+ * @param cmd Device action command.
+ * @return true if the command was accepted and sent.
+ */
+bool POWERCONTROL_Device::deviceAction(string cmd)
+{
+    if(cmd == "S" || cmd == "shutdown" || cmd == "SHUTDOWN") {
+        return requestDelayedShutdown();
+    }
+
+    LOGT_ERROR("POWERCONTROL_Device rejected unsupported deviceAction \"%s\"",
+               cmd.c_str());
+
     return false;
 }

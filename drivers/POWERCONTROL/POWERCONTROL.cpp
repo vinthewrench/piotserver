@@ -250,3 +250,71 @@ bool POWERCONTROL::readStatus(POWERCONTROL_data &data)
 
     return true;
 }
+
+/**
+ * @brief Send a one-byte command to the AVR power controller.
+ *
+ * This is the explicit command path.
+ *
+ * Normal status polling must remain read-only and must not call this function.
+ *
+ * Firmware v26 command protocol:
+ *
+ *   bare one-byte read       -> status byte
+ *   one-byte write command   -> explicit command
+ *
+ * @param command One-byte AVR command.
+ * @return true if the command byte was written successfully.
+ */
+bool POWERCONTROL::sendCommand(uint8_t command)
+{
+    uint8_t data[1] = { command };
+
+    if(!_i2cPort.isAvailable()) {
+        LOGT_ERROR("POWERCONTROL(%02X) command 0x%02X failed: I2C port not available",
+                   _i2cPort.getDevAddr(),
+                   command);
+        return false;
+    }
+
+    if(!_isSetup) {
+        LOGT_ERROR("POWERCONTROL(%02X) command 0x%02X failed: device not setup",
+                   _i2cPort.getDevAddr(),
+                   command);
+        return false;
+    }
+
+    /*
+     * Explicit one-byte command write.
+     *
+     * This intentionally does not write a register pointer.
+     * The single byte is the command.
+     */
+    if(!_i2cPort.stdWriteBytes(sizeof(data), data)) {
+        LOGT_ERROR("POWERCONTROL(%02X) command 0x%02X write failed: %s",
+                   _i2cPort.getDevAddr(),
+                   command,
+                   strerror(errno));
+        return false;
+    }
+
+    // LOGT_INFO("POWERCONTROL(%02X) command 0x%02X sent",
+    //           _i2cPort.getDevAddr(),
+    //           command);
+
+    return true;
+}
+
+/**
+ * @brief Request delayed power shutdown from the AVR.
+ *
+ * Sends firmware command:
+ *
+ *   'S' = delayed shutdown request
+ *
+ * @return true if the command byte was written successfully.
+ */
+bool POWERCONTROL::requestDelayedShutdown()
+{
+    return sendCommand(COMMAND_DELAYED_SHUTDOWN);
+}

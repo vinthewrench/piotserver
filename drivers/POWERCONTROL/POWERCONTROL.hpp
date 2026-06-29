@@ -94,6 +94,42 @@ public:
      */
     bool readStatus(POWERCONTROL_data &data);
 
+    /**
+     * @brief AVR command byte for delayed shutdown request.
+     *
+     * Firmware command:
+     *
+     *   'S' = request delayed shutdown
+     *
+     * The AVR should start its configured shutdown/power-off delay after
+     * receiving this command.
+     */
+    static constexpr uint8_t COMMAND_DELAYED_SHUTDOWN = 'S';
+
+    /**
+     * @brief Send a one-byte command to the AVR power controller.
+     *
+     * This is the explicit command path. Normal polling must not call this.
+     *
+     * POWERCONTROL firmware v26 command protocol:
+     *
+     *   bare one-byte read       -> status byte
+     *   one-byte write command   -> explicit command
+     *
+     * @param command One-byte AVR command.
+     * @return true if the command byte was written successfully.
+     */
+    bool sendCommand(uint8_t command);
+
+    /**
+     * @brief Request delayed power shutdown from the AVR.
+     *
+     * Sends command byte 'S'.
+     *
+     * @return true if the command was written successfully.
+     */
+    bool requestDelayedShutdown();
+
 private:
 
     /**

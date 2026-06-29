@@ -20,7 +20,10 @@ using namespace std;
  *
  * @brief pIoTServer plugin wrapper for the AVR power controller.
  *
- * This driver is intentionally read-only.
+ * Normal polling is intentionally read-only.
+ *
+ * The only explicit write action allowed by this wrapper is the delayed
+ * shutdown request command used during controlled system shutdown.
  *
  * AVR POWERCONTROL firmware v26 uses a one-byte I2C status protocol:
  *
@@ -71,6 +74,34 @@ public:
 
     bool getValues(keyValueMap_t &results);
     bool setValues(keyValueMap_t kv);
+
+    /**
+     * @brief Request delayed shutdown from the AVR power controller.
+     *
+     * This is the one explicit write action allowed by this wrapper.
+     *
+     * Normal polling remains read-only. allOff() remains a no-op.
+     * setValues() still rejects writes.
+     *
+     * @return true if the AVR accepted the shutdown command write.
+     */
+    bool requestDelayedShutdown();
+
+    /**
+     * @brief Handle explicit POWERCONTROL device actions.
+     *
+     * Supported command:
+     *
+     *   "S" = request delayed shutdown
+     *
+     * This exists so pIoTServerMgr can arm POWERCONTROL during controlled
+     * shutdown without abusing setValues() or allOff().
+     *
+     * @param cmd Device action command.
+     * @return true if the command was accepted and sent.
+     */
+    bool deviceAction(string cmd);
+
 
 private:
 

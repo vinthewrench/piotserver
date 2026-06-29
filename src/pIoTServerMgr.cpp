@@ -736,11 +736,356 @@ void pIoTServerMgr::stop()
     LOGT_INFO("pIoTServerMgr stopped");
 }
 
-
-
 void pIoTServerMgr::setActiveConnections(bool isActive){
     _hasActiveConnections = isActive;
 }
+
+// MARK: - Shutdown management
+
+/**
+ * @brief Return whether controlled shutdown support is available.
+ *
+ * Controlled shutdown requires both:
+ *
+ *   - SHUTDOWN_SIG to detect BAT_LOW
+ *   - POWERCONTROL to accept the delayed shutdown command
+ *
+ * If POWERCONTROL is missing, disabled, or disconnected, the shutdown feature
+ * is considered unavailable. In that case BAT_LOW may still be reported as an
+ * incident, but pIoTServer must not arm shutdown or halt Linux automatically.
+ *
+ * @return true if controlled shutdown can be safely used.
+ */
+bool pIoTServerMgr::isControlledShutdownAvailable()
+{
+    pIoTServerDevice* powerControl = deviceForKey("POWER_AC_OK");
+
+    if(powerControl == nullptr) {
+        LOGT_ERROR("pIoTServerMgr controlled shutdown unavailable: POWERCONTROL not loaded");
+        return false;
+    }
+
+    if(!powerControl->isEnabled()) {
+        LOGT_ERROR("pIoTServerMgr controlled shutdown unavailable: POWERCONTROL disabled");
+        return false;
+    }
+
+    if(!powerControl->isConnected()) {
+        LOGT_ERROR("pIoTServerMgr controlled shutdown unavailable: POWERCONTROL not connected");
+        return false;
+    }
+
+    pIoTServerDevice* shutdownSig = deviceForKey("BATLOW_ACTIVE");
+
+    if(shutdownSig == nullptr) {
+        LOGT_ERROR("pIoTServerMgr controlled shutdown unavailable: SHUTDOWN_SIG not loaded");
+        return false;
+    }
+
+    if(!shutdownSig->isEnabled()) {
+        LOGT_ERROR("pIoTServerMgr controlled shutdown unavailable: SHUTDOWN_SIG disabled");
+        return false;
+    }
+
+    if(!shutdownSig->isConnected()) {
+        LOGT_ERROR("pIoTServerMgr controlled shutdown unavailable: SHUTDOWN_SIG not connected");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Request a controlled system shutdown.
+ *
+ * This function is intentionally small and thread-safe. It may be called from
+ * a device driver such as SHUTDOWN_SIG after a hardware shutdown condition has
+ * been confirmed.
+ *
+ * It does not stop devices, touch I2C, arm POWERCONTROL, or invoke Linux
+ * shutdown directly. It only records the request and wakes the server thread.
+ *
+ * @param reason Human-readable shutdown reason.
+ * @return true if this call created the shutdown request, false if shutdown
+ *         was already requested.
+ */
+bool pIoTServerMgr::requestSystemShutdown(const string& reason)
+{
+    if(_systemShutdownRequested.exchange(true)) {
+        LOGT_DEBUG("pIoTServerMgr controlled shutdown already requested; ignored duplicate request: %s",
+                   reason.c_str());
+        return false;
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(_systemShutdownMutex);
+        _systemShutdownReason = reason;
+    }
+
+    LOGT_ERROR("pIoTServerMgr controlled shutdown requested: %s",
+               reason.c_str());
+
+    /*
+     * Wake the server thread if it is ever waiting on _valuesUpdated.
+     * Right now serverThread mostly sleeps, but this is still the correct
+     * signal path for later cleanup.
+     */
+    _valuesUpdated.notify_all();
+
+    return true;
+}
+
+
+/**
+ * @brief Run the controlled shutdown sequence.
+ *
+ * Controlled shutdown is manager-owned because the manager can stop normal
+ * server work, keep device/I2C access ordered, arm POWERCONTROL, release
+ * devices, and then invoke Linux shutdown.
+ *
+ * @return true if the sequence ran far enough to invoke Linux shutdown.
+ */
+bool pIoTServerMgr::runControlledShutdown()
+{
+    if(!isControlledShutdownAvailable()) {
+        LOGT_ERROR("pIoTServerMgr controlled shutdown ignored: shutdown feature unavailable");
+        return false;
+    }
+
+    string reason;
+
+    {
+        std::lock_guard<std::mutex> lock(_systemShutdownMutex);
+        reason = _systemShutdownReason;
+    }
+
+    if(reason.empty()) {
+        reason = "controlled shutdown requested";
+    }
+
+    // LOGT_ERROR("pIoTServerMgr controlled shutdown sequence starting: %s",
+    //            reason.c_str());
+
+    /*
+     * Mark manager stopping immediately.
+     *
+     * This prevents Ctrl-C from trying to start a second normal stop path while
+     * controlled shutdown is already in progress.
+     */
+    _running = false;
+
+    /*
+     * POWERCONTROL arm is best-effort.
+     *
+     * Missing POWERCONTROL, disabled POWERCONTROL, disconnected POWERCONTROL,
+     * or failed I2C command must not prevent Linux from being halted cleanly.
+     */
+    bool powerManagerArmed = armPowerManagerForShutdown();
+
+    if(powerManagerArmed) {
+   //     LOGT_ERROR("pIoTServerMgr POWERCONTROL delayed shutdown armed");
+    }
+    else {
+        LOGT_ERROR("pIoTServerMgr POWERCONTROL delayed shutdown not armed; continuing Linux shutdown");
+    }
+
+  //  LOGT_DEBUG("pIoTServerMgr stopping devices for controlled shutdown");
+
+    stopDevices();
+
+    bool linuxShutdownStarted = invokeLinuxShutdown();
+
+    if(!linuxShutdownStarted) {
+        LOGT_ERROR("pIoTServerMgr Linux shutdown command not started");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Arm POWERCONTROL delayed shutdown.
+ *
+ * Best-effort manager-owned POWERCONTROL shutdown request.
+ *
+ * This function is intentionally tolerant:
+ *
+ *   - POWERCONTROL may not be present in a test config.
+ *   - POWERCONTROL may not be loaded.
+ *   - POWERCONTROL may not be connected.
+ *   - POWERCONTROL may fail the I2C command.
+ *
+ * Any of those cases return false, but they do not abort the controlled
+ * shutdown sequence. If BATLOW is real, Linux should still be halted cleanly.
+ *
+ * This must run before stopDevices(), because POWERCONTROL needs I2C available
+ * when the delayed shutdown command is sent.
+ *
+ * Important:
+ *
+ *   Do not hold _deviceMutex while calling deviceForKey() unless deviceForKey()
+ *   is known not to lock internally.
+ *
+ *   Do not hold _deviceMutex while calling deviceAction(). The action may touch
+ *   I2C and must not run while the manager device-list mutex is held.
+ *
+ * @return true if POWERCONTROL accepted the delayed shutdown command.
+ * @return false if POWERCONTROL was missing, unavailable, or failed.
+ */
+bool pIoTServerMgr::armPowerManagerForShutdown()
+{
+
+    // LOGT_ERROR("pIoTServerMgr POWERCONTROL() dry-run: shutdown not invoked");
+    //    return false;
+
+    static const string powerControlKey = "POWER_AC_OK";
+
+    // LOGT_ERROR("pIoTServerMgr checking for POWERCONTROL delayed shutdown support");
+
+    /*
+     * Find POWERCONTROL by one of its normal read keys.
+     *
+     * Do not take _deviceMutex here. deviceForKey() may already handle its own
+     * locking, and taking the lock here can deadlock during shutdown.
+     */
+    pIoTServerDevice* device = deviceForKey(powerControlKey);
+
+    if(device == nullptr) {
+        LOGT_ERROR("pIoTServerMgr POWERCONTROL shutdown arm skipped: key \"%s\" not found; POWERCONTROL may not be loaded",
+                   powerControlKey.c_str());
+        return false;
+    }
+
+    if(!device->isEnabled()) {
+        LOGT_ERROR("pIoTServerMgr POWERCONTROL shutdown arm skipped: POWERCONTROL device is disabled");
+        return false;
+    }
+
+    if(!device->isConnected()) {
+        LOGT_ERROR("pIoTServerMgr POWERCONTROL shutdown arm skipped: POWERCONTROL device is not connected");
+        return false;
+    }
+
+    /*
+     * Explicit action path only.
+     *
+     * Do not use setValues().
+     * Do not use allOff().
+     * Do not rely on generic cleanup behavior.
+     *
+     * Also do not hold the manager device-list mutex while doing this. The
+     * device action may perform I2C and may log/report incidents.
+     */
+  //  LOGT_ERROR("pIoTServerMgr arming POWERCONTROL delayed shutdown");
+
+    if(!device->deviceAction("S")) {
+        LOGT_ERROR("pIoTServerMgr POWERCONTROL delayed shutdown action failed");
+        return false;
+    }
+
+ //   LOGT_ERROR("pIoTServerMgr POWERCONTROL delayed shutdown action accepted");
+
+    return true;
+}
+
+/**
+ * @brief Invoke Linux shutdown.
+ *
+ * This function invokes Linux shutdown through sudo:
+ *
+ * @code
+ * /usr/bin/sudo -n /usr/sbin/shutdown now
+ * @endcode
+ *
+ * The "-n" option is important. It tells sudo to run non-interactively. If the
+ * pIoTServer process user is not allowed to run shutdown without a password,
+ * sudo fails immediately instead of hanging while waiting for a password prompt.
+ *
+ * The pIoTServer process user must be granted passwordless permission to run
+ * the exact shutdown binary used by this function.
+ *
+ * Setup on the target Pi:
+ *
+ * 1. Confirm the shutdown path:
+ *
+ * @code
+ * which shutdown
+ * @endcode
+ *
+ * Expected path is usually:
+ *
+ * @code
+ * /usr/sbin/shutdown
+ * @endcode
+ *
+ * 2. Create a sudoers drop-in using visudo:
+ *
+ * @code
+ * sudo visudo -f /etc/sudoers.d/piotserver-shutdown
+ * @endcode
+ *
+ * 3. Add one rule for the user that runs pIoTServer.
+ *
+ * If pIoTServer runs as user "vinnie":
+ *
+ * @code
+ * vinnie ALL=(root) NOPASSWD: /usr/sbin/shutdown
+ * @endcode
+ *
+ * If pIoTServer runs as a different user, replace "vinnie" with that user.
+ *
+ * 4. Save the file, then set safe sudoers permissions:
+ *
+ * @code
+ * sudo chmod 440 /etc/sudoers.d/piotserver-shutdown
+ * @endcode
+ *
+ * 5. Test the sudoers rule without allowing sudo to prompt:
+ *
+ * @code
+ * sudo -n /usr/sbin/shutdown --help >/dev/null && echo OK
+ * @endcode
+ *
+ * Expected result:
+ *
+ * @code
+ * OK
+ * @endcode
+ *
+ * If the test fails, fix sudoers before enabling real controlled shutdown.
+ *
+ * Do not run this manually unless you intend to halt the Pi:
+ *
+ * @code
+ * sudo -n /usr/sbin/shutdown now
+ * @endcode
+ *
+ * @return true if the shutdown command returned success.
+ */
+
+bool pIoTServerMgr::invokeLinuxShutdown()
+{
+
+    // LOGT_ERROR("pIoTServerMgr invokeLinuxShutdown() dry-run: Linux shutdown not invoked");
+    //    return false;
+
+    static const char* shutdownCommand = "/usr/bin/sudo -n /usr/sbin/shutdown now";
+
+    LOGT_DEBUG("pIoTServerMgr invoking Linux shutdown: %s",
+               shutdownCommand);
+
+    int result = system(shutdownCommand);
+
+    if(result != 0) {
+        LOGT_ERROR("pIoTServerMgr Linux shutdown command failed result=%d",
+                   result);
+        return false;
+    }
+
+    return true;
+}
+
+
 // MARK: - Global Values
 bool pIoTServerMgr::loadGlobalValues()
 {
@@ -1539,11 +1884,31 @@ void pIoTServerMgr::serverThread(){
 
     bool shouldRunStartup = true;
     bool waitForStartupToComplete = false;
+    bool didRunControlledShutdown = false;
 
     while(_running){
 
         std::mutex cv_m;
         std::unique_lock<std::mutex> lk(cv_m);
+
+        /*
+         * Controlled shutdown is manager-owned.
+         *
+         * Drivers such as SHUTDOWN_SIG only request shutdown. The server
+         * thread sees the request here and runs the shutdown sequence from
+         * the manager context.
+         *
+         * Do not start another device read/processEvents cycle after shutdown
+         * has been requested.
+         */
+        if(isSystemShutdownRequested()) {
+            if(!didRunControlledShutdown) {
+                didRunControlledShutdown = true;
+                runControlledShutdown();
+            }
+
+            break;
+        }
 
         if(shouldRunStartup){
             shouldRunStartup = false;
@@ -1561,6 +1926,14 @@ void pIoTServerMgr::serverThread(){
 
         // read data from devices
         readDevices();
+
+        /*
+         * Shutdown may have been requested by a device during readDevices().
+         * If so, do not process timed events/rules/sequences after that.
+         */
+        if(isSystemShutdownRequested()) {
+            continue;
+        }
 
         // process any timed events
         processEvents();
@@ -1597,15 +1970,29 @@ bool pIoTServerMgr::readDevices(){
 
     static time_t lastRun = 0;
 
+    if(isSystemShutdownRequested()) {
+        return false;
+    }
+
     time_t now = time(NULL);
     int didUpdate = 0;
 
     if(difftime(now, lastRun) >= static_cast<double>(_probeSleepTime)) {
 
         std::lock_guard<std::mutex> lock(_deviceMutex);
+
+        if(isSystemShutdownRequested()) {
+            return false;
+        }
+
         lastRun = now;
 
         for( auto &e: _devices){
+
+            if(isSystemShutdownRequested()) {
+                break;
+            }
+
             keyValueMap_t results;
 
             if( e.device->hasUpdates() &&

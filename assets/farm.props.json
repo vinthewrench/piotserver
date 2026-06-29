@@ -70,6 +70,29 @@
             "title": "Power Controller"
         },
         {
+            "deviceID": "BATLOW_SIG",
+            "device_type": "SHUTDOWN_SIG",
+            "enable": true,
+            "interval": 1,
+            "pins": [
+                {
+                    "data_type": "BOOL",
+                    "key": "BATLOW_ACTIVE",
+                    "other.props": {
+                        "active_low": true,
+                        "assert_delay_sec": 1,
+                        "debounce_ms": 250,
+                        "gpio_pin": 23,
+                        "gpio_pull": "up"
+                    },
+                    "read_only": true,
+                    "title": "Battery Low Shutdown Signal",
+                    "tracking": "track.changes"
+                }
+            ],
+            "title": "Battery Low Shutdown"
+        },
+        {
             "address": "/mnt/1wire/28.B9F533000000/",
             "data_type": "TEMPERATURE",
             "description": "Plot A Soil DS2482",
@@ -397,8 +420,8 @@
         "SPRK_9"
     ],
     "prop.file.version": {
-        "file.etag": 1107,
-        "last_write": 1782250657
+        "file.etag": 1300,
+        "last_write": 1782690651
     },
     "rule": [
         {
@@ -630,6 +653,10 @@
                             "cmd": "SET",
                             "key": "SPRK_12",
                             "value": "off"
+                        },
+                        {
+                            "cmd": "EVAL",
+                            "expression": "IRRIGATION_RUN_COUNT := IRRIGATION_RUN_COUNT + 1"
                         }
                     ],
                     "duration": 30
@@ -1016,6 +1043,14 @@
             "initial.value": false,
             "key": "RAIN_SENSOR",
             "title": "Rain Sensor"
+        },
+        {
+            "data_type": "INT",
+            "description": "Counter incremented after irrigation sequence completes",
+            "initial.value": 0,
+            "key": "IRRIGATION_RUN_COUNT",
+            "title": "Irrigation Run Count",
+            "tracking": "track.latest"
         }
     ]
 }

@@ -31,7 +31,9 @@ bool GPIO::begin(std::vector<gpio_pin_t> pinsIn, int &error) {
         return false;
     }
 
-    // --- Check for GPIO v2 API support ---
+    /*
+     * Check for GPIO v2 API support.
+     */
     struct gpiochip_info cinfo = {};
     if (ioctl(_chipFd, GPIO_GET_CHIPINFO_IOCTL, &cinfo) < 0) {
         error = errno;
@@ -53,27 +55,66 @@ bool GPIO::begin(std::vector<gpio_pin_t> pinsIn, int &error) {
 
         config.num_attrs = 0;
 
-        // Apply direction flag
-        if (p.direction == GPIO_DIRECTION_INPUT)
+        /*
+         * Apply direction flag from the requested direction.
+         */
+        if (p.direction == GPIO_DIRECTION_INPUT) {
             config.flags |= GPIO_V2_LINE_FLAG_INPUT;
-        else if (p.direction == GPIO_DIRECTION_OUTPUT)
+        }
+        else if (p.direction == GPIO_DIRECTION_OUTPUT) {
             config.flags |= GPIO_V2_LINE_FLAG_OUTPUT;
+        }
+        else {
+            error = EINVAL;
+            LOGT_ERROR("Invalid GPIO direction for line %d", p.lineNo);
+            continue;
+        }
 
-        // Apply user-specified flags (bias, active-low, etc.)
+        /*
+         * Apply user-specified line flags.
+         *
+         * Expected examples:
+         *
+         *   input + pull-up:
+         *      p.flags      = 0x200
+         *      config.flags = 0x204
+         *
+         *   input only:
+         *      p.flags      = 0x000
+         *      config.flags = 0x004
+         *
+         * ACTIVE_LOW is only applied if the caller explicitly puts it in
+         * p.flags. GPIO does not add it by itself.
+         */
         config.flags |= p.flags;
 
-        // Set consumer label
+        /*
+         * Set consumer label.
+         */
         strncpy((char *)req.consumer, "GPIO_Class", sizeof(req.consumer) - 1);
+        req.consumer[sizeof(req.consumer) - 1] = '\0';
 
-        // Target line
+        /*
+         * Target one GPIO line.
+         */
         req.offsets[0] = p.lineNo;
         req.num_lines = 1;
         req.config = config;
 
-        // Request the line
+        // LOGT_ERROR("GPIO request line=%d direction=%d p.flags=0x%X config.flags=0x%llX",
+        //            p.lineNo,
+        //            p.direction,
+        //            p.flags,
+        //            static_cast<unsigned long long>(config.flags));
+
+        /*
+         * Request the line.
+         */
         if (ioctl(_chipFd, GPIO_V2_GET_LINE_IOCTL, &req) < 0) {
             error = errno;
-            LOGT_ERROR("Failed to request GPIO line %d: %s",  p.lineNo, strerror(errno));
+            LOGT_ERROR("Failed to request GPIO line %d: %s",
+                       p.lineNo,
+                       strerror(errno));
             continue;
         }
 
@@ -87,6 +128,11 @@ bool GPIO::begin(std::vector<gpio_pin_t> pinsIn, int &error) {
 
     if (_lines.empty()) {
         stop();
+
+        if (error == 0) {
+            error = ENODEV;
+        }
+
         return false;
     }
 
@@ -118,27 +164,55 @@ bool GPIO::isAvailable() {
 }
 
 bool GPIO::get(gpioStates_t &statesOut) {
-    if (!_isSetup)
+    statesOut.clear();
+
+    if (!_isSetup) {
         return false;
+    }
+
+    bool readAny = false;
 
     for (auto &l : _lines) {
-        if (l.direction != GPIO_DIRECTION_INPUT)
+        if (l.direction != GPIO_DIRECTION_INPUT) {
             continue;
+        }
 
         struct gpio_v2_line_values vals = {};
         vals.mask = 0x1;
 
         if (ioctl(l.fd, GPIO_V2_LINE_GET_VALUES_IOCTL, &vals) < 0) {
-            LOGT_ERROR("Failed to read GPIO line %d: %s",  l.lineNo, strerror(errno));
-             continue;
+            LOGT_ERROR("Failed to read GPIO line %d: %s",
+                       l.lineNo,
+                       strerror(errno));
+            continue;
         }
 
-        bool value = (vals.bits & 0x1);
+        /*
+         * GPIO v2 returns the requested line value in bit 0 because each line
+         * request here owns exactly one line.
+         *
+         * This value is the kernel-returned line value for the request. If the
+         * caller requested GPIO_V2_LINE_FLAG_ACTIVE_LOW, the kernel may report
+         * the logical active-low value. If the caller did not request
+         * ACTIVE_LOW, this is the raw electrical high/low level.
+         *
+         * SHUTDOWN_SIG should not request ACTIVE_LOW at the GPIO layer. It
+         * should read raw high/low here and apply BAT_LOW polarity itself.
+         */
+        bool value = (vals.bits & 0x1) != 0;
+
         statesOut.push_back({l.lineNo, value});
+        readAny = true;
+
+        // LOGT_DEBUG("GPIO read line=%d value=%d flags=0x%X",
+        //            l.lineNo,
+        //            value ? 1 : 0,
+        //            l.flags);
     }
 
-    return true;
+    return readAny;
 }
+
 
 bool GPIO::set(gpioStates_t states) {
     if (!_isSetup)

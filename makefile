@@ -187,7 +187,8 @@ PLUGIN_DIRS := \
 	TANKDEPTH \
 	VELM6030 \
 	TMP10X	\
-	FAULT_SIG
+	FAULT_SIG \
+	SHUTDOWN_SIG
 
 .PHONY: all nostrip core app plugins strip strip-app strip-core strip-plugins clean clean-plugins distclean run dirs print $(PLUGIN_DIRS)
 

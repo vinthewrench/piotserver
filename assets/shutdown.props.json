@@ -1,0 +1,69 @@
+{
+    "config": {
+        "access_keys": {},
+        "description": "The Raspbery Pi Irrigation System",
+        "lat_long": "34.465338, -93.362827",
+        "name": "Shutdown Test"
+    },
+    "devices": [
+        {
+            "deviceID": "BATLOW_SIG",
+            "device_type": "SHUTDOWN_SIG",
+            "enable": true,
+            "interval": 1,
+            "pins": [
+                {
+                    "data_type": "BOOL",
+                    "key": "BATLOW_ACTIVE",
+                    "other.props": {
+                        "active_low": true,
+                        "assert_delay_sec": 1,
+                        "debounce_ms": 250,
+                        "gpio_pin": 23,
+                        "gpio_pull": "up"
+                    },
+                    "read_only": true,
+                    "title": "Battery Low Shutdown Signal",
+                    "tracking": "track.changes"
+                }
+            ],
+            "title": "Battery Low Shutdown"
+        },
+        {
+            "address": "0x08",
+            "deviceID": "POWERCONTROL_1",
+            "device_type": "POWERCONTROL",
+            "enable": true,
+            "interval": 30,
+            "pins": [
+                {
+                    "data_type": "BOOL",
+                    "key": "POWER_AC_OK",
+                    "read_only": true,
+                    "title": "AC Power OK",
+                    "tracking": "track.changes"
+                },
+                {
+                    "data_type": "INT",
+                    "key": "POWER_DIAGNOSTIC_STATUS",
+                    "read_only": true,
+                    "title": "Power Controller Diagnostic Status",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "INT",
+                    "key": "POWER_WAKE_TIMER_MIN",
+                    "read_only": true,
+                    "title": "Power Controller Wake Timer Minutes",
+                    "tracking": "dont.record"
+                }
+            ],
+            "title": "Power Controller"
+        }
+    ],
+    "prop.file.version": {
+        "file.etag": 7,
+        "last_write": 1782673210
+    },
+    "sequence": null
+}
