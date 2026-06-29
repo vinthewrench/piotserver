@@ -684,31 +684,45 @@ void pIoTServerMgr::setupDeviceNotifications(){
     _db.sequenceSave(seq,&sid);
 }
 
-
-void pIoTServerMgr::stop()
+/**
+ * @brief Stop the pIoTServer runtime cleanly.
+ *
+ * This is the common shutdown path used by normal process stop and controlled
+ * system shutdown.
+ *
+ * The order is:
+ *
+ *   1. Stop future manager work.
+ *   2. Join the manager worker thread if called from another thread.
+ *   3. Run application shutdown event sequences.
+ *   4. Stop devices.
+ *   5. Stop notifications.
+ *   6. Record SERVER_STOP.
+ *
+ * If this function is called from the manager worker thread itself, it must not
+ * join _thread. Joining the current thread throws std::system_error with
+ * "Resource deadlock avoided".
+ *
+ * This function intentionally does not invoke Linux shutdown. It only stops
+ * the pIoTServer runtime.
+ *
+ * @return true if devices stopped cleanly.
+ */
+bool pIoTServerMgr::shutdownRuntime()
 {
-    if(!_running) {
-        return;
-    }
-
-    LOGT_INFO("Stop pIoTServerMgr");
-
-    /*
-     * Stop the background thread first.
-     *
-     * This prevents polling and timed events from racing against shutdown
-     * sequences and device cleanup.
-     */
     _shouldReconcileEvents = false;
     _running = false;
 
+    /*
+     * If controlled shutdown is initiated from the manager worker thread,
+     * do not join ourselves.
+     */
     if(_thread.joinable()) {
-        _thread.join();
+        if(std::this_thread::get_id() != _thread.get_id()) {
+            _thread.join();
+        }
     }
 
-    /*
-     * Run shutdown app-event actions after the worker thread has stopped.
-     */
     runSequenceForAppEvent(EventTrigger::APP_EVENT_SHUTDOWN, [](bool didSucceed) {
         if(didSucceed) {
             LOGT_DEBUG("Completed Shutdown events");
@@ -718,10 +732,9 @@ void pIoTServerMgr::stop()
         }
     });
 
-    /*
-     * Always stop devices after shutdown events.
-     */
-    if(!stopDevices()) {
+    bool devicesStopped = stopDevices();
+
+    if(!devicesStopped) {
         LOGT_ERROR("One or more devices failed during shutdown");
     }
 
@@ -732,6 +745,19 @@ void pIoTServerMgr::stop()
         "SERVER_STOP",
         "piotserver"
     );
+
+    return devicesStopped;
+}
+
+void pIoTServerMgr::stop()
+{
+    if(!_running) {
+        return;
+    }
+
+    LOGT_INFO("Stop pIoTServerMgr");
+
+    shutdownRuntime();
 
     LOGT_INFO("pIoTServerMgr stopped");
 }
@@ -839,19 +865,21 @@ bool pIoTServerMgr::requestSystemShutdown(const string& reason)
 /**
  * @brief Run the controlled shutdown sequence.
  *
- * Controlled shutdown is manager-owned because the manager can stop normal
- * server work, keep device/I2C access ordered, arm POWERCONTROL, release
- * devices, and then invoke Linux shutdown.
+ * Controlled shutdown requires POWERCONTROL to accept the delayed shutdown
+ * command before pIoTServer stops its runtime or invokes Linux shutdown.
  *
- * @return true if the sequence ran far enough to invoke Linux shutdown.
+ * If POWERCONTROL is missing, disconnected, disabled, or fails the command,
+ * this function aborts. It must not stop devices and must not invoke Linux
+ * shutdown in that case.
+ *
+ * Once POWERCONTROL is armed, this function uses the same shutdown runtime path
+ * as normal pIoTServer stop(), then invokes Linux shutdown.
+ *
+ * @return true if the controlled shutdown sequence reached Linux shutdown.
+ * @return false if shutdown was aborted or Linux shutdown was not started.
  */
 bool pIoTServerMgr::runControlledShutdown()
 {
-    if(!isControlledShutdownAvailable()) {
-        LOGT_ERROR("pIoTServerMgr controlled shutdown ignored: shutdown feature unavailable");
-        return false;
-    }
-
     string reason;
 
     {
@@ -863,35 +891,14 @@ bool pIoTServerMgr::runControlledShutdown()
         reason = "controlled shutdown requested";
     }
 
-    // LOGT_ERROR("pIoTServerMgr controlled shutdown sequence starting: %s",
-    //            reason.c_str());
-
-    /*
-     * Mark manager stopping immediately.
-     *
-     * This prevents Ctrl-C from trying to start a second normal stop path while
-     * controlled shutdown is already in progress.
-     */
-    _running = false;
-
-    /*
-     * POWERCONTROL arm is best-effort.
-     *
-     * Missing POWERCONTROL, disabled POWERCONTROL, disconnected POWERCONTROL,
-     * or failed I2C command must not prevent Linux from being halted cleanly.
-     */
     bool powerManagerArmed = armPowerManagerForShutdown();
 
-    if(powerManagerArmed) {
-   //     LOGT_ERROR("pIoTServerMgr POWERCONTROL delayed shutdown armed");
-    }
-    else {
-        LOGT_ERROR("pIoTServerMgr POWERCONTROL delayed shutdown not armed; continuing Linux shutdown");
+    if(!powerManagerArmed) {
+        LOGT_ERROR("pIoTServerMgr controlled shutdown ABORTED: POWERCONTROL delayed shutdown was not armed");
+        return false;
     }
 
-  //  LOGT_DEBUG("pIoTServerMgr stopping devices for controlled shutdown");
-
-    stopDevices();
+    shutdownRuntime();
 
     bool linuxShutdownStarted = invokeLinuxShutdown();
 
