@@ -24,9 +24,11 @@
 #     make -j4 core         Build only shared core library.
 #     make -j4 app          Build only app and shared core library without stripping the app.
 #     make -j4 plugins      Build only plugins in parallel.
+#     make -j4 piottool     Build only piottool and shared core library.
 #     make strip            Strip app, shared core, and plugins.
-#     make clean            Remove app, shared core, app objects, plugin objects, and plugin products.
+#     make clean            Remove app, shared core, app objects, plugin objects, plugin products, and piottool products.
 #     make clean-plugins    Clean only plugin object directories and plugin products.
+#     make piottool-clean   Clean only piottool objects/products.
 #     make distclean        Remove clean products plus generated auxiliary files.
 #
 
@@ -190,7 +192,26 @@ PLUGIN_DIRS := \
 	FAULT_SIG \
 	SHUTDOWN_SIG
 
-.PHONY: all nostrip core app plugins strip strip-app strip-core strip-plugins clean clean-plugins distclean run dirs print $(PLUGIN_DIRS)
+.PHONY: \
+	all \
+	nostrip \
+	core \
+	app \
+	plugins \
+	piottool \
+	strip \
+	strip-app \
+	strip-core \
+	strip-plugins \
+	clean \
+	clean-plugins \
+	piottool-clean \
+	piottool-distclean \
+	distclean \
+	run \
+	dirs \
+	print \
+	$(PLUGIN_DIRS)
 
 all: core app plugins strip
 
@@ -211,6 +232,15 @@ plugins: $(PLUGIN_DIRS)
 
 $(PLUGIN_DIRS):
 	$(MAKE) -C drivers/$@
+
+#
+# piottool is intentionally not part of "all" yet.
+# Build it explicitly while the tool framework is being bootstrapped:
+#
+#     make piottool
+#
+piottool: core
+	$(MAKE) -C piottool
 
 $(CORE_LIB): $(CORE_OBJECTS)
 	@mkdir -p $(LIB_DIR)
@@ -253,7 +283,7 @@ endif
 run: nostrip
 	./$(APP_NAME)
 
-clean: clean-plugins
+clean: clean-plugins piottool-clean
 	rm -rf $(BUILD_DIR)
 	rm -rf $(LIB_DIR)
 	rm -f $(APP_NAME)
@@ -265,7 +295,17 @@ clean-plugins:
 	rm -f plugins/*.so
 	rm -f plugins/*.dylib
 
-distclean: clean
+piottool-clean:
+	@if [ -d piottool ]; then \
+		$(MAKE) -C piottool clean; \
+	fi
+
+piottool-distclean:
+	@if [ -d piottool ]; then \
+		$(MAKE) -C piottool distclean; \
+	fi
+
+distclean: clean piottool-distclean
 	rm -f logfile.txt
 	rm -f compile_commands.json
 	rm -f *.db

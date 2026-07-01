@@ -1,0 +1,32 @@
+## For more options and information see
+# http://rptl.io/configtxt
+# Some settings may impact device functionality. See link above for details.
+
+# Enable I2C for local hardware devices.
+dtparam=i2c_arm=on,i2c_arm_baudrate=80000
+
+# Disable unused onboard features for a headless controller.
+dtparam=audio=off
+dtoverlay=disable-bt
+camera_auto_detect=0
+display_auto_detect=0
+hdmi_ignore_hotplug=1
+hdmi_blanking=2
+
+# POWER_DOWN - output
+# Assert GPIO25 when the Pi has halted so external power-control hardware
+# can safely remove power.
+dtoverlay=gpio-poweroff,gpiopin=25
+
+# BAT_LOW - input
+# Use GPIO23 as an active-low shutdown input with pull-up.
+dtoverlay=gpio-shutdown,gpio_pin=23,active_low=1,gpio_pull=up
+
+# Automatically load initramfs files, if found.
+auto_initramfs=1
+
+# Run in 64-bit mode. Valid for Pi Zero 2 W.
+arm_64bit=1
+
+# Enable UART if serial console or local serial hardware is needed.
+enable_uart=1
