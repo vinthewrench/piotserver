@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "CmdLineParser.hpp"
+#include "LogMgr.hpp"
 #include "ModuleLoader.hpp"
 #include "ModuleRegistry.hpp"
 #include "PToolContext.hpp"
@@ -61,6 +62,32 @@ static std::string sDefaultModuleDir(const char* argv0)
 }
 
 
+static void sStartToolLogging()
+{
+    /*
+     * piottool is a foreground command-line utility.
+     *
+     * The lower drivers already use LOGT_ERROR(), LOGT_DEBUG(), etc.
+     * In piotserver, printing is enabled by the server's -p / gPrint_flag path.
+     * piottool has no -d/-p mode, so enable print logging here.
+     *
+     * Default:
+     *   show LOGT_ERROR and normal tool output.
+     *
+     * -v:
+     *   show verbose lower-driver logging.
+     */
+    START_LOGPRINT;
+
+    if(gOptions.verbose > 0) {
+        LogMgr::shared()->_logFlags = LogMgr::LogLevelVerbose;
+    }
+    else {
+        LogMgr::shared()->_logFlags = LogMgr::LogLevelError;
+    }
+}
+
+
 static void sPrintUsage(std::ostream& out,
                         const ModuleRegistry* registry)
 {
@@ -78,6 +105,7 @@ static void sPrintUsage(std::ostream& out,
     out << "Examples:\n";
     out << "  piottool pca9536 help\n";
     out << "  piottool pca9536 status\n";
+    out << "  piottool tmp10x read\n";
     out << "  piottool --bus 1 --addr 0x41 pca9536 status\n";
     out << "  piottool --module-dir ./piottool/plugins pca9536 status\n";
     out << "\n";
@@ -109,6 +137,8 @@ int main(int argc, const char* argv[])
     if(gOptions.moduleDir.empty()) {
         gOptions.moduleDir = sDefaultModuleDir(argc > 0 ? argv[0] : nullptr);
     }
+
+    sStartToolLogging();
 
     ModuleRegistry registry;
 

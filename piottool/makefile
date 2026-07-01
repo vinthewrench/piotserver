@@ -31,6 +31,9 @@ LIB_DIR   := $(ROOT_DIR)/lib
 
 TARGET := $(APP_NAME)
 
+INSTALL_DIR ?= $(HOME)/bin
+INSTALL_LINK := $(INSTALL_DIR)/$(APP_NAME)
+
 CXX := clang++
 CC  := clang
 
@@ -94,10 +97,10 @@ OBJECTS := \
 DEPS := $(OBJECTS:.o=.d)
 
 MODULE_DIRS := \
-	PCA9536	\
+	PCA9536 \
 	TMP10X
 
-.PHONY: all modules clean clean-modules distclean print $(MODULE_DIRS)
+.PHONY: all modules clean clean-modules distclean print install uninstall $(MODULE_DIRS)
 
 all: $(TARGET) modules
 
@@ -130,6 +133,21 @@ clean-modules:
 
 distclean: clean
 
+install: all
+	@mkdir -p $(INSTALL_DIR)
+	@printf '%s\n' '#!/bin/sh' > $(INSTALL_LINK)
+	@printf '%s\n' 'cd "$(abspath .)" || exit 1' >> $(INSTALL_LINK)
+	@printf '%s\n' 'exec "./$(APP_NAME)" "$$@"' >> $(INSTALL_LINK)
+	@chmod +x $(INSTALL_LINK)
+	@echo "installed wrapper: $(INSTALL_LINK)"
+	@echo "working-dir:       $(abspath .)"
+	@echo "target:            $(abspath $(TARGET))"
+	@echo "module-dir:        $(abspath plugins)"
+
+uninstall:
+	rm -f $(INSTALL_LINK)
+	@echo "removed: $(INSTALL_LINK)"
+
 print:
 	@echo "APP_NAME:       $(APP_NAME)"
 	@echo "UNAME_S:        $(UNAME_S)"
@@ -142,6 +160,8 @@ print:
 	@echo "LDLIBS:         $(LDLIBS)"
 	@echo "CORE_LIB:       $(CORE_LIB)"
 	@echo "TARGET:         $(TARGET)"
+	@echo "INSTALL_DIR:    $(INSTALL_DIR)"
+	@echo "INSTALL_LINK:   $(INSTALL_LINK)"
 	@echo "MODULE_DIRS:"
 	@printf '  %s\n' $(MODULE_DIRS)
 	@echo "CPP_SOURCES:"

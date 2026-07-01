@@ -19,17 +19,19 @@
 #
 # Useful commands:
 #
-#     make -j4              Build app, shared core, and plugins in parallel, then strip products.
-#     make -j4 nostrip      Build app, shared core, and plugins without stripping products.
-#     make -j4 core         Build only shared core library.
-#     make -j4 app          Build only app and shared core library without stripping the app.
-#     make -j4 plugins      Build only plugins in parallel.
-#     make -j4 piottool     Build only piottool and shared core library.
-#     make strip            Strip app, shared core, and plugins.
-#     make clean            Remove app, shared core, app objects, plugin objects, plugin products, and piottool products.
-#     make clean-plugins    Clean only plugin object directories and plugin products.
-#     make piottool-clean   Clean only piottool objects/products.
-#     make distclean        Remove clean products plus generated auxiliary files.
+#     make -j4                  Build app, shared core, and plugins in parallel, then strip products.
+#     make -j4 nostrip          Build app, shared core, and plugins without stripping products.
+#     make -j4 core             Build only shared core library.
+#     make -j4 app              Build only app and shared core library without stripping the app.
+#     make -j4 plugins          Build only plugins in parallel.
+#     make -j4 piottool         Build only piottool and shared core library.
+#     make piottool-install     Install piottool into ~/bin.
+#     make piottool-uninstall   Remove piottool from ~/bin.
+#     make strip                Strip app, shared core, and plugins.
+#     make clean                Remove app, shared core, app objects, plugin objects, plugin products, and piottool products.
+#     make clean-plugins        Clean only plugin object directories and plugin products.
+#     make piottool-clean       Clean only piottool objects/products.
+#     make distclean            Remove clean products plus generated auxiliary files.
 #
 
 
@@ -199,6 +201,8 @@ PLUGIN_DIRS := \
 	app \
 	plugins \
 	piottool \
+	piottool-install \
+	piottool-uninstall \
 	strip \
 	strip-app \
 	strip-core \
@@ -241,6 +245,20 @@ $(PLUGIN_DIRS):
 #
 piottool: core
 	$(MAKE) -C piottool
+
+#
+# Install piottool for easier command-line use.
+#
+# The piottool/makefile owns the actual install details.
+# This top-level target keeps the normal workflow at repo root:
+#
+#     make piottool-install
+#
+piottool-install: piottool
+	$(MAKE) -C piottool install
+
+piottool-uninstall:
+	$(MAKE) -C piottool uninstall
 
 $(CORE_LIB): $(CORE_OBJECTS)
 	@mkdir -p $(LIB_DIR)
