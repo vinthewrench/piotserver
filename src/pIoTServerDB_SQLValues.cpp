@@ -96,6 +96,11 @@ bool pIoTServerDB::initLogDatabase(string assetPath){
          return false;
      }
 
+    if(!initTrackingTables()){
+           LOG_ERROR("initTrackingTables FAILED\n");
+           return false;
+       }
+
     if(!restoreValuesFromDB()){
         LOG_ERROR("restoreValuesFromDB FAILED\n");
         return false;

@@ -137,6 +137,7 @@ CPP_SOURCES := \
 	$(SRC_DIR)/pIoTServerDB_Rules.cpp \
 	$(SRC_DIR)/pIoTServerDB_Sequences.cpp \
 	$(SRC_DIR)/pIoTServerDB_SQLValues.cpp \
+	$(SRC_DIR)/pIoTServerDB_Tracking.cpp \
 	$(SRC_DIR)/pIoTServerDB_Values.cpp \
 	$(SRC_DIR)/pIoTServerEvaluator.cpp \
 	$(SRC_DIR)/pIoTServerMgr.cpp \
@@ -154,6 +155,7 @@ CPP_SOURCES := \
 	$(SRC_DIR)/sunset.cpp \
 	$(SRC_DIR)/TCPClientInfo.cpp \
 	$(SRC_DIR)/TCPServer.cpp \
+	$(SRC_DIR)/TrackingMgr.cpp \
 	$(SRC_DIR)/W1_Device.cpp \
 	$(PLATFORM_CPP_SOURCES)
 

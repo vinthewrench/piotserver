@@ -399,6 +399,43 @@ class pIoTServerDB  {
 
     bool removeAllIncidents();
 
+
+    // MARK: - Tracking / Usage History
+
+    typedef struct trackingEntry {
+        int64_t     trackingID = 0;
+        std::string valueName;
+        time_t      startTime = 0;
+        uint32_t    durationSec = 0;
+        eTag_t      eTag = 0;
+    } trackingEntry_t;
+
+    typedef std::vector<trackingEntry_t> trackingHistory_t;
+
+    bool initTrackingTables();
+
+    bool insertTrackingDuration(std::string valueName,
+                                time_t startTime,
+                                uint32_t durationSec);
+
+    bool historyForTracking(std::string valueName = "",
+                            float days = 0,
+                            int limit = 0,
+                            int offset = 0,
+                            int64_t sinceEtag = 0,
+                            trackingHistory_t* trackingOut = nullptr);
+
+    bool countHistoryForTracking(std::string valueName = "",
+                                 float days = 0,
+                                 int64_t sinceEtag = 0,
+                                 int* countOut = nullptr);
+
+    bool removeHistoryForTracking(std::string valueName = "",
+                                  float days = 0);
+
+    bool removeAllTracking();
+
+
     // MARK: - utility
 
     string makeNonce();

@@ -34,6 +34,8 @@ constexpr string_view NOUN_LOG                     = "log";
 constexpr string_view NOUN_DEVICES                 = "devices";
 constexpr string_view NOUN_SEQUENCES               = "sequences";
 constexpr string_view NOUN_SEQUENCE_GROUPS         = "sequence.groups";
+constexpr string_view NOUN_TRACKING                = "tracking";
+
 constexpr string_view NOUN_TEST                    = "test";
 
 
@@ -355,6 +357,9 @@ constexpr static string_view JSON_ARG_CRON_SEQUENCES     = "sequences.cron";
 constexpr static string_view PROP_ARG_GROUPID            = "groupID";
 constexpr static string_view PROP_ARG_GROUPIDS           = "groupIDs";
 
+constexpr static string_view JSON_ARG_TRACKING          = "tracking";
+constexpr static string_view JSON_ARG_TRACKING_ID       = "trackingID";
+
 constexpr static string_view JSON_ARG_ACTION             = "action";
 constexpr static string_view JSON_ARG_STEPS              = "steps";
 constexpr static string_view JSON_ARG_STEP               = "step";
@@ -365,7 +370,6 @@ constexpr static string_view JSON_ARG_POST_ACTION        = "post.action";
 
 constexpr static string_view JSON_ARG_OVERIDE_MANUAL     = "override_manualmode";
 constexpr static string_view PROP_ISRUNNING              = "is_running";
-
 
 // -----------------------------------------------------------------------------
 // Rule JSON keys

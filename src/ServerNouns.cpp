@@ -3447,6 +3447,268 @@ static void Rule_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
 
 }
 
+// MARK: - TRACKING NOUN HANDLER
+
+static bool Tracking_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                                      REST_URL url,
+                                      [[maybe_unused]] TCPClientInfo cInfo,
+                                      ServerCmdQueue::cmdCallback_t completion) {
+    using namespace rest;
+
+    json reply;
+    ServerCmdArgValidator v1;
+
+    auto path = url.path();
+
+    auto pIoTServer = pIoTServerMgr::shared();
+    auto db = pIoTServer->getDB();
+
+    size_t pathsize = path.size();
+
+    float days = 0;
+    int limit = 0;
+    int offset = 0;
+    int64_t sinceEtag = 0;
+    string str;
+
+    if (v1.getStringFromMap(JSON_HDR_LIMIT, url.headers(), str)) {
+        char* p;
+        limit = (int) strtol(str.c_str(), &p, 10);
+        if (*p != 0) {
+            limit = 0;
+        }
+    }
+
+    if (v1.getStringFromMap(JSON_HDR_DAYS, url.headers(), str)) {
+        char* p;
+        days = strtof(str.c_str(), &p);
+        if (*p != 0) {
+            days = 0;
+        }
+    }
+
+    if (v1.getStringFromMap(JSON_HDR_OFFSET, url.headers(), str)) {
+        char* p;
+        offset = (int) strtol(str.c_str(), &p, 10);
+        if (*p != 0) {
+            offset = 0;
+        }
+    }
+
+    if (v1.getStringFromMap(JSON_ARG_ETAG, url.headers(), str)) {
+        char* p;
+        sinceEtag = strtoll(str.c_str(), &p, 10);
+        if (*p != 0) {
+            sinceEtag = 0;
+        }
+    }
+
+    if (pathsize == 1) {
+        pIoTServerDB::trackingHistory_t tracking;
+
+        if (db->historyForTracking(string(), days, limit, offset, sinceEtag, &tracking)) {
+            json entries = json::array();
+
+            for (auto& entry : tracking) {
+                json j1;
+
+                j1[string(JSON_ARG_TRACKING_ID)]  = entry.trackingID;
+                j1[string(PROP_KEY)]          = entry.valueName;
+                j1[string(JSON_ARG_TIME)]     = entry.startTime;
+                j1[string(JSON_ARG_DURATION)] = entry.durationSec;
+                j1[string(JSON_ARG_ETAG)]     = entry.eTag;
+
+                entries.push_back(j1);
+            }
+
+            reply[string(JSON_ARG_TRACKING)] = entries;
+        }
+
+        if (reply.empty()) {
+            makeStatusJSON(reply,
+                           STATUS_BAD_REQUEST,
+                           "Not Found",
+                           "No tracking history was found.");
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
+    }
+    else if (pathsize == 2 && path.at(1) == SUBPATH_COUNT) {
+        int count = 0;
+
+        if (db->countHistoryForTracking(string(), days, sinceEtag, &count)) {
+            reply[JSON_ARG_COUNT] = count;
+        }
+
+        if (reply.empty()) {
+            makeStatusJSON(reply,
+                           STATUS_BAD_REQUEST,
+                           "URL Invalid",
+                           "The tracking count request was malformed.");
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
+    }
+    else if (pathsize == 2) {
+        string key = path.at(1);
+        std::transform(key.begin(), key.end(), key.begin(), ::toupper);
+
+        pIoTServerDB::trackingHistory_t tracking;
+
+        reply[PROP_KEY] = key;
+
+        string deviceID;
+        if (pIoTServer->getDeviceIDForKey(key, deviceID)) {
+            reply[PROP_DEVICE_ID] = deviceID;
+        }
+
+        pIoTServerDB::valueSchema_t schema = db->schemaForKey(key);
+
+        if (!schema.title.empty()) {
+            reply[PROP_TITLE] = schema.title;
+        }
+
+        if (schema.units != UNKNOWN) {
+            reply[JSON_ARG_UNITS] = stringforSchemaUnits(schema.units);
+        }
+
+        if (db->historyForTracking(key, days, limit, offset, sinceEtag, &tracking)) {
+            json entries = json::array();
+
+            for (auto& entry : tracking) {
+                json j1;
+
+                j1[string(JSON_ARG_TRACKING_ID)]  = entry.trackingID;
+                j1[string(JSON_ARG_TIME)]     = entry.startTime;
+                j1[string(JSON_ARG_DURATION)] = entry.durationSec;
+                j1[string(JSON_ARG_ETAG)]     = entry.eTag;
+
+                entries.push_back(j1);
+            }
+
+            reply[string(JSON_ARG_TRACKING)] = entries;
+        }
+
+        if (reply.empty()) {
+            makeStatusJSON(reply,
+                           STATUS_BAD_REQUEST,
+                           "Not Found",
+                           "The value key provided has no tracking history.");
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
+    }
+    else if (pathsize == 3 && path.at(1) == SUBPATH_COUNT) {
+        string key = path.at(2);
+        std::transform(key.begin(), key.end(), key.begin(), ::toupper);
+
+        int count = 0;
+
+        if (db->countHistoryForTracking(key, days, sinceEtag, &count)) {
+            reply[PROP_KEY] = key;
+            reply[JSON_ARG_COUNT] = count;
+
+            string deviceID;
+            if (pIoTServer->getDeviceIDForKey(key, deviceID)) {
+                reply[PROP_DEVICE_ID] = deviceID;
+            }
+        }
+
+        if (reply.empty()) {
+            makeStatusJSON(reply,
+                           STATUS_BAD_REQUEST,
+                           "URL Invalid",
+                           "The tracking key provided was malformed or null.");
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
+    }
+    else {
+        return false;
+    }
+
+    makeStatusJSON(reply, STATUS_OK);
+    (completion)(reply, STATUS_OK);
+    return true;
+}
+
+
+static bool Tracking_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                                         REST_URL url,
+                                         [[maybe_unused]] TCPClientInfo cInfo,
+                                         ServerCmdQueue::cmdCallback_t completion) {
+    using namespace rest;
+
+    json reply;
+    ServerCmdArgValidator v1;
+    string str;
+
+    auto path = url.path();
+
+    auto pIoTServer = pIoTServerMgr::shared();
+    auto db = pIoTServer->getDB();
+
+    float days = 0;
+
+    if (v1.getStringFromMap(JSON_HDR_DAYS, url.headers(), str)) {
+        char* p;
+        days = strtof(str.c_str(), &p);
+        if (*p != 0) {
+            days = 0;
+        }
+    }
+
+    if (path.size() == 1) {
+        if (db->removeHistoryForTracking(string(), days)) {
+            makeStatusJSON(reply, STATUS_NO_CONTENT);
+            (completion)(reply, STATUS_NO_CONTENT);
+            return true;
+        }
+    }
+    else if (path.size() == 2) {
+        string key = path.at(1);
+        std::transform(key.begin(), key.end(), key.begin(), ::toupper);
+
+        if (db->removeHistoryForTracking(key, days)) {
+            makeStatusJSON(reply, STATUS_NO_CONTENT);
+            (completion)(reply, STATUS_NO_CONTENT);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+static void Tracking_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
+                                  REST_URL url,
+                                  [[maybe_unused]] TCPClientInfo cInfo,
+                                  ServerCmdQueue::cmdCallback_t completion) {
+    using namespace rest;
+
+    json reply;
+
+    bool isValidURL = false;
+
+    switch (url.method()) {
+        case HTTP_GET:
+            isValidURL = Tracking_NounHandler_GET(cmdQueue, url, cInfo, completion);
+            break;
+
+        case HTTP_DELETE:
+            isValidURL = Tracking_NounHandler_DELETE(cmdQueue, url, cInfo, completion);
+            break;
+
+        default:
+            (completion)(reply, STATUS_INVALID_METHOD);
+            return;
+    }
+
+    if (!isValidURL) {
+        (completion)(reply, STATUS_NOT_FOUND);
+    }
+}
+
 
 // MARK: -  register server nouns
 
@@ -3478,7 +3740,7 @@ void registerServerNouns() {
 
     cmdQueue->registerNoun(NOUN_RULES,  Rule_NounHandler);
 
+    cmdQueue->registerNoun(NOUN_TRACKING,  Tracking_NounHandler);
+
     cmdQueue->registerNoun(NOUN_TEST,  Test_NounHandler);
-
-
 }

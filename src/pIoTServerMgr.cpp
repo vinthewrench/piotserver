@@ -24,6 +24,7 @@
 #include "pIoTServerMgr.hpp"
 #include "IncidentMgr.hpp"
 #include "NotificationMgr.hpp"
+#include "TrackingMgr.hpp"
 #include "LogMgr.hpp"
 #include "PropValKeys.hpp"
 #include "Utils.hpp"
@@ -623,6 +624,8 @@ void pIoTServerMgr::start(){
                "SERVER_START",
                "piotserver"
            );
+
+        TrackingMgr::shared()->begin(&_db);
 
         LOGT_DEBUG("Start pIoTServer");
         startDevices();
