@@ -98,7 +98,12 @@ DEPS := $(OBJECTS:.o=.d)
 
 MODULE_DIRS := \
 	PCA9536 \
-	TMP10X
+	TMP10X	\
+	MCP23008 \
+	SHT25	\
+	SHT30	\
+	VALVEMASTER \
+	POWERCONTROL
 
 .PHONY: all modules clean clean-modules distclean print install uninstall $(MODULE_DIRS)
 

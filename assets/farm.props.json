@@ -237,6 +237,7 @@
             "device_type": "VALVEMASTER",
             "interval": 5,
             "key": "VALVEMASTER_1",
+            "condition": "RAIN_SENSOR == 0",
             "pins": [
                 {
                     "data_type": "BOOL",
