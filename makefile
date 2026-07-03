@@ -36,7 +36,7 @@
 
 
 APP_NAME := piotserver
-APP_VERSION := 1.5.0-field
+APP_VERSION := 1.6.0-field
 GIT_HASH := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 
 CXX := clang++

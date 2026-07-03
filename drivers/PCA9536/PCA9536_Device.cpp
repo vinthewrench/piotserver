@@ -387,3 +387,34 @@ bool PCA9536_Device::getValues (keyValueMap_t &results){
 
     return hasData;
 }
+
+
+
+bool PCA9536_Device::deviceAction(string cmd)
+{
+    std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
+
+
+    if(!_isEnabled){
+        LOGT_ERROR("PCA9536_Device devID \"%s\" DEVICE_ACTION \"%s\" failed: device disabled",
+                   _deviceID.c_str(),
+                   cmd.c_str());
+        return false;
+    }
+
+    // LOGT_DEBUG("PCA9536_Device devID \"%s\" DEVICE_ACTION : \"%s\"",
+    //            _deviceID.c_str(),
+    //            cmd.c_str());
+
+
+    if(cmd == DEVICE_ACTION_ALL_OFF){
+        return allOff();;
+    }
+
+
+    LOGT_ERROR("PCA9536_Device devID \"%s\" unknown DEVICE_ACTION \"%s\"",
+               _deviceID.c_str(),
+               cmd.c_str());
+
+    return false;
+}

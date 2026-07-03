@@ -34,6 +34,7 @@
 #include "LogMgr.hpp"
 #include "SolarTimeMgr.hpp"
 #include "TimeStamp.hpp"
+#include "TrackingMgr.hpp"
 #include "lunar.hpp"
 #include "Actuator_Device.hpp"
 #include "pIoTServerEvaluator.hpp"
@@ -373,7 +374,16 @@ bool pIoTServerDB::restorePropertiesFromFile(string propFileNameIn, string asset
                 }
             }
 
-            else if( it.key() == PROP_RULE && it.value().is_array()){
+            else if( it.key() == PROP_TRACKING) {
+                if(!TrackingMgr::shared()->configure(it.value())) {
+                    LOG_ERROR("TrackingMgr configure FAILED\n");
+                }
+                else {
+  //                  TrackingMgr::shared()->dumpTracking();
+                }
+            }
+
+             else if( it.key() == PROP_RULE && it.value().is_array()){
                for (auto& el : it.value()) {
                     if(el.is_object()){
                         Rule rule = Rule(el);
@@ -392,6 +402,7 @@ bool pIoTServerDB::restorePropertiesFromFile(string propFileNameIn, string asset
              }
           }
 
+        _props.erase(PROP_TRACKING);
         _props.erase(PROP_SEQUENCE);
         _props.erase(PROP_SEQUENCE_GROUPS);
         _props.erase(PROP_RULE);
@@ -495,6 +506,17 @@ bool pIoTServerDB::saveProperties(){
         if(_keysInManualMode.size()){
             jP[JSON_ARG_MANUAL_KEYS] = _keysInManualMode;
           }
+
+        json trackingConfig = TrackingMgr::shared()->jsonConfig();
+
+        if(trackingConfig.contains("items")
+           && trackingConfig["items"].is_array()
+           && !trackingConfig["items"].empty()) {
+            jP[PROP_TRACKING] = trackingConfig;
+        }
+        else {
+            jP.erase(PROP_TRACKING);
+        }
 
         string jsonStr = jP.dump(4);
         ofs << jsonStr << "\n";

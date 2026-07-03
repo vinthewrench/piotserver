@@ -1,0 +1,87 @@
+{
+    "config": {
+        "lat_long": "34.465338, -93.362827"
+    },
+    "devices": [
+        {
+            "address": "0x41",
+            "deviceID": "RELAYS",
+            "device_type": "PCA9536",
+            "enable": true,
+            "key": "RELAYS",
+            "pins": [
+                {
+                    "bit": 0,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RLY41_CH1",
+                    "title": "Relay 41 CH1"
+                },
+                {
+                    "bit": 1,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RLY41_CH2",
+                    "title": "Relay 41 CH2"
+                }
+            ]
+        }
+    ],
+    "prop.file.version": {
+        "file.etag": 28,
+        "last_write": 1783042539
+    },
+    "sequence": [
+        {
+            "enable": true,
+            "override_manualmode": false,
+            "sequenceID": "0001",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "DEVICE_ACTION",
+                            "key": "RELAYS",
+                            "value": "ALL_OFF"
+                        }
+                    ]
+                }
+            ],
+            "trigger": {
+                "event": "manual"
+            }
+        }
+    ],
+    "tracking": {
+        "action_effects": [
+            {
+                "action": "ALL_OFF",
+                "device": "RELAYS",
+                "effect": "inactive"
+            }
+        ],
+        "enabled": true,
+        "items": [
+            {
+                "device": "RELAYS",
+                "key": "RLY41_CH1",
+                "kind": "duration"
+            },
+            {
+                "device": "RELAYS",
+                "key": "RLY41_CH2",
+                "kind": "duration"
+            }
+        ]
+    },
+    "ui.groups": {
+        "relays": {
+            "control": "switch",
+            "label": "Relays",
+            "members": [
+                "RLY41_CH1",
+                "RLY41_CH2"
+            ]
+        }
+    }
+}

@@ -462,6 +462,9 @@ private:
     pIoTServerDevice* deviceForKey(string key);
     pIoTServerDevice* deviceForActionKey(string key);
 
+    bool deviceAction(const std::string& key,
+                      const std::string& value);
+
     string createUniqueDeviceID();
 
     pIoTServerDevice* createpIoTServerDevice(string driverName, string deviceID);

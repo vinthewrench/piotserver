@@ -1790,6 +1790,8 @@ bool pIoTServerMgr:: setValues(keyValueMap_t kv){
                 if(d.device->setValues(forThisDevice)){
                     // if success then update DB immediately
                     _db.insertValues(forThisDevice);
+
+                    TrackingMgr::shared()->setValues(forThisDevice);
                     success = true;
                 }
                 else {
@@ -1821,6 +1823,50 @@ bool pIoTServerMgr:: setValues(keyValueMap_t kv){
         _valuesUpdated.notify_all();
 
     return success;
+}
+
+bool pIoTServerMgr::deviceAction(const std::string& key,
+                                 const std::string& value)
+{
+    pIoTServerDevice* device = deviceForActionKey(key);
+
+    if(device == nullptr) {
+        LOGT_ERROR("DEVICE_ACTION failed: no device found for key \"%s\"",
+                   key.c_str());
+        return false;
+    }
+
+    string devID;
+    string devName = device->getDeviceTitle();
+
+    device->getDeviceID(devID);
+
+    LOGT_INFO("DEVICE_ACTION dispatch: key=\"%s\" device=%s \"%s\" value=\"%s\"",
+              key.c_str(),
+              devID.c_str(),
+              devName.c_str(),
+              value.c_str());
+
+    bool success = device->deviceAction(value);
+
+    if(!success) {
+        LOGT_ERROR("DEVICE_ACTION failed: device=%s \"%s\" key=\"%s\" value=\"%s\"",
+                   devID.c_str(),
+                   devName.c_str(),
+                   key.c_str(),
+                   value.c_str());
+        return false;
+    }
+
+   // bool tracked =
+        TrackingMgr::shared()->deviceAction(devID, value, true);
+
+    // LOGT_INFO("DEVICE_ACTION tracking: device=%s action=\"%s\" tracked=%s",
+    //           devID.c_str(),
+    //           value.c_str(),
+    //           tracked ? "true" : "false");
+
+    return true;
 }
 
 bool pIoTServerMgr::stopDevices()
@@ -2115,7 +2161,7 @@ bool pIoTServerMgr::processEvents(){
 
                     string name = _db.sequenceGetName(sid);
 
-                   if(!dontLog)
+                  if(!dontLog)
                         LOGT_INFO("RUN %s SEQUENCE %04x, Step %d \"%s\"",
                                   trgiStr.c_str(),
                                   sid, stepNo, name.c_str());
@@ -2333,20 +2379,9 @@ bool pIoTServerMgr::runAbortActions(sequenceID_t sid){
             string key = action.key();
             string value = action.value();
 
-            pIoTServerDevice* device = deviceForActionKey(key);
-
-            if(device == nullptr){
-                LOGT_ERROR("DEVICE_ACTION failed: no device found for key \"%s\"",
-                           key.c_str());
+            if(!deviceAction(key,value)){
                 success = false;
                 continue;
-            }
-
-            if(!device->deviceAction(value)){
-                LOGT_ERROR("DEVICE_ACTION failed: key \"%s\" value \"%s\"",
-                           key.c_str(),
-                           value.c_str());
-                success = false;
             }
         }
     }
@@ -2477,11 +2512,10 @@ bool pIoTServerMgr::runSequenceStep(sequenceID_t sid,
 
     _db.sequenceSetCurrentStep(sid, stepNo);
 
-    if(!dontLog) {
+  if(!dontLog)
         LOGT_DEBUG("RUN SEQUENCE %s step %d",
                    SequenceID_to_string(sid).c_str(),
                    stepNo);
-    }
 
     EventTrigger trig;
     EventTrigger* trigPtr = nullptr;
@@ -2511,6 +2545,7 @@ bool pIoTServerMgr::runSequenceStep(sequenceID_t sid,
 bool pIoTServerMgr::startRunningSequence(sequenceID_t sid,
                                          boolCallback_t cb){
     bool success = _db.triggerSequence(sid);
+
     if(cb) (cb)(success);
     return success;
 }
@@ -3131,22 +3166,9 @@ bool pIoTServerMgr::runActionList(const vector<Action>& actions,
             string key = action.key();
             string value = action.value();
 
-            pIoTServerDevice* device = deviceForActionKey(key);
-
-            if(device == nullptr) {
-                LOGT_ERROR("%s DEVICE_ACTION failed: no device found for key \"%s\"",
-                           ownerLabel.c_str(),
-                           key.c_str());
+            if(!deviceAction(key,value)){
                 success = false;
                 continue;
-            }
-
-            if(!device->deviceAction(value)) {
-                LOGT_ERROR("%s DEVICE_ACTION failed: key \"%s\" value \"%s\"",
-                           ownerLabel.c_str(),
-                           key.c_str(),
-                           value.c_str());
-                success = false;
             }
         }
         else {

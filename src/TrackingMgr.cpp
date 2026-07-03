@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <ctime>
+#include <cstdio>
 
 using namespace nlohmann;
 using namespace std;
@@ -46,8 +47,15 @@ bool TrackingMgr::begin(pIoTServerDB* db)
         return false;
     }
 
-    _itemsByKey.clear();
-    _actionEffects.clear();
+    /*
+     * Do not clear _itemsByKey or _actionEffects here.
+     *
+     * Tracking config may have already been loaded by
+     * restorePropertiesFromFile() before the database is opened.
+     *
+     * configure() owns replacing tracking config.
+     * stop() owns clearing runtime/config state.
+     */
 
     _isSetup = true;
     return true;
@@ -69,15 +77,87 @@ bool TrackingMgr::configure(const nlohmann::json& config)
 {
     std::lock_guard<std::mutex> lock(_mutex);
 
-    if(!_isSetup || !_db) {
-        LOG_ERROR("TrackingMgr configure failed: manager is not setup");
-        return false;
-    }
-
     _itemsByKey.clear();
     _actionEffects.clear();
 
     return loadConfig(config);
+}
+
+nlohmann::json TrackingMgr::jsonConfig() const
+{
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    json config;
+
+    config["enabled"] = true;
+
+    json items = json::array();
+
+    for(const auto& [key, item] : _itemsByKey) {
+        json entry;
+
+        entry["key"] = item.key;
+
+        switch(item.kind) {
+            case Kind::Duration:
+                entry["kind"] = "duration";
+                break;
+
+            case Kind::Unknown:
+            default:
+                entry["kind"] = "unknown";
+                break;
+        }
+
+        if(!item.deviceID.empty()) {
+            entry["device"] = item.deviceID;
+        }
+
+        /*
+         * active_value defaults to true / "1".
+         * Only write it if it is not default.
+         */
+        if(item.activeValue != "1") {
+            if(item.activeValue == "0") {
+                entry["active_value"] = false;
+            }
+            else {
+                entry["active_value"] = item.activeValue;
+            }
+        }
+
+        items.push_back(entry);
+    }
+
+    config["items"] = items;
+
+    json effects = json::array();
+
+    for(const auto& effect : _actionEffects) {
+        json entry;
+
+        entry["device"] = effect.deviceID;
+        entry["action"] = effect.action;
+
+        switch(effect.effect) {
+            case ActionEffect::Inactive:
+                entry["effect"] = "inactive";
+                break;
+
+            case ActionEffect::Unknown:
+            default:
+                entry["effect"] = "unknown";
+                break;
+        }
+
+        effects.push_back(entry);
+    }
+
+    if(!effects.empty()) {
+        config["action_effects"] = effects;
+    }
+
+    return config;
 }
 
 bool TrackingMgr::isSetup() const
@@ -119,20 +199,28 @@ bool TrackingMgr::deviceAction(const std::string& deviceID,
         return false;
     }
 
+    std::string normalizedDeviceID = normalizeDeviceID(deviceID);
+
+    std::string normalizedAction = action;
+    std::transform(normalizedAction.begin(),
+                   normalizedAction.end(),
+                   normalizedAction.begin(),
+                   ::toupper);
+
     bool handled = false;
 
     for(const auto& effect : _actionEffects) {
-        if(effect.deviceID != deviceID) {
+        if(effect.deviceID != normalizedDeviceID) {
             continue;
         }
 
-        if(effect.action != action) {
+        if(effect.action != normalizedAction) {
             continue;
         }
 
         switch(effect.effect) {
             case ActionEffect::Inactive:
-                if(forceInactiveForDevice(deviceID)) {
+                if(forceInactiveForDevice(normalizedDeviceID)) {
                     handled = true;
                 }
                 break;
@@ -146,128 +234,146 @@ bool TrackingMgr::deviceAction(const std::string& deviceID,
     return handled;
 }
 
+
 bool TrackingMgr::isTrackingKey(const std::string& key) const
 {
     std::lock_guard<std::mutex> lock(_mutex);
     return _itemsByKey.count(key) != 0;
 }
 
-bool TrackingMgr::loadConfig(const nlohmann::json& config)
-{
-    if(config.is_null()) {
-        return true;
-    }
 
-    if(!config.is_object()) {
-        LOG_ERROR("TrackingMgr config is not an object");
-        return false;
-    }
+ bool TrackingMgr::loadConfig(const nlohmann::json& config)
+ {
+     //   string jsonStr = config.dump(4);
+     // printf("\n------- Tracking----- \n");
+     // printf("%s\n", jsonStr.c_str());
+     // printf("\n--------------------- \n");
 
-    bool enabled = true;
+     if(config.is_null()) {
+         return true;
+     }
 
-    if(config.contains("enabled") && config["enabled"].is_boolean()) {
-        enabled = config["enabled"].get<bool>();
-    }
+     if(!config.is_object()) {
+         LOG_ERROR("TrackingMgr config is not an object");
+         return false;
+     }
 
-    if(!enabled) {
-        LOG_INFO("TrackingMgr disabled by config");
-        return true;
-    }
+     bool enabled = true;
 
-    if(config.contains("items") && config["items"].is_array()) {
-        for(const auto& entry : config["items"]) {
-            if(!entry.is_object()) {
-                continue;
-            }
+     if(config.contains("enabled") && config["enabled"].is_boolean()) {
+         enabled = config["enabled"].get<bool>();
+     }
 
-            if(!entry.contains("key") || !entry["key"].is_string()) {
-                LOG_ERROR("TrackingMgr item missing key");
-                continue;
-            }
+     if(!enabled) {
+         LOG_INFO("TrackingMgr disabled by config");
+         return true;
+     }
 
-            trackingItem_t item = {};
+     if(config.contains("items") && config["items"].is_array()) {
+         for(const auto& entry : config["items"]) {
+             if(!entry.is_object()) {
+                 continue;
+             }
 
-            item.key = entry["key"].get<std::string>();
-            std::transform(item.key.begin(), item.key.end(), item.key.begin(), ::toupper);
+             if(!entry.contains("key") || !entry["key"].is_string()) {
+                 LOG_ERROR("TrackingMgr item missing key");
+                 continue;
+             }
 
-            if(entry.contains("device") && entry["device"].is_string()) {
-                item.deviceID = entry["device"].get<std::string>();
-            }
-            else if(entry.contains("deviceID") && entry["deviceID"].is_string()) {
-                item.deviceID = entry["deviceID"].get<std::string>();
-            }
+             trackingItem_t item = {};
 
-            if(entry.contains("kind") && entry["kind"].is_string()) {
-                item.kind = kindForString(entry["kind"].get<std::string>());
-            }
-            else {
-                item.kind = Kind::Duration;
-            }
+             item.key = entry["key"].get<std::string>();
+             std::transform(item.key.begin(),
+                            item.key.end(),
+                            item.key.begin(),
+                            ::toupper);
 
-            if(item.kind == Kind::Unknown) {
-                LOGT_ERROR("TrackingMgr item %s has unknown kind", item.key.c_str());
-                continue;
-            }
+             if(entry.contains("device") && entry["device"].is_string()) {
+                 item.deviceID = normalizeDeviceID(entry["device"].get<std::string>());
+             }
+             else if(entry.contains("deviceID") && entry["deviceID"].is_string()) {
+                 item.deviceID = normalizeDeviceID(entry["deviceID"].get<std::string>());
+             }
 
-            if(entry.contains("active_value")) {
-                item.activeValue = normalizeValue(entry["active_value"]);
-            }
-            else {
-                item.activeValue = "1";
-            }
+             if(entry.contains("kind") && entry["kind"].is_string()) {
+                 item.kind = kindForString(entry["kind"].get<std::string>());
+             }
+             else {
+                 item.kind = Kind::Duration;
+             }
 
-            item.active = false;
-            item.startTime = 0;
+             if(item.kind == Kind::Unknown) {
+                 LOGT_ERROR("TrackingMgr item %s has unknown kind",
+                            item.key.c_str());
+                 continue;
+             }
 
-            _itemsByKey[item.key] = item;
+             if(entry.contains("active_value")) {
+                 item.activeValue = normalizeValue(entry["active_value"]);
+             }
+             else {
+                 item.activeValue = "1";
+             }
 
-            LOGT_INFO("TrackingMgr tracking key %s kind=%d active_value=%s device=%s",
-                      item.key.c_str(),
-                      (int)item.kind,
-                      item.activeValue.c_str(),
-                      item.deviceID.c_str());
-        }
-    }
+             item.active = false;
+             item.startTime = 0;
 
-    if(config.contains("action_effects") && config["action_effects"].is_array()) {
-        for(const auto& entry : config["action_effects"]) {
-            if(!entry.is_object()) {
-                continue;
-            }
+             _itemsByKey[item.key] = item;
 
-            trackingActionEffect_t effect = {};
+             LOGT_INFO("TrackingMgr tracking key %s kind=%d active_value=%s device=%s",
+                       item.key.c_str(),
+                       (int)item.kind,
+                       item.activeValue.c_str(),
+                       item.deviceID.c_str());
+         }
+     }
 
-            if(entry.contains("device") && entry["device"].is_string()) {
-                effect.deviceID = entry["device"].get<std::string>();
-            }
-            else if(entry.contains("deviceID") && entry["deviceID"].is_string()) {
-                effect.deviceID = entry["deviceID"].get<std::string>();
-            }
+     if(config.contains("action_effects") && config["action_effects"].is_array()) {
+         for(const auto& entry : config["action_effects"]) {
+             if(!entry.is_object()) {
+                 continue;
+             }
 
-            if(entry.contains("action") && entry["action"].is_string()) {
-                effect.action = entry["action"].get<std::string>();
-            }
+             trackingActionEffect_t effect = {};
 
-            if(entry.contains("effect") && entry["effect"].is_string()) {
-                effect.effect = actionEffectForString(entry["effect"].get<std::string>());
-            }
+             if(entry.contains("device") && entry["device"].is_string()) {
+                 effect.deviceID = normalizeDeviceID(entry["device"].get<std::string>());
+             }
+             else if(entry.contains("deviceID") && entry["deviceID"].is_string()) {
+                 effect.deviceID = normalizeDeviceID(entry["deviceID"].get<std::string>());
+             }
 
-            if(effect.deviceID.empty() || effect.action.empty() || effect.effect == ActionEffect::Unknown) {
-                LOG_ERROR("TrackingMgr action_effect malformed");
-                continue;
-            }
+             if(entry.contains("action") && entry["action"].is_string()) {
+                 effect.action = entry["action"].get<std::string>();
+                 std::transform(effect.action.begin(),
+                                effect.action.end(),
+                                effect.action.begin(),
+                                ::toupper);
+             }
 
-            _actionEffects.push_back(effect);
+             if(entry.contains("effect") && entry["effect"].is_string()) {
+                 effect.effect = actionEffectForString(entry["effect"].get<std::string>());
+             }
 
-            LOGT_INFO("TrackingMgr action effect device=%s action=%s effect=%d",
-                      effect.deviceID.c_str(),
-                      effect.action.c_str(),
-                      (int)effect.effect);
-        }
-    }
+             if(effect.deviceID.empty()
+                || effect.action.empty()
+                || effect.effect == ActionEffect::Unknown) {
+                 LOG_ERROR("TrackingMgr action_effect malformed");
+                 continue;
+             }
 
-    return true;
-}
+             _actionEffects.push_back(effect);
+
+             LOGT_INFO("TrackingMgr action effect device=%s action=%s effect=%d",
+                       effect.deviceID.c_str(),
+                       effect.action.c_str(),
+                       (int)effect.effect);
+         }
+     }
+
+     return true;
+ }
+
 
 bool TrackingMgr::handleValue(const std::string& key,
                               const std::string& value)
@@ -336,10 +442,12 @@ bool TrackingMgr::forceInactiveForKey(const std::string& key)
 
 bool TrackingMgr::forceInactiveForDevice(const std::string& deviceID)
 {
+    std::string normalizedDeviceID = normalizeDeviceID(deviceID);
+
     bool handled = false;
 
     for(auto& [key, item] : _itemsByKey) {
-        if(item.deviceID != deviceID) {
+        if(item.deviceID != normalizedDeviceID) {
             continue;
         }
 
@@ -457,4 +565,96 @@ std::string TrackingMgr::normalizeValue(const nlohmann::json& value)
     }
 
     return "1";
+}
+
+std::string TrackingMgr::normalizeDeviceID(const std::string& str)
+{
+    std::string s = str;
+    std::transform(s.begin(),
+                   s.end(),
+                   s.begin(),
+                   ::toupper);
+    return s;
+}
+
+
+std::string TrackingMgr::printString() const
+{
+  //  std::lock_guard<std::mutex> lock(_mutex);
+
+    std::stringstream ss;
+
+    ss << "TrackingMgr"
+       << " setup=" << (_isSetup ? "true" : "false")
+       << " items=" << _itemsByKey.size()
+       << " action_effects=" << _actionEffects.size()
+       << "\n";
+
+    if(_itemsByKey.empty()) {
+        ss << "  items: none\n";
+    }
+    else {
+        ss << "  items:\n";
+
+        for(const auto& [key, item] : _itemsByKey) {
+            ss << "    "
+               << "key=" << item.key
+               << " kind=" << stringForKind(item.kind)
+               << " active_value=" << item.activeValue
+               << " active=" << (item.active ? "true" : "false")
+               << " start_time=" << static_cast<long>(item.startTime);
+
+            if(!item.deviceID.empty()) {
+                ss << " device=" << item.deviceID;
+            }
+
+            ss << "\n";
+        }
+    }
+
+    if(_actionEffects.empty()) {
+        ss << "  action_effects: none\n";
+    }
+    else {
+        ss << "  action_effects:\n";
+
+        for(const auto& effect : _actionEffects) {
+            ss << "    "
+               << "device=" << effect.deviceID
+               << " action=" << effect.action
+               << " effect=" << stringForActionEffect(effect.effect)
+               << "\n";
+        }
+    }
+
+    return ss.str();
+}
+
+void TrackingMgr::dumpTracking() const
+{
+    printf("%s\n", printString().c_str());
+}
+
+std::string TrackingMgr::stringForKind(Kind kind)
+{
+    switch(kind) {
+        case Kind::Duration:
+            return "duration";
+
+        case Kind::Unknown:
+        default:
+            return "unknown";
+    }
+}
+
+std::string TrackingMgr::stringForActionEffect(ActionEffect effect)
+{
+    switch(effect) {
+        case ActionEffect::Inactive:
+            return "inactive";
+
+        case ActionEffect::Unknown:
+        default:
+            return "unknown";
+    }
 }

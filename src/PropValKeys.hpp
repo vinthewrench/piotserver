@@ -223,6 +223,7 @@ constexpr static string_view PROP_CONFIG_RULE_EVAL_INTERVAL = "rule.eval_interva
 // -----------------------------------------------------------------------------
 
 constexpr static string_view PROP_DEVICES          = "devices";
+
 constexpr static string_view PROP_SEQUENCE         = "sequence";
 constexpr static string_view PROP_SEQUENCE_GROUPS  = "sequence.groups";
 constexpr static string_view PROP_DEVICE_PARAMS    = "params";

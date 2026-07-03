@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 #include <mutex>
+#include <time.h>
 
 #include "json.hpp"
 
@@ -44,10 +45,9 @@ public:
     static TrackingMgr* shared();
 
     bool begin(pIoTServerDB* db);
-    void stop();
-
     bool configure(const nlohmann::json& config);
-
+    nlohmann::json jsonConfig() const;
+    void stop();
 
     bool isSetup() const;
 
@@ -58,6 +58,9 @@ public:
                       bool success);
 
     bool isTrackingKey(const std::string& key) const;
+
+    std::string printString() const;
+    void dumpTracking() const;
 
 private:
     TrackingMgr();
@@ -78,6 +81,10 @@ private:
     static Kind kindForString(const std::string& str);
     static ActionEffect actionEffectForString(const std::string& str);
     static std::string normalizeValue(const nlohmann::json& value);
+
+    static std::string stringForKind(Kind kind);
+    static std::string stringForActionEffect(ActionEffect effect);
+    static std::string normalizeDeviceID(const std::string& str);
 
     mutable std::mutex _mutex;
     pIoTServerDB* _db = nullptr;
