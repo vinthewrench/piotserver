@@ -1,0 +1,451 @@
+GET /values?PLOT1 HTTP/1.1
+Host: royal0:8081
+Connection: close
+
+
+
+PUT /values HTTP/1.1
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+Content-Length: 31
+
+{"RELAY_1":true,"RELAY_4":true}
+
+OPTIONS / HTTP/1.1
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /test HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 718276081a2452fce00b541973965f3965b037db3c63c4f5dd86f5dd86cf0158
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /state HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: f121bdd1bd7b61f35a5086bf7f6c5998ede6c4fa2f7d40a1409e27f9afc89b29
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+PUT /state HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: becac9d7b6aa6d0236da77ae4b7bd9feb475c35848d590c55aa2b6ff28864afa
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+Content-Length: 15
+
+{"enable":true}
+
+GET /date HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 793af07e4d6e599538fea8e240a849ff0d0c8dc623f374b09581cd21bc46157f
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /version HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 017340eb663849fc154f333fe49823250e6140675f838cea745e3d618fe600e9
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+PATCH /log HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 5adeebb9d1e717b7b298ea2eec76f68e1946478ef5fae3cc89906b779349a53e
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+Content-Length: 57
+
+{"message":"Test Log Entry: 1780004223 0BEC103E7D5E478C"}
+
+GET /eatme/dorko?zip=999 HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 8ca667905c59697a9be3eabd2522d6e1cb3b5ebb5d613790a2c99ed00f14b7a0
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /range/?GREENHOUSE&GARDEN_TEMPERATURE&PLOT1&COOLER_TEMPERATURE&GARDEN_HUMIDITY&COOLER_HUMIDITY HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: a39c980f5fb052c8d48c2dcdfadcb9d3f1e6f89505c09faf45d3ca68f319d0dd
+Hours: 24
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /history/RAIN_SENSOR HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 2af9de55056089b5d3bae307d7f994dd0f4eaec97d0a6942f30b0aab3e6e0a01
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /history/GARDEN_HUMIDITY HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 298b1b575980662b6bfd988d81b1a8bb425b0ee63b6522398a5b17f948eb32ca
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /history/count/PLOT1 HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 627783be9242319362bd947d23301c99f3f793fec816ef51e381ebaa9539ea83
+Days: 1
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /history/count/GARDEN_HUMIDITY HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: a855fecb00701d1e0e95e44a9795772de037c041be7ddbc6d97c94fee57f3cb6
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+DELETE /history/GREENHOUSE HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: f57ace49dd9ba3f7c3ce881eb01db2a68ba1c5e57b7357424551b908b9e6f46d
+Days: 11
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /values HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: f36dffd2d931b8872a5cffba831b1a9d4842fc520315cbc6d032c8b3d6d47ab2
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /values?POWER_FAIL HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: f36dffd2d931b8872a5cffba831b1a9d4842fc520315cbc6d032c8b3d6d47ab2
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /values/?SPRK_1&SPRK_5 HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 36ef6fc5e4a4c8340c1f25b908ef4d038c4ad89c365c39bf3407909bacece0d4
+Host: royal0:8081
+Connection: close
+
+
+
+GET /range/?GARDEN_TEMPERATURE HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: a39c980f5fb052c8d48c2dcdfadcb9d3f1e6f89505c09faf45d3ca68f319d0dd
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+PUT /values HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: ebe4e8e763aa77046d3aea67c11c22125a61db3a7ac3a35ef7e94fb1982524b2
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+Content-Length: 15
+
+{"SPRK_5":true}
+
+GET /alerts HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: a69f20524eff82709a41dd808f3a7f0fcff0bc153ed139befa69fe4ad9b1cf0c
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /alerts/count HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: adf6a04489fbbb35562146305a7af2f2c6f6aaaf0f43162e042c1d30c6facc01
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+DELETE /alerts HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 91d78c85a4f2b26fd2002f758e119f7e6f58b935dac2e80dd8c455fcfedcf099
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /props HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: d9eeeca623f01aff01ac85a187842eaf3e189d162f90aa26fab220f0538613e3
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /props/?COOLER_TEMPERATURE HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 3734ecad8668b8c7da66eab1beccc9821d589f0b6ca80a43e6aac2dfdd39444b
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+PUT /props HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: eb92748771ff78e4e48ae7e5da6384f3a592f2c8a222904ac3c01bdfbf146450
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+Content-Length: 21
+
+{"foobar":"vVP1i3Ws"}
+
+DELETE /props/logfile_flags HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 9ab76a9f79c9fbd14333febbe8c5ace4fa9a5ad57107f5f38222f2cf7bf6f59e
+Content-Type: application/x-www-form-urlencoded; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /devices/ HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: fce152a3a853a934464784305143e4bac5937a4e0908146510016ec28dac92c6
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /devices/?1599 HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: fce152a3a853a934464784305143e4bac5937a4e0908146510016ec28dac92c6
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+PUT /devices/44158 HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 027ba34b83da49243b03d6ac4b57a8734a179b15c31545f753ea96c557e85d01
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+Content-Length: 15
+
+{"enable":true}
+
+GET /schema/?PLOT1 HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: ac800599b51f666da613431655e7870e32f9be9c131b9b3063335a1672491bf2
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /sequences HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 37a1b9882d1e8ab2fe8ee82f7a5eaa5560021cc51af181a157bc553bdf596fe5
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+DELETE /sequences/1000 HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: c0f35292f4dbfccc9261875a4fd34eac666567c80c6a8a6bf7e77d420c305833
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+Content-Length: 43
+
+{"name":"YDd0JK4UM3hxYMWlIbrisF5XrG5DJfwn"}
+
+POST /sequences HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 23e3404367a766838e8d5a56196990ad9cdd44c251e03bbd84b771d2cbe31d45
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+Content-Length: 208
+
+{"enable":true,"name":"Test sequence","trigger":{"cron":"@hourly"},"steps":[{"duration":5,"action":[{"cmd":"LOG","value":"first log entry"}]},{"duration":5,"action":{"cmd":"LOG","value":"second log entry"}}]}
+
+PATCH /sequences/4000 HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 37403e48c76b834f65fd0d96677f7ddcac7b91fb8029a4caefac06aa9b043aa3
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+Content-Length: 14
+
+{"abort":true}
+
+PUT /sequences HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 8148a47044b27bf8c2cb384ec3cc7b6d3c50c4984fdcad3b6b3b5bb9ba469304
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+Content-Length: 21
+
+{"sequenceID":"4000"}
+
+GET /sequence.groups HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: fe456dbf95559a7fe195896c300b756e6c165859fade496dd118db323068464d
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+GET /sequence.groups/?1000 HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 132801cf73046b60caa875110576a70f7a52a18c06b49419ef840703931c2c17
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+
+
+
+POST /sequence.groups HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: c5279d37b88345f019bffb1c80dfd3d9fd10ec408ec6036f1b1d06aacb3d6b79
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+Content-Length: 31
+
+{"name":"other sequence.group"}
+
+DELETE /sequence.groups/8ac3 HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 19183b90e5cb216e91245b76bc7ad760eaba0cc5625f81fa8779479d44ae1e89
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+Content-Length: 43
+
+{"name":"YDd0JK4UM3hxYMWlIbrisF5XrG5DJfwn"}
+
+PATCH /sequence.groups/b5e8 HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 48d3dede3b6876d9c3c467ecd93b1e820c67a0675dc4c3715084870fb567b875
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+Content-Length: 25
+
+{"name":"Group-5adysDii"}
+
+PUT /sequence.groups/8ac3 HTTP/1.1
+X-Auth-Date: 1780004223
+X-Auth-Key: test
+Authorization: 5f693a3278792ea7c6302a804cfb8b8ed194913b5d10db33d6f2fc13353a7ce0
+Content-Type: application/json; charset=utf-8
+Host: royal0:8081
+Connection: close
+User-Agent: RapidAPI/4.5.2 (Macintosh; OS X/14.8.2) GCDHTTPRequest
+Content-Length: 21
+
+{"sequenceID":"1002"}
+
