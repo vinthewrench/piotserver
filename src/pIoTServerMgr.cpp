@@ -741,6 +741,9 @@ bool pIoTServerMgr::shutdownRuntime()
         LOGT_ERROR("One or more devices failed during shutdown");
     }
 
+
+    TrackingMgr::shared()->stop();
+
     NotificationMgr::shared()->stop();
 
     IncidentMgr::shared()->notice(
