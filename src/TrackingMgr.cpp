@@ -91,14 +91,70 @@ nlohmann::json TrackingMgr::jsonConfig() const
 
     config["enabled"] = true;
 
-    json items = json::array();
+    /*
+     * _itemsByKey is flat internally, but props are easier to read when
+     * equivalent items are grouped into one entry with key[].
+     *
+     * Only group items that share the same config-affecting fields:
+     *
+     *   - deviceID
+     *   - kind
+     *   - activeValue
+     *
+     * Runtime fields such as active/startTime are intentionally not written.
+     */
+    typedef struct itemGroup {
+        std::string deviceID;
+        Kind kind = Kind::Unknown;
+        std::string activeValue = "1";
+        std::vector<std::string> keys;
+    } itemGroup_t;
+
+    std::map<std::string, itemGroup_t> groups;
 
     for(const auto& [key, item] : _itemsByKey) {
+        std::string groupKey;
+
+        groupKey += item.deviceID;
+        groupKey += "|";
+        groupKey += std::to_string(static_cast<int>(item.kind));
+        groupKey += "|";
+        groupKey += item.activeValue;
+
+        if(groups.count(groupKey) == 0) {
+            itemGroup_t group = {};
+
+            group.deviceID = item.deviceID;
+            group.kind = item.kind;
+            group.activeValue = item.activeValue;
+
+            groups[groupKey] = group;
+        }
+
+        groups[groupKey].keys.push_back(item.key);
+    }
+
+    json items = json::array();
+
+    for(auto& [groupKey, group] : groups) {
+        (void)groupKey;
+
         json entry;
 
-        entry["key"] = item.key;
+        if(group.keys.size() == 1) {
+            entry["key"] = group.keys.front();
+        }
+        else {
+            json keys = json::array();
 
-        switch(item.kind) {
+            for(const auto& key : group.keys) {
+                keys.push_back(key);
+            }
+
+            entry["key"] = keys;
+        }
+
+        switch(group.kind) {
             case Kind::Duration:
                 entry["kind"] = "duration";
                 break;
@@ -109,20 +165,20 @@ nlohmann::json TrackingMgr::jsonConfig() const
                 break;
         }
 
-        if(!item.deviceID.empty()) {
-            entry["device"] = item.deviceID;
+        if(!group.deviceID.empty()) {
+            entry["device"] = group.deviceID;
         }
 
         /*
          * active_value defaults to true / "1".
          * Only write it if it is not default.
          */
-        if(item.activeValue != "1") {
-            if(item.activeValue == "0") {
+        if(group.activeValue != "1") {
+            if(group.activeValue == "0") {
                 entry["active_value"] = false;
             }
             else {
-                entry["active_value"] = item.activeValue;
+                entry["active_value"] = group.activeValue;
             }
         }
 
@@ -242,137 +298,151 @@ bool TrackingMgr::isTrackingKey(const std::string& key) const
 }
 
 
- bool TrackingMgr::loadConfig(const nlohmann::json& config)
- {
-     //   string jsonStr = config.dump(4);
-     // printf("\n------- Tracking----- \n");
-     // printf("%s\n", jsonStr.c_str());
-     // printf("\n--------------------- \n");
+bool TrackingMgr::loadConfig(const nlohmann::json& config)
+{
+    if(config.is_null()) {
+        return true;
+    }
 
-     if(config.is_null()) {
-         return true;
-     }
+    if(!config.is_object()) {
+        LOG_ERROR("TrackingMgr config is not an object");
+        return false;
+    }
 
-     if(!config.is_object()) {
-         LOG_ERROR("TrackingMgr config is not an object");
-         return false;
-     }
+    bool enabled = true;
 
-     bool enabled = true;
+    if(config.contains("enabled") && config["enabled"].is_boolean()) {
+        enabled = config["enabled"].get<bool>();
+    }
 
-     if(config.contains("enabled") && config["enabled"].is_boolean()) {
-         enabled = config["enabled"].get<bool>();
-     }
+    if(!enabled) {
+        LOG_INFO("TrackingMgr disabled by config");
+        return true;
+    }
 
-     if(!enabled) {
-         LOG_INFO("TrackingMgr disabled by config");
-         return true;
-     }
+    if(config.contains("items") && config["items"].is_array()) {
+        for(const auto& entry : config["items"]) {
+            if(!entry.is_object()) {
+                continue;
+            }
 
-     if(config.contains("items") && config["items"].is_array()) {
-         for(const auto& entry : config["items"]) {
-             if(!entry.is_object()) {
-                 continue;
-             }
+            if(!entry.contains("key")) {
+                LOG_ERROR("TrackingMgr item missing key");
+                continue;
+            }
 
-             if(!entry.contains("key") || !entry["key"].is_string()) {
-                 LOG_ERROR("TrackingMgr item missing key");
-                 continue;
-             }
+            std::vector<std::string> keys;
 
-             trackingItem_t item = {};
+            if(entry["key"].is_string()) {
+                keys.push_back(entry["key"].get<std::string>());
+            }
+            else if(entry["key"].is_array()) {
+                for(const auto& keyEntry : entry["key"]) {
+                    if(!keyEntry.is_string()) {
+                        LOG_ERROR("TrackingMgr key array contains non-string item");
+                        continue;
+                    }
 
-             item.key = entry["key"].get<std::string>();
-             std::transform(item.key.begin(),
-                            item.key.end(),
-                            item.key.begin(),
-                            ::toupper);
+                    keys.push_back(keyEntry.get<std::string>());
+                }
+            }
+            else {
+                LOG_ERROR("TrackingMgr item key is not string or array");
+                continue;
+            }
 
-             if(entry.contains("device") && entry["device"].is_string()) {
-                 item.deviceID = normalizeDeviceID(entry["device"].get<std::string>());
-             }
-             else if(entry.contains("deviceID") && entry["deviceID"].is_string()) {
-                 item.deviceID = normalizeDeviceID(entry["deviceID"].get<std::string>());
-             }
+            if(keys.empty()) {
+                LOG_ERROR("TrackingMgr item key list is empty");
+                continue;
+            }
 
-             if(entry.contains("kind") && entry["kind"].is_string()) {
-                 item.kind = kindForString(entry["kind"].get<std::string>());
-             }
-             else {
-                 item.kind = Kind::Duration;
-             }
+            std::string deviceID;
 
-             if(item.kind == Kind::Unknown) {
-                 LOGT_ERROR("TrackingMgr item %s has unknown kind",
-                            item.key.c_str());
-                 continue;
-             }
+            if(entry.contains("device") && entry["device"].is_string()) {
+                deviceID = normalizeDeviceID(entry["device"].get<std::string>());
+            }
+            else if(entry.contains("deviceID") && entry["deviceID"].is_string()) {
+                deviceID = normalizeDeviceID(entry["deviceID"].get<std::string>());
+            }
 
-             if(entry.contains("active_value")) {
-                 item.activeValue = normalizeValue(entry["active_value"]);
-             }
-             else {
-                 item.activeValue = "1";
-             }
+            Kind kind = Kind::Duration;
 
-             item.active = false;
-             item.startTime = 0;
+            if(entry.contains("kind") && entry["kind"].is_string()) {
+                kind = kindForString(entry["kind"].get<std::string>());
+            }
 
-             _itemsByKey[item.key] = item;
+            if(kind == Kind::Unknown) {
+                LOG_ERROR("TrackingMgr item has unknown kind");
+                continue;
+            }
 
-             LOGT_INFO("TrackingMgr tracking key %s kind=%d active_value=%s device=%s",
-                       item.key.c_str(),
-                       (int)item.kind,
-                       item.activeValue.c_str(),
-                       item.deviceID.c_str());
-         }
-     }
+            std::string activeValue = "1";
 
-     if(config.contains("action_effects") && config["action_effects"].is_array()) {
-         for(const auto& entry : config["action_effects"]) {
-             if(!entry.is_object()) {
-                 continue;
-             }
+            if(entry.contains("active_value")) {
+                activeValue = normalizeValue(entry["active_value"]);
+            }
 
-             trackingActionEffect_t effect = {};
+            for(auto key : keys) {
+                std::transform(key.begin(),
+                               key.end(),
+                               key.begin(),
+                               ::toupper);
 
-             if(entry.contains("device") && entry["device"].is_string()) {
-                 effect.deviceID = normalizeDeviceID(entry["device"].get<std::string>());
-             }
-             else if(entry.contains("deviceID") && entry["deviceID"].is_string()) {
-                 effect.deviceID = normalizeDeviceID(entry["deviceID"].get<std::string>());
-             }
+                trackingItem_t item = {};
 
-             if(entry.contains("action") && entry["action"].is_string()) {
-                 effect.action = entry["action"].get<std::string>();
-                 std::transform(effect.action.begin(),
-                                effect.action.end(),
-                                effect.action.begin(),
-                                ::toupper);
-             }
+                item.key = key;
+                item.deviceID = deviceID;
+                item.kind = kind;
+                item.activeValue = activeValue;
+                item.active = false;
+                item.startTime = 0;
 
-             if(entry.contains("effect") && entry["effect"].is_string()) {
-                 effect.effect = actionEffectForString(entry["effect"].get<std::string>());
-             }
+                _itemsByKey[item.key] = item;
+            }
+        }
+    }
 
-             if(effect.deviceID.empty()
-                || effect.action.empty()
-                || effect.effect == ActionEffect::Unknown) {
-                 LOG_ERROR("TrackingMgr action_effect malformed");
-                 continue;
-             }
+    if(config.contains("action_effects") && config["action_effects"].is_array()) {
+        for(const auto& entry : config["action_effects"]) {
+            if(!entry.is_object()) {
+                continue;
+            }
 
-             _actionEffects.push_back(effect);
+            trackingActionEffect_t effect = {};
 
-             LOGT_INFO("TrackingMgr action effect device=%s action=%s effect=%d",
-                       effect.deviceID.c_str(),
-                       effect.action.c_str(),
-                       (int)effect.effect);
-         }
-     }
+            if(entry.contains("device") && entry["device"].is_string()) {
+                effect.deviceID = normalizeDeviceID(entry["device"].get<std::string>());
+            }
+            else if(entry.contains("deviceID") && entry["deviceID"].is_string()) {
+                effect.deviceID = normalizeDeviceID(entry["deviceID"].get<std::string>());
+            }
 
-     return true;
- }
+            if(entry.contains("action") && entry["action"].is_string()) {
+                effect.action = entry["action"].get<std::string>();
+
+                std::transform(effect.action.begin(),
+                               effect.action.end(),
+                               effect.action.begin(),
+                               ::toupper);
+            }
+
+            if(entry.contains("effect") && entry["effect"].is_string()) {
+                effect.effect = actionEffectForString(entry["effect"].get<std::string>());
+            }
+
+            if(effect.deviceID.empty()
+               || effect.action.empty()
+               || effect.effect == ActionEffect::Unknown) {
+                LOG_ERROR("TrackingMgr action_effect malformed");
+                continue;
+            }
+
+            _actionEffects.push_back(effect);
+        }
+    }
+
+    return true;
+}
 
 
 bool TrackingMgr::handleValue(const std::string& key,
