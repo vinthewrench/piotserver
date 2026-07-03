@@ -920,7 +920,7 @@ bool VALVEMASTER_Device::runQueuedCommandWithRetries(
     };
 
     for(uint32_t attempt = 1; attempt <= attempts; attempt++) {
-        if(attempts > 1) {
+        if(attempt > 1) {
             LOGT_DEBUG("VALVEMASTER_Device command \"%s\" attempt %u/%u",
                        commandName.c_str(),
                        static_cast<unsigned int>(attempt),

@@ -97,7 +97,7 @@ void TrackingMgr::stop()
         }
 
         if(closedCount > 0 || failedCount > 0) {
-            LOGT_INFO("TrackingMgr stop closed active tracking transactions closed=%zu failed=%zu",
+            LOGT_DEBUG("TrackingMgr stop closed active tracking transactions closed=%zu failed=%zu",
                       closedCount,
                       failedCount);
         }
@@ -511,9 +511,9 @@ bool TrackingMgr::handleValue(const std::string& key,
             item.active = true;
             item.startTime = time(nullptr);
 
-            LOGT_INFO("TrackingMgr start %s at %ld",
-                      item.key.c_str(),
-                      (long)item.startTime);
+            // LOGT_DEBUG("TrackingMgr start %s at %ld",
+            //           item.key.c_str(),
+            //           (long)item.startTime);
         }
 
         return true;
@@ -600,10 +600,10 @@ bool TrackingMgr::closeDurationItem(trackingItem_t& item)
                                                durationSec);
 
     if(success) {
-        LOGT_INFO("TrackingMgr recorded %s start=%ld duration=%u",
-                  item.key.c_str(),
-                  (long)startTime,
-                  durationSec);
+        // LOGT_INFO("TrackingMgr recorded %s start=%ld duration=%u",
+        //           item.key.c_str(),
+        //           (long)startTime,
+        //           durationSec);
     }
     else {
         LOGT_ERROR("TrackingMgr failed to record %s start=%ld duration=%u",
