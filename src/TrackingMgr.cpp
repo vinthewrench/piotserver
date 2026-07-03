@@ -66,6 +66,43 @@ void TrackingMgr::stop()
 {
     std::lock_guard<std::mutex> lock(_mutex);
 
+    /*
+     * Server stop means all active tracking transactions are closed.
+     *
+     * This does not prove the physical device/output changed state.
+     * It only means pIoTServer is no longer managing/observing the active
+     * state, so the tracking DB should not keep open in-memory transactions.
+     */
+    if(_isSetup && _db) {
+        size_t closedCount = 0;
+        size_t failedCount = 0;
+
+        for(auto& [key, item] : _itemsByKey) {
+            (void)key;
+
+            if(item.kind != Kind::Duration) {
+                continue;
+            }
+
+            if(!item.active) {
+                continue;
+            }
+
+            if(closeDurationItem(item)) {
+                closedCount++;
+            }
+            else {
+                failedCount++;
+            }
+        }
+
+        if(closedCount > 0 || failedCount > 0) {
+            LOGT_INFO("TrackingMgr stop closed active tracking transactions closed=%zu failed=%zu",
+                      closedCount,
+                      failedCount);
+        }
+    }
+
     _itemsByKey.clear();
     _actionEffects.clear();
 

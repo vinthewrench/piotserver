@@ -237,7 +237,6 @@
             "device_type": "VALVEMASTER",
             "interval": 5,
             "key": "VALVEMASTER_1",
-            "condition": "RAIN_SENSOR == 0",
             "pins": [
                 {
                     "data_type": "BOOL",
@@ -421,8 +420,8 @@
         "SPRK_9"
     ],
     "prop.file.version": {
-        "file.etag": 1300,
-        "last_write": 1782690651
+        "file.etag": 1367,
+        "last_write": 1783098446
     },
     "rule": [
         {
@@ -453,6 +452,7 @@
     ],
     "sequence": [
         {
+            "condition": "RAIN_SENSOR == 0",
             "description": "Runs each Valve Master sprinkler zone in sequence and shuts all zones off on abort.",
             "enable": true,
             "name": "Garden irrigation valve sequence",
@@ -890,6 +890,60 @@
             }
         }
     ],
+    "tracking": {
+        "action_effects": [
+            {
+                "action": "ALL_OFF",
+                "device": "4001",
+                "effect": "inactive"
+            },
+            {
+                "action": "ALL_OFF",
+                "device": "VALVEMASTER_1",
+                "effect": "inactive"
+            },
+            {
+                "action": "POWER_OFF",
+                "device": "VALVEMASTER_1",
+                "effect": "inactive"
+            }
+        ],
+        "enabled": true,
+        "items": [
+            {
+                "device": "4001",
+                "key": [
+                    "GI_1",
+                    "GI_2",
+                    "GI_3",
+                    "GI_4",
+                    "GI_5",
+                    "GI_6",
+                    "GI_7",
+                    "GI_8"
+                ],
+                "kind": "duration"
+            },
+            {
+                "device": "VALVEMASTER_1",
+                "key": [
+                    "SPRK_1",
+                    "SPRK_10",
+                    "SPRK_11",
+                    "SPRK_12",
+                    "SPRK_2",
+                    "SPRK_3",
+                    "SPRK_4",
+                    "SPRK_5",
+                    "SPRK_6",
+                    "SPRK_7",
+                    "SPRK_8",
+                    "SPRK_9"
+                ],
+                "kind": "duration"
+            }
+        ]
+    },
     "ui.controls": {
         "garden_irrigation": {
             "control": "valve",
