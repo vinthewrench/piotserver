@@ -413,3 +413,214 @@ bool pIoTServerDB::removeAllTracking() {
 
     return success;
 }
+
+bool pIoTServerDB::maxETagForTracking(eTag_t* eTagOut) {
+    bool success = false;
+
+    if (!_sdb) {
+        return false;
+    }
+
+    if (eTagOut) {
+        *eTagOut = 0;
+    }
+
+    /*
+     * TRACKING has an index on ETAG, so MAX(ETAG) is a cheap way to let the
+     * REST/API layer decide whether it needs to run the heavier summary query.
+     */
+    const char* sql =
+        "SELECT COALESCE(MAX(ETAG), 0) "
+        "FROM TRACKING;";
+
+    sqlite3_stmt* stmt = nullptr;
+
+    if (sqlite3_prepare_v2(_sdb, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        LOGT_ERROR("maxETagForTracking prepare failed: %s", sqlite3_errmsg(_sdb));
+        return false;
+    }
+
+    int rc = sqlite3_step(stmt);
+
+    if (rc == SQLITE_ROW) {
+        if (eTagOut) {
+            *eTagOut = static_cast<eTag_t>(sqlite3_column_int64(stmt, 0));
+        }
+
+        success = true;
+    }
+    else {
+        LOGT_ERROR("maxETagForTracking step failed: %s", sqlite3_errmsg(_sdb));
+    }
+
+    sqlite3_finalize(stmt);
+
+    return success;
+}
+
+
+bool pIoTServerDB::todayStartForTracking(time_t* todayStartOut) {
+    bool success = false;
+
+    if (!_sdb) {
+        return false;
+    }
+
+    if (todayStartOut) {
+        *todayStartOut = 0;
+    }
+
+    /*
+     * "Today" in the tracking summary is based on local farm time.
+     *
+     * This value must travel with cached summary responses because today's
+     * count/duration can change at local midnight even if TRACKING.ETAG has
+     * not changed.
+     *
+     * strftime('%s', ...) returns text in SQLite, so cast it to INTEGER here.
+     */
+    const char* sql =
+        "SELECT CAST(strftime('%s', 'now', 'localtime', 'start of day') AS INTEGER);";
+
+    sqlite3_stmt* stmt = nullptr;
+
+    if (sqlite3_prepare_v2(_sdb, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        LOGT_ERROR("todayStartForTracking prepare failed: %s", sqlite3_errmsg(_sdb));
+        return false;
+    }
+
+    int rc = sqlite3_step(stmt);
+
+    if (rc == SQLITE_ROW) {
+        if (todayStartOut) {
+            *todayStartOut = static_cast<time_t>(sqlite3_column_int64(stmt, 0));
+        }
+
+        success = true;
+    }
+    else {
+        LOGT_ERROR("todayStartForTracking step failed: %s", sqlite3_errmsg(_sdb));
+    }
+
+    sqlite3_finalize(stmt);
+
+    return success;
+}
+
+
+bool pIoTServerDB::summaryForTracking(trackingSummary_t* summaryOut) {
+    bool success = false;
+
+    if (!_sdb) {
+        return false;
+    }
+
+    if (summaryOut) {
+        summaryOut->clear();
+    }
+
+    /*
+     * Compact tracking summary.
+     *
+     * This returns one row per VALUE_NAME with:
+     *
+     *   - today's count and duration, using local midnight
+     *   - lifetime count and duration
+     *   - latest tracking row for that VALUE_NAME
+     *
+     * The latest row is selected by MAX(ID). ID is AUTOINCREMENT, and tracking
+     * rows are append-only completed sessions, so this is the simplest stable
+     * way to identify the most recently inserted row for each VALUE_NAME.
+     *
+     * The DB only stores VALUE_NAME. The REST/API layer should decorate the
+     * value with deviceID/title/units from schema/config when needed.
+     *
+     * strftime('%s', ...) returns text in SQLite, so today_start casts it to
+     * INTEGER before comparing it against START_TIME.
+     */
+    const char* sql =
+        "WITH today_start(ts) AS ("
+        "  SELECT CAST(strftime('%s', 'now', 'localtime', 'start of day') AS INTEGER)"
+        "),"
+        "totals AS ("
+        "  SELECT "
+        "    VALUE_NAME, "
+        "    COUNT(*) AS total_count, "
+        "    COALESCE(SUM(DURATION_SEC), 0) AS total_duration "
+        "  FROM TRACKING "
+        "  GROUP BY VALUE_NAME"
+        "),"
+        "today AS ("
+        "  SELECT "
+        "    VALUE_NAME, "
+        "    COUNT(*) AS today_count, "
+        "    COALESCE(SUM(DURATION_SEC), 0) AS today_duration "
+        "  FROM TRACKING, today_start "
+        "  WHERE START_TIME >= today_start.ts "
+        "  GROUP BY VALUE_NAME"
+        "),"
+        "last AS ("
+        "  SELECT "
+        "    VALUE_NAME, "
+        "    MAX(ID) AS last_id "
+        "  FROM TRACKING "
+        "  GROUP BY VALUE_NAME"
+        ") "
+        "SELECT "
+        "  totals.VALUE_NAME, "
+        "  COALESCE(today.today_count, 0) AS today_count, "
+        "  COALESCE(today.today_duration, 0) AS today_duration, "
+        "  totals.total_count, "
+        "  totals.total_duration, "
+        "  TRACKING.START_TIME AS last_time, "
+        "  TRACKING.DURATION_SEC AS last_duration, "
+        "  TRACKING.ID AS last_tracking_id, "
+        "  TRACKING.ETAG AS last_etag "
+        "FROM totals "
+        "LEFT JOIN today ON today.VALUE_NAME = totals.VALUE_NAME "
+        "LEFT JOIN last ON last.VALUE_NAME = totals.VALUE_NAME "
+        "LEFT JOIN TRACKING ON TRACKING.ID = last.last_id "
+        "ORDER BY totals.VALUE_NAME;";
+
+    sqlite3_stmt* stmt = nullptr;
+
+    if (sqlite3_prepare_v2(_sdb, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        LOGT_ERROR("summaryForTracking prepare failed: %s", sqlite3_errmsg(_sdb));
+        return false;
+    }
+
+    int rc = SQLITE_OK;
+
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+        trackingSummaryEntry_t entry = {};
+
+        const unsigned char* txt = sqlite3_column_text(stmt, 0);
+        if (txt) {
+            entry.valueName = reinterpret_cast<const char*>(txt);
+        }
+
+        entry.todayCount       = sqlite3_column_int(stmt, 1);
+        entry.todayDurationSec = sqlite3_column_int64(stmt, 2);
+        entry.totalCount       = sqlite3_column_int(stmt, 3);
+        entry.totalDurationSec = sqlite3_column_int64(stmt, 4);
+        entry.lastStartTime    = static_cast<time_t>(sqlite3_column_int64(stmt, 5));
+        entry.lastDurationSec  = static_cast<uint32_t>(sqlite3_column_int64(stmt, 6));
+        entry.lastTrackingID   = sqlite3_column_int64(stmt, 7);
+        entry.lastETag         = static_cast<eTag_t>(sqlite3_column_int64(stmt, 8));
+
+        if (summaryOut) {
+            summaryOut->push_back(entry);
+        }
+    }
+
+    if (rc == SQLITE_DONE) {
+        success = true;
+    }
+    else {
+        LOGT_ERROR("summaryForTracking step failed: %s", sqlite3_errmsg(_sdb));
+    }
+
+    sqlite3_finalize(stmt);
+
+    return success;
+}

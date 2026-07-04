@@ -48,6 +48,7 @@ constexpr string_view SUBPATH_STATE                = "state";
 constexpr string_view SUBPATH_RUN_ACTION           = "run.actions";
 constexpr string_view SUBPATH_COUNT                = "count";
 constexpr string_view SUBPATH_RANGE                = "range";
+constexpr string_view SUBPATH_SUMMARY                = "summary";
 
 
 // -----------------------------------------------------------------------------
@@ -387,3 +388,21 @@ constexpr static string_view JSON_ARG_CLEAR_ACTION       = "clear_action";
 
 constexpr static string_view JSON_ARG_TRIGGER_DELAY      = "trigger_delay";
 constexpr static string_view JSON_ARG_CLEAR_DELAY        = "clear_delay";
+
+// -----------------------------------------------------------------------------
+// Tracking JSON keys
+// -----------------------------------------------------------------------------
+
+constexpr string_view JSON_ARG_CHANGED                 = "changed";
+constexpr string_view JSON_ARG_TODAY_START             = "today_start";
+constexpr string_view JSON_ARG_TODAY_COUNT             = "today_count";
+constexpr string_view JSON_ARG_TODAY_DURATION          = "today_duration";
+constexpr string_view JSON_ARG_TOTAL_COUNT             = "total_count";
+constexpr string_view JSON_ARG_TOTAL_DURATION          = "total_duration";
+constexpr string_view JSON_ARG_LAST_TIME               = "last_time";
+constexpr string_view JSON_ARG_LAST_DURATION           = "last_duration";
+constexpr string_view JSON_ARG_LAST_TRACKING_ID        = "last_tracking_id";
+constexpr string_view JSON_ARG_LAST_ETAG               = "last_etag";
+
+constexpr string_view JSON_HDR_PIOT_ETAG               = "X-PIOT-ETag";
+constexpr string_view JSON_HDR_PIOT_TODAY_START        = "X-PIOT-Today-Start";

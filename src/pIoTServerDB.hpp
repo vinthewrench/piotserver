@@ -6,7 +6,6 @@
 
 #pragma once
 
-
 #include <map>
 #include <algorithm>
 #include <mutex>
@@ -20,6 +19,7 @@
 #include <string>
 
 #include <cstring>
+#include <cstdint>
 #include <time.h>
 #include <sqlite3.h>
 
@@ -42,7 +42,8 @@ typedef  unsigned short sequenceGroupID_t;
 bool str_to_SequenceGroupID(const char* str, sequenceGroupID_t *sequenceGroupIDOut = NULL);
 string  SequenceGroupID_to_string(sequenceGroupID_t sequenceGroupID);
 
-// dont change the order of these numbers, they persist in database
+// Do not change the order of these numbers; they persist in the database.
+
 typedef enum {
     ALERT_UNKNOWN               = 0,
     ALERT_START                 = 1,
@@ -402,22 +403,120 @@ class pIoTServerDB  {
 
     // MARK: - Tracking / Usage History
 
+    /**
+     * @brief One raw tracking history row.
+     *
+     * A tracking row records one completed duration event for a tracked value.
+     *
+     * Current database backing table:
+     *
+     *     TRACKING (
+     *         ID INTEGER PRIMARY KEY AUTOINCREMENT,
+     *         VALUE_NAME TEXT NOT NULL,
+     *         START_TIME INTEGER NOT NULL,
+     *         DURATION_SEC INTEGER NOT NULL,
+     *         ETAG INTEGER NOT NULL DEFAULT 0
+     *     )
+     *
+     * VALUE_NAME is currently the globally-visible value key, such as "SPRK_1"
+     * or "GI_1".  The database does not currently store DEVICE_ID, so callers
+     * that need device/title/units should decorate rows from the schema/config
+     * layer.
+     */
     typedef struct trackingEntry {
-        int64_t     trackingID = 0;
-        std::string valueName;
-        time_t      startTime = 0;
-        uint32_t    durationSec = 0;
-        eTag_t      eTag = 0;
+        int64_t     trackingID = 0;     ///< TRACKING.ID.
+        std::string valueName;          ///< TRACKING.VALUE_NAME / value key.
+        time_t      startTime = 0;      ///< TRACKING.START_TIME, Unix epoch seconds.
+        uint32_t    durationSec = 0;    ///< TRACKING.DURATION_SEC.
+        eTag_t      eTag = 0;           ///< TRACKING.ETAG for change detection.
     } trackingEntry_t;
 
+    /**
+     * @brief Raw tracking history result list.
+     *
+     * This is used for explicit history/detail requests.  It can become large,
+     * so normal UI/dashboard calls should prefer trackingSummary_t.
+     */
     typedef std::vector<trackingEntry_t> trackingHistory_t;
 
+    /**
+     * @brief Compact tracking summary row for one tracked value.
+     *
+     * This is the lightweight form intended for the farm-web dashboard and other
+     * normal polling clients.  It answers:
+     *
+     * - how many times this value ran today
+     * - how long it ran today
+     * - how many times it has ever run
+     * - total recorded duration
+     * - most recent run information
+     *
+     * It intentionally does not include raw history rows.
+     */
+    typedef struct trackingSummaryEntry {
+        std::string valueName;              ///< TRACKING.VALUE_NAME / value key.
+
+        int         todayCount = 0;         ///< Number of rows since local midnight.
+        int64_t     todayDurationSec = 0;   ///< Sum of DURATION_SEC since local midnight.
+
+        int         totalCount = 0;         ///< Total number of rows for this value.
+        int64_t     totalDurationSec = 0;   ///< Total sum of DURATION_SEC for this value.
+
+        time_t      lastStartTime = 0;      ///< START_TIME of the most recent row.
+        uint32_t    lastDurationSec = 0;    ///< DURATION_SEC of the most recent row.
+        int64_t     lastTrackingID = 0;     ///< ID of the most recent row.
+        eTag_t      lastETag = 0;           ///< ETAG of the most recent row.
+    } trackingSummaryEntry_t;
+
+    /**
+     * @brief Compact tracking summary result list.
+     *
+     * Used by the summary API instead of returning the full TRACKING history table.
+     */
+    typedef std::vector<trackingSummaryEntry_t> trackingSummary_t;
+
+    /**
+     * @brief Create or update the TRACKING database table and indexes.
+     *
+     * Creates the storage used by insertTrackingDuration(), historyForTracking(),
+     * countHistoryForTracking(), removeHistoryForTracking(), and the summary
+     * helpers.
+     *
+     * @return true on success, false on database error.
+     */
     bool initTrackingTables();
 
+    /**
+     * @brief Insert one completed tracking duration row.
+     *
+     * This records a completed usage/run duration for a value.  For example, a
+     * valve open interval or relay active interval.
+     *
+     * @param valueName Value key being tracked, such as "SPRK_1" or "GI_1".
+     * @param startTime Start time of the tracked interval, Unix epoch seconds.
+     * @param durationSec Duration of the interval in seconds.
+     *
+     * @return true on success, false on database error.
+     */
     bool insertTrackingDuration(std::string valueName,
                                 time_t startTime,
                                 uint32_t durationSec);
 
+    /**
+     * @brief Read raw tracking history rows.
+     *
+     * This is the detailed/history query.  It may return a large number of rows,
+     * so dashboard/UI polling should use summaryForTracking() instead.
+     *
+     * @param valueName Optional value key.  Empty string returns all values.
+     * @param days Optional lookback window in days.  0 means no day filter.
+     * @param limit Optional maximum number of rows.  0 means no explicit limit.
+     * @param offset Optional row offset for paging.
+     * @param sinceEtag Optional ETAG filter.  0 means no ETAG filter.
+     * @param trackingOut Receives matching tracking rows.
+     *
+     * @return true on success, false on database error.
+     */
     bool historyForTracking(std::string valueName = "",
                             float days = 0,
                             int limit = 0,
@@ -425,16 +524,85 @@ class pIoTServerDB  {
                             int64_t sinceEtag = 0,
                             trackingHistory_t* trackingOut = nullptr);
 
+    /**
+     * @brief Count raw tracking history rows matching the supplied filters.
+     *
+     * Useful for paging and diagnostics.
+     *
+     * @param valueName Optional value key.  Empty string counts all values.
+     * @param days Optional lookback window in days.  0 means no day filter.
+     * @param sinceEtag Optional ETAG filter.  0 means no ETAG filter.
+     * @param countOut Receives the matching row count.
+     *
+     * @return true on success, false on database error.
+     */
     bool countHistoryForTracking(std::string valueName = "",
                                  float days = 0,
                                  int64_t sinceEtag = 0,
                                  int* countOut = nullptr);
 
+    /**
+     * @brief Get the maximum ETAG currently present in the TRACKING table.
+     *
+     * This is used by the summary API to cheaply determine whether a client needs
+     * a refreshed summary.  Because TRACKING has an ETAG index, this is much
+     * cheaper than reading the full history table.
+     *
+     * @param eTagOut Receives the maximum ETAG value, or 0 if no rows exist.
+     *
+     * @return true on success, false on database error.
+     */
+    bool maxETagForTracking(eTag_t* eTagOut = nullptr);
+
+    /**
+     * @brief Get the local midnight epoch used for "today" summary calculations.
+     *
+     * This value must be included with cached summary responses because today's
+     * count/duration can change at midnight even when the tracking ETAG has not
+     * changed.
+     *
+     * @param todayStartOut Receives local midnight as Unix epoch seconds.
+     *
+     * @return true on success, false on database error.
+     */
+    bool todayStartForTracking(time_t* todayStartOut = nullptr);
+
+    /**
+     * @brief Read compact tracking summary rows grouped by VALUE_NAME.
+     *
+     * This is the preferred query for normal UI/dashboard polling.  It returns
+     * one compact row per tracked value instead of returning all raw history rows.
+     *
+     * Each row includes today's count/duration, lifetime total count/duration,
+     * and the most recent tracking event.
+     *
+     * @param summaryOut Receives summary rows.
+     *
+     * @return true on success, false on database error.
+     */
+    bool summaryForTracking(trackingSummary_t* summaryOut = nullptr);
+
+    /**
+     * @brief Remove tracking history matching the supplied filters.
+     *
+     * @param valueName Optional value key.  Empty string removes all values that
+     *                  match the day filter.
+     * @param days Optional age filter in days.  0 means no day filter.
+     *
+     * @return true on success, false on database error.
+     */
     bool removeHistoryForTracking(std::string valueName = "",
                                   float days = 0);
 
+    /**
+     * @brief Remove all tracking history rows.
+     *
+     * This is a hard cleanup helper.  It should be treated as an admin/dev action,
+     * not a normal UI operation.
+     *
+     * @return true on success, false on database error.
+     */
     bool removeAllTracking();
-
 
     // MARK: - utility
 

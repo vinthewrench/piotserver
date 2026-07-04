@@ -3449,6 +3449,8 @@ static void Rule_NounHandler([[maybe_unused]] ServerCmdQueue* cmdQueue,
 
 // MARK: - TRACKING NOUN HANDLER
 
+// MARK: - TRACKING NOUN HANDLER
+
 static bool Tracking_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                       REST_URL url,
                                       [[maybe_unused]] TCPClientInfo cInfo,
@@ -3469,6 +3471,7 @@ static bool Tracking_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
     int limit = 0;
     int offset = 0;
     int64_t sinceEtag = 0;
+    time_t clientTodayStart = 0;
     string str;
 
     if (v1.getStringFromMap(JSON_HDR_LIMIT, url.headers(), str)) {
@@ -3495,7 +3498,24 @@ static bool Tracking_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
         }
     }
 
-    if (v1.getStringFromMap(JSON_ARG_ETAG, url.headers(), str)) {
+    /*
+     * Optional client cache ETAG.
+     *
+     * HTTP headers are supposed to be case-insensitive, but our REST header map
+     * lookup may not be. Also, "ETag" has standard HTTP meaning, so clients or
+     * proxies may normalize it. Accept the existing project key plus common
+     * spellings and the preferred X-PIOT-* form.
+     *
+     * Preferred client header:
+     *
+     *      X-PIOT-ETag: <etag>
+     */
+    if (v1.getStringFromMap(JSON_ARG_ETAG, url.headers(), str) ||
+        v1.getStringFromMap(string(JSON_HDR_PIOT_ETAG), url.headers(), str) ||
+        v1.getStringFromMap("ETag", url.headers(), str) ||
+        v1.getStringFromMap("etag", url.headers(), str) ||
+        v1.getStringFromMap("eTag", url.headers(), str) ||
+        v1.getStringFromMap("x-piot-etag", url.headers(), str)) {
         char* p;
         sinceEtag = strtoll(str.c_str(), &p, 10);
         if (*p != 0) {
@@ -3503,7 +3523,142 @@ static bool Tracking_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
         }
     }
 
-    if (pathsize == 1) {
+    /*
+     * Optional client cache day marker.
+     *
+     * This prevents a midnight cache bug where TRACKING.ETAG has not changed,
+     * but the meaning of today_count/today_duration has changed because the
+     * local day rolled over.
+     *
+     * Preferred client header:
+     *
+     *      X-PIOT-Today-Start: <local-midnight-epoch>
+     */
+    if (v1.getStringFromMap(string(JSON_ARG_TODAY_START), url.headers(), str) ||
+        v1.getStringFromMap(string(JSON_HDR_PIOT_TODAY_START), url.headers(), str) ||
+        v1.getStringFromMap("Today-Start", url.headers(), str) ||
+        v1.getStringFromMap("today-start", url.headers(), str) ||
+        v1.getStringFromMap("x-piot-today-start", url.headers(), str)) {
+        char* p;
+        clientTodayStart = static_cast<time_t>(strtoll(str.c_str(), &p, 10));
+        if (*p != 0) {
+            clientTodayStart = 0;
+        }
+    }
+
+    /*
+     * GET /tracking/summary
+     *
+     * Lightweight dashboard route. This does not return raw history rows.
+     * It returns one summary row per tracked VALUE_NAME.
+     *
+     * Cache behavior:
+     *   - client sends previous ETAG and today_start
+     *   - if both still match, return changed:false without running summary SQL
+     */
+    if (pathsize == 2 && path.at(1) == string(SUBPATH_SUMMARY)) {
+        eTag_t trackingETag = 0;
+        time_t todayStart = 0;
+
+        if (!db->maxETagForTracking(&trackingETag)) {
+            makeStatusJSON(reply,
+                           STATUS_BAD_REQUEST,
+                           "Tracking Error",
+                           "Could not read tracking ETag.");
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
+
+        if (!db->todayStartForTracking(&todayStart)) {
+            makeStatusJSON(reply,
+                           STATUS_BAD_REQUEST,
+                           "Tracking Error",
+                           "Could not calculate tracking today_start.");
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
+
+        reply[string(JSON_ARG_ETAG)] = trackingETag;
+        reply[string(JSON_ARG_TODAY_START)] = todayStart;
+
+        /*
+         * Do not use ETAG alone for this cache check.
+         *
+         * The summary includes today_count/today_duration. Those values can
+         * change at local midnight even if no new tracking row was inserted.
+         */
+        if (sinceEtag > 0 &&
+            sinceEtag >= static_cast<int64_t>(trackingETag) &&
+            clientTodayStart > 0 &&
+            clientTodayStart == todayStart) {
+            reply[string(JSON_ARG_CHANGED)] = false;
+
+            makeStatusJSON(reply, STATUS_OK);
+            (completion)(reply, STATUS_OK);
+            return true;
+        }
+
+        pIoTServerDB::trackingSummary_t summary;
+
+        if (db->summaryForTracking(&summary)) {
+            json entries = json::array();
+
+            for (auto& entry : summary) {
+                json j1;
+
+                string key = entry.valueName;
+                std::transform(key.begin(), key.end(), key.begin(), ::toupper);
+
+                j1[string(PROP_KEY)] = key;
+
+                /*
+                 * The TRACKING table currently stores only VALUE_NAME.
+                 *
+                 * Runtime/schema config owns the friendly metadata. Decorate
+                 * the compact DB summary here so the UI does not need a second
+                 * lookup for common display fields.
+                 */
+                string deviceID;
+                if (pIoTServer->getDeviceIDForKey(key, deviceID)) {
+                    j1[string(PROP_DEVICE_ID)] = deviceID;
+                }
+
+                pIoTServerDB::valueSchema_t schema = db->schemaForKey(key);
+
+                if (!schema.title.empty()) {
+                    j1[string(PROP_TITLE)] = schema.title;
+                }
+
+                if (schema.units != UNKNOWN) {
+                    j1[string(JSON_ARG_UNITS)] = stringforSchemaUnits(schema.units);
+                }
+
+                j1[string(JSON_ARG_TODAY_COUNT)] = entry.todayCount;
+                j1[string(JSON_ARG_TODAY_DURATION)] = entry.todayDurationSec;
+                j1[string(JSON_ARG_TOTAL_COUNT)] = entry.totalCount;
+                j1[string(JSON_ARG_TOTAL_DURATION)] = entry.totalDurationSec;
+                j1[string(JSON_ARG_LAST_TIME)] = entry.lastStartTime;
+                j1[string(JSON_ARG_LAST_DURATION)] = entry.lastDurationSec;
+                j1[string(JSON_ARG_LAST_TRACKING_ID)] = entry.lastTrackingID;
+                j1[string(JSON_ARG_LAST_ETAG)] = entry.lastETag;
+
+                entries.push_back(j1);
+            }
+
+            reply[string(JSON_ARG_CHANGED)] = true;
+            reply[string(JSON_ARG_TRACKING)] = entries;
+        }
+
+        if (reply.find(string(JSON_ARG_TRACKING)) == reply.end()) {
+            makeStatusJSON(reply,
+                           STATUS_BAD_REQUEST,
+                           "Not Found",
+                           "No tracking summary was found.");
+            (completion)(reply, STATUS_BAD_REQUEST);
+            return true;
+        }
+    }
+    else if (pathsize == 1) {
         pIoTServerDB::trackingHistory_t tracking;
 
         if (db->historyForTracking(string(), days, limit, offset, sinceEtag, &tracking)) {
@@ -3512,11 +3667,11 @@ static bool Tracking_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
             for (auto& entry : tracking) {
                 json j1;
 
-                j1[string(JSON_ARG_TRACKING_ID)]  = entry.trackingID;
-                j1[string(PROP_KEY)]          = entry.valueName;
-                j1[string(JSON_ARG_TIME)]     = entry.startTime;
+                j1[string(JSON_ARG_TRACKING_ID)] = entry.trackingID;
+                j1[string(PROP_KEY)] = entry.valueName;
+                j1[string(JSON_ARG_TIME)] = entry.startTime;
                 j1[string(JSON_ARG_DURATION)] = entry.durationSec;
-                j1[string(JSON_ARG_ETAG)]     = entry.eTag;
+                j1[string(JSON_ARG_ETAG)] = entry.eTag;
 
                 entries.push_back(j1);
             }
@@ -3578,10 +3733,10 @@ static bool Tracking_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
             for (auto& entry : tracking) {
                 json j1;
 
-                j1[string(JSON_ARG_TRACKING_ID)]  = entry.trackingID;
-                j1[string(JSON_ARG_TIME)]     = entry.startTime;
+                j1[string(JSON_ARG_TRACKING_ID)] = entry.trackingID;
+                j1[string(JSON_ARG_TIME)] = entry.startTime;
                 j1[string(JSON_ARG_DURATION)] = entry.durationSec;
-                j1[string(JSON_ARG_ETAG)]     = entry.eTag;
+                j1[string(JSON_ARG_ETAG)] = entry.eTag;
 
                 entries.push_back(j1);
             }
@@ -3631,7 +3786,6 @@ static bool Tracking_NounHandler_GET([[maybe_unused]] ServerCmdQueue* cmdQueue,
     (completion)(reply, STATUS_OK);
     return true;
 }
-
 
 static bool Tracking_NounHandler_DELETE([[maybe_unused]] ServerCmdQueue* cmdQueue,
                                          REST_URL url,
