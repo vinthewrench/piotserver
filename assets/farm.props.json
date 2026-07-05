@@ -93,14 +93,25 @@
             "title": "Battery Low Shutdown"
         },
         {
-            "address": "/mnt/1wire/28.B9F533000000/",
-            "data_type": "TEMPERATURE",
-            "description": "Plot A Soil DS2482",
-            "device_type": "1wire",
-            "interval": 3600,
-            "key": "PLOT1",
-            "title": "Soil Temp Plot A",
-            "tracking": "track.changes"
+            "address": "0x18",
+            "description": "DS2482 1-Wire temperature bridge",
+            "device_type": "DS2482",
+            "enable": true,
+            "interval": 30,
+            "pins": [
+                {
+                    "data_type": "TEMPERATURE",
+                    "description": "Plot A Soil Temperature",
+                    "interval": 30,
+                    "key": "PLOT1",
+                    "other.props": {
+                        "address": "28-b9-f5-33-00-00-00-3b"
+                    },
+                    "title": "Soil Temp Plot A",
+                    "tracking": "track.range"
+                }
+            ],
+            "title": "Soil Temperature 1-Wire Bus"
         },
         {
             "address": "0x4F",
@@ -420,8 +431,8 @@
         "SPRK_9"
     ],
     "prop.file.version": {
-        "file.etag": 1367,
-        "last_write": 1783098446
+        "file.etag": 1370,
+        "last_write": 1783275754
     },
     "rule": [
         {

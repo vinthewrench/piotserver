@@ -374,6 +374,42 @@ Expected:
 Power save: off
 ```
 
+#### Preferred DS2482 direct driver for DS18B20 sensors
+
+pIoTServer now includes a direct `DS2482` driver for reading DS18B20 1-Wire temperature sensors through the DS2482 I2C-to-1-Wire bridge.
+
+This driver is preferred over the OWFS setup below. It avoids the extra OWFS daemon, avoids `/mnt/1wire` filesystem mappings, avoids stale file reads, and lets pIoTServer perform its own DS18B20 ROM matching, temperature conversion, and CRC validation.
+
+Example configuration:
+
+```json
+{
+    "address": "0x18",
+    "description": "DS2482 1-Wire temperature bridge",
+    "device_type": "DS2482",
+    "enable": true,
+    "interval": 30,
+    "pins": [
+        {
+            "data_type": "TEMPERATURE",
+            "description": "Plot A Soil Temperature",
+            "interval": 30,
+            "key": "PLOT1",
+            "other.props": {
+                "address": "28-b9-f5-33-00-00-00-3b"
+            },
+            "title": "Soil Temp Plot A",
+            "tracking": "track.range"
+        }
+    ],
+    "title": "Soil Temperature 1-Wire Bus"
+}
+```
+
+The device-level `address` is the DS2482 I2C address. The `pins[].other.props.address` value is the DS18B20 1-Wire ROM address.
+
+The OWFS setup below is kept for reference or legacy installations.
+
 #### Setting up the 1-Wire DS2482 OWFS driver
 
 Check if your hardware is working. You should at least see the DS2482 at address `0x18`.
