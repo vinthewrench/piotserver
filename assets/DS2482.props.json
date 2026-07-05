@@ -1,0 +1,39 @@
+{
+    "config": {
+        "lat_long": "34.465338, -93.362827"
+    },
+    "devices": [
+        {
+            "address": "0x18",
+            "description": "DS2482 1-Wire temperature bridge",
+            "device_type": "DS2482",
+            "enable": true,
+            "interval": 30,
+            "pins": [
+                {
+                    "data_type": "TEMPERATURE",
+                    "description": "Plot A Soil Temperature",
+                    "interval": 30,
+                    "key": "PLOT1",
+                    "title": "Soil Temp Plot A",
+                    "tracking": "dont.record",
+                    "other.props": {
+                        "address": "28-9d-74-46-d4-6c-0c-4d"
+                    }
+                },
+                {
+                    "data_type": "TEMPERATURE",
+                    "description": "Plot B Soil Temperature",
+                    "interval": 30,
+                    "key": "PLOT2",
+                    "title": "Soil Temp Plot B",
+                    "tracking": "dont.record",
+                    "other.props": {
+                        "address": "28-3d-85-35-00-00-00-69"
+                    }
+                }
+            ],
+            "title": "Soil Temperature 1-Wire Bus"
+        }
+    ]
+}

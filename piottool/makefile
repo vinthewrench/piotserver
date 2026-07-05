@@ -103,7 +103,8 @@ MODULE_DIRS := \
 	SHT25	\
 	SHT30	\
 	VALVEMASTER \
-	POWERCONTROL
+	POWERCONTROL \
+	DS2482
 
 .PHONY: all modules clean clean-modules distclean print install uninstall $(MODULE_DIRS)
 
