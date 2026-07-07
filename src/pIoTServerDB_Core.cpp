@@ -315,41 +315,64 @@ void MinMaxValue::commonInit(){
 
 void MinMaxValue::setValue(time_t when, double value){
 
-    int hour = (when / 3600) % 24;
- //   cout << "when " << hour <<endl;
-
-    if((_lastTime != TIME_MAX) && (when - _lastTime > 3600)){
-        int start = (int) _lastTime/3600;
-        int end = (int) when/3600;
-
- //       cout <<  "start: " << start << " " << end <<endl;
-
-        for(int i = start; i < end; i++){
-            int offset = i %24;
-
-            _entries[offset].maxValue = DBL_MAX;
-            _entries[offset].minValue = DBL_MAX;
-
-//            cout <<  offset <<endl;
-          }
-     };
-
-
-
-    if( _entries[hour].maxValue == DBL_MAX){
-        _entries[hour].maxValue = value;
-        _entries[hour].minValue = value;
+    if(when <= 0) {
+        return;
     }
-    else
-    {
-        if(value > _entries[hour].maxValue)
-            _entries[hour].maxValue =  value;
-        else if(value < _entries[hour].minValue)
-            _entries[hour].minValue =  value;
+
+    const int currentEpochHour = static_cast<int>(when / 3600);
+    const int currentHourSlot = currentEpochHour % 24;
+
+    /*
+     * Each slot represents one absolute epoch hour modulo 24.
+     *
+     * The old code only cleared slots when there was a gap greater than one
+     * hour. That allowed continuously-updating sensors to reuse the same
+     * hour slot day after day without clearing it, causing stale min/max
+     * values to persist for months.
+     *
+     * Clear every hour slot crossed since the previous sample, including the
+     * current slot. This makes the 24 slots a true rolling 24-hour window.
+     */
+    if(_lastTime != TIME_MAX) {
+        const int lastEpochHour = static_cast<int>(_lastTime / 3600);
+
+        if(currentEpochHour != lastEpochHour) {
+            int start = lastEpochHour + 1;
+            int end = currentEpochHour;
+
+            /*
+             * If the clock jumped forward a long way, clearing more than 24
+             * slots is pointless; clearing one full ring is enough.
+             */
+            if(end - start >= 24) {
+                start = end - 23;
+            }
+
+            for(int epochHour = start; epochHour <= end; epochHour++) {
+                const int slot = epochHour % 24;
+
+                _entries[slot].minValue = DBL_MAX;
+                _entries[slot].maxValue = DBL_MAX;
+            }
+        }
+    }
+
+    if(_entries[currentHourSlot].maxValue == DBL_MAX) {
+        _entries[currentHourSlot].maxValue = value;
+        _entries[currentHourSlot].minValue = value;
+    }
+    else {
+        if(value > _entries[currentHourSlot].maxValue) {
+            _entries[currentHourSlot].maxValue = value;
+        }
+
+        if(value < _entries[currentHourSlot].minValue) {
+            _entries[currentHourSlot].minValue = value;
+        }
     }
 
     _lastTime = when;
-};
+}
 
 bool MinMaxValue::getMax(double &value){
 
