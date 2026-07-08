@@ -397,7 +397,9 @@
                     "data_type": "BOOL",
                     "key": "FAULT_SIG_ACTIVE",
                     "other.props": {
-                        "active_low": true
+                        "active_low": true,
+                        "assert_delay_sec": 5,
+                        "clear_delay_sec": 1
                     },
                     "read_only": true,
                     "title": "Fault Signal Active",

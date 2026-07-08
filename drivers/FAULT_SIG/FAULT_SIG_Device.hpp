@@ -15,11 +15,20 @@
 //    - GPIO high means no fault when active_low=true.
 //    - GPIO low means fault active when active_low=true.
 //
+//  Fault qualification:
+//
+//    - Raw GPIO state is read every interval.
+//    - A fault must remain active for assert_delay_sec before it is reported.
+//    - A reported fault must remain inactive for clear_delay_sec before it is
+//      cleared.
+//    - This prevents short VALVEMASTER retry pulses from becoming incidents.
+//
 
 #ifndef FAULT_SIG_Device_hpp
 #define FAULT_SIG_Device_hpp
 
 #include <sys/time.h>
+#include <ctime>
 #include <string>
 
 #include "pIoTServerDevice.hpp"
@@ -51,6 +60,19 @@ public:
      * @brief Default fault-signal polarity.
      */
     static const bool default_activeLow = true;
+
+    /**
+     * @brief Default active qualification delay in seconds.
+     *
+     * Default remains conservative: one full polling interval. Production
+     * farm configs can raise this to suppress normal VALVEMASTER retry pulses.
+     */
+    static const uint64_t default_assertDelaySec = 1;
+
+    /**
+     * @brief Default inactive qualification delay in seconds.
+     */
+    static const uint64_t default_clearDelaySec = 1;
 
     /**
      * @brief Construct FAULT_SIG plugin instance.
@@ -169,17 +191,47 @@ private:
     bool _activeLow = default_activeLow;
 
     /**
-     * @brief Current logical fault-active state.
+     * @brief Active qualification delay in seconds.
+     */
+    uint64_t _assertDelaySec = default_assertDelaySec;
+
+    /**
+     * @brief Inactive qualification delay in seconds.
+     */
+    uint64_t _clearDelaySec = default_clearDelaySec;
+
+    /**
+     * @brief Current raw logical fault-active state from GPIO.
+     */
+    bool _rawFaultActive = false;
+
+    /**
+     * @brief Last raw logical fault-active state from GPIO.
+     */
+    bool _lastRawFaultActive = false;
+
+    /**
+     * @brief True after first successful raw fault-state read.
+     */
+    bool _hasLastRawFaultState = false;
+
+    /**
+     * @brief Time when the raw logical fault state last changed.
+     */
+    time_t _rawFaultChangedAt = 0;
+
+    /**
+     * @brief Current debounced/reported fault-active state.
      */
     bool _faultActive = false;
 
     /**
-     * @brief Last reported logical fault-active state.
+     * @brief Last debounced/reported fault-active state.
      */
     bool _lastFaultActive = false;
 
     /**
-     * @brief True after first successful fault-state read.
+     * @brief True after first debounced fault-state publication.
      */
     bool _hasLastFaultState = false;
 };

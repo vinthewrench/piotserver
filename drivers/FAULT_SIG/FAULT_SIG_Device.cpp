@@ -123,13 +123,19 @@ bool FAULT_SIG_Device::getVersion(std::string &version)
  * queryDelay supplied by the schema.
  *
  * FAULT_SIG is intentionally a singleton. GPIO remains fixed at GPIO22 for
- * now. The only supported per-key schema override is signal polarity:
+ * now. Supported per-key schema overrides are:
  *
  * @code{.json}
  * "other.props": {
- *     "active_low": true
+ *     "active_low": true,
+ *     "assert_delay_sec": 5,
+ *     "clear_delay_sec": 1
  * }
  * @endcode
+ *
+ * assert_delay_sec prevents short active-low fault pulses from becoming
+ * user-facing incidents. clear_delay_sec prevents a noisy release from
+ * immediately clearing a confirmed fault.
  *
  * @param deviceSchema pIoTServer device schema entries for this plugin.
  * @return true if the FAULT_SIG_ACTIVE key was found and accepted.
@@ -143,6 +149,18 @@ bool FAULT_SIG_Device::initWithSchema(deviceSchemaMap_t deviceSchema)
     _gpioLine = default_gpioLine;
     _activeLow = default_activeLow;
     _queryDelay = default_queryDelay;
+    _assertDelaySec = default_assertDelaySec;
+    _clearDelaySec = default_clearDelaySec;
+
+    _rawFaultActive = false;
+    _lastRawFaultActive = false;
+    _hasLastRawFaultState = false;
+    _rawFaultChangedAt = 0;
+
+    _faultActive = false;
+    _lastFaultActive = false;
+    _hasLastFaultState = false;
+
     _isSetup = false;
 
     for(const auto& [key, entry] : deviceSchema) {
@@ -158,10 +176,12 @@ bool FAULT_SIG_Device::initWithSchema(deviceSchemaMap_t deviceSchema)
              * entry.otherProps is nlohmann::json here.
              *
              * Keep GPIO fixed for now because FAULT_SIG is a singleton.
-             * Allow only polarity override:
+             * Allow polarity and qualification overrides:
              *
              *   "other.props": {
-             *      "active_low": true
+             *      "active_low": true,
+             *      "assert_delay_sec": 5,
+             *      "clear_delay_sec": 1
              *   }
              */
             if(entry.otherProps.contains("active_low")) {
@@ -170,6 +190,30 @@ bool FAULT_SIG_Device::initWithSchema(deviceSchemaMap_t deviceSchema)
                 }
                 catch(...) {
                     LOGT_ERROR("FAULT_SIG_Device devID \"%s\" invalid active_low value",
+                               _deviceID.c_str());
+                    _deviceState = DEVICE_STATE_ERROR;
+                    return false;
+                }
+            }
+
+            if(entry.otherProps.contains("assert_delay_sec")) {
+                try {
+                    _assertDelaySec = entry.otherProps.at("assert_delay_sec").get<uint64_t>();
+                }
+                catch(...) {
+                    LOGT_ERROR("FAULT_SIG_Device devID \"%s\" invalid assert_delay_sec value",
+                               _deviceID.c_str());
+                    _deviceState = DEVICE_STATE_ERROR;
+                    return false;
+                }
+            }
+
+            if(entry.otherProps.contains("clear_delay_sec")) {
+                try {
+                    _clearDelaySec = entry.otherProps.at("clear_delay_sec").get<uint64_t>();
+                }
+                catch(...) {
+                    LOGT_ERROR("FAULT_SIG_Device devID \"%s\" invalid clear_delay_sec value",
                                _deviceID.c_str());
                     _deviceState = DEVICE_STATE_ERROR;
                     return false;
@@ -187,16 +231,19 @@ bool FAULT_SIG_Device::initWithSchema(deviceSchemaMap_t deviceSchema)
     _queryDelay = delay != UINT64_MAX ? delay : default_queryDelay;
     _deviceState = DEVICE_STATE_DISCONNECTED;
 
-    LOGT_DEBUG("FAULT_SIG_Device devID \"%s\" setup=%s faultSigActiveKey=\"%s\" gpio=%d activeLow=%s queryDelay=%llu",
+    LOGT_DEBUG("FAULT_SIG_Device devID \"%s\" setup=%s faultSigActiveKey=\"%s\" gpio=%d activeLow=%s queryDelay=%llu assert_delay_sec=%llu clear_delay_sec=%llu",
                _deviceID.c_str(),
                _isSetup ? "true" : "false",
                _faultSigActiveKey.c_str(),
                _gpioLine,
                _activeLow ? "true" : "false",
-               static_cast<unsigned long long>(_queryDelay));
+               static_cast<unsigned long long>(_queryDelay),
+               static_cast<unsigned long long>(_assertDelaySec),
+               static_cast<unsigned long long>(_clearDelaySec));
 
     return _isSetup;
 }
+
 
 /**
  * @brief Start the FAULT_SIG plugin.
@@ -234,13 +281,25 @@ bool FAULT_SIG_Device::start()
     }
 
     gettimeofday(&_lastQueryTime, NULL);
+
+    _rawFaultActive = false;
+    _lastRawFaultActive = false;
+    _hasLastRawFaultState = false;
+    _rawFaultChangedAt = 0;
+
+    _faultActive = false;
+    _lastFaultActive = false;
+    _hasLastFaultState = false;
+
     _deviceState = DEVICE_STATE_CONNECTED;
 
-    LOGT_INFO("FAULT_SIG_Device devID \"%s\" started gpio=%d active_low=%s queryDelay=%llu",
+    LOGT_INFO("FAULT_SIG_Device devID \"%s\" started gpio=%d active_low=%s queryDelay=%llu assert_delay_sec=%llu clear_delay_sec=%llu",
               _deviceID.c_str(),
               _gpioLine,
               _activeLow ? "true" : "false",
-              static_cast<unsigned long long>(_queryDelay));
+              static_cast<unsigned long long>(_queryDelay),
+              static_cast<unsigned long long>(_assertDelaySec),
+              static_cast<unsigned long long>(_clearDelaySec));
 
     return true;
 }
@@ -307,19 +366,20 @@ bool FAULT_SIG_Device::isConnected()
  * @brief Read and publish the fault signal state.
  *
  * Reads GPIO22 through the shared GPIO helper, converts the raw electrical
- * level into a logical FAULT_SIG_ACTIVE value using the configured polarity,
- * and writes the configured key into results.
+ * level into a raw logical fault value using the configured polarity, then
+ * qualifies that raw value before publishing FAULT_SIG_ACTIVE or touching
+ * IncidentMgr.
  *
  * Incident behavior:
  *
  *   - GPIO read failure raises FAULT_SIG_READ_FAILED.
  *   - Missing GPIO line in the read result raises FAULT_SIG_READ_FAILED.
  *   - Successful read clears FAULT_SIG_READ_FAILED.
- *   - Fault inactive -> active raises FAULT_SIG_ACTIVE.
- *   - Fault active -> inactive clears FAULT_SIG_ACTIVE.
- *
- * Repeated unchanged fault states do not spam IncidentMgr; only transitions
- * raise/clear the active fault incident.
+ *   - Raw fault active must persist for assert_delay_sec before being
+ *     reported active.
+ *   - Raw fault inactive must persist for clear_delay_sec before a reported
+ *     fault is cleared.
+ *   - Short raw active pulses are logged but do not raise incidents.
  *
  * @param results Receives pIoTServer key/value output.
  * @return true if the GPIO line was read successfully.
@@ -395,25 +455,78 @@ bool FAULT_SIG_Device::getValues(keyValueMap_t &results)
         _faultSigActiveKey.empty() ? KEY_FAULT_SIG_ACTIVE : _faultSigActiveKey
     );
 
-    _faultActive = _activeLow ? !rawHigh : rawHigh;
+    const time_t now = time(nullptr);
+    _rawFaultActive = _activeLow ? !rawHigh : rawHigh;
+
+    if(!_hasLastRawFaultState) {
+        _lastRawFaultActive = _rawFaultActive;
+        _hasLastRawFaultState = true;
+        _rawFaultChangedAt = now;
+
+        LOGT_INFO("FAULT_SIG_Device devID \"%s\" raw %s=%s gpio=%d raw=%s active_low=%s",
+                  _deviceID.c_str(),
+                  _faultSigActiveKey.c_str(),
+                  _rawFaultActive ? "true" : "false",
+                  _gpioLine,
+                  rawHigh ? "high" : "low",
+                  _activeLow ? "true" : "false");
+    }
+    else if(_rawFaultActive != _lastRawFaultActive) {
+        _lastRawFaultActive = _rawFaultActive;
+        _rawFaultChangedAt = now;
+
+        LOGT_INFO("FAULT_SIG_Device devID \"%s\" raw %s=%s gpio=%d raw=%s active_low=%s",
+                  _deviceID.c_str(),
+                  _faultSigActiveKey.c_str(),
+                  _rawFaultActive ? "true" : "false",
+                  _gpioLine,
+                  rawHigh ? "high" : "low",
+                  _activeLow ? "true" : "false");
+    }
+
+    uint64_t stableForSec = 0;
+    if(_rawFaultChangedAt > 0 && now >= _rawFaultChangedAt) {
+        stableForSec = static_cast<uint64_t>(now - _rawFaultChangedAt);
+    }
+
+    bool qualifiedFaultActive = _faultActive;
+
+    if(_rawFaultActive) {
+        if(stableForSec >= _assertDelaySec) {
+            qualifiedFaultActive = true;
+        }
+    }
+    else {
+        if(stableForSec >= _clearDelaySec) {
+            qualifiedFaultActive = false;
+        }
+    }
+
+    _faultActive = qualifiedFaultActive;
 
     if(!_faultSigActiveKey.empty()) {
         results[_faultSigActiveKey] = _faultActive ? "1" : "0";
     }
 
     if(!_hasLastFaultState || _faultActive != _lastFaultActive) {
-        LOGT_INFO("FAULT_SIG_Device devID \"%s\" %s=%s gpio=%d raw=%s active_low=%s",
+        LOGT_INFO("FAULT_SIG_Device devID \"%s\" qualified %s=%s gpio=%d raw=%s active_low=%s stable_for=%llu assert_delay_sec=%llu clear_delay_sec=%llu",
                   _deviceID.c_str(),
                   _faultSigActiveKey.c_str(),
                   _faultActive ? "true" : "false",
                   _gpioLine,
                   rawHigh ? "high" : "low",
-                  _activeLow ? "true" : "false");
+                  _activeLow ? "true" : "false",
+                  static_cast<unsigned long long>(stableForSec),
+                  static_cast<unsigned long long>(_assertDelaySec),
+                  static_cast<unsigned long long>(_clearDelaySec));
 
         std::string details =
             "gpio=" + std::to_string(_gpioLine) +
             " raw=" + std::string(rawHigh ? "high" : "low") +
-            " active_low=" + std::string(_activeLow ? "true" : "false");
+            " active_low=" + std::string(_activeLow ? "true" : "false") +
+            " stable_for=" + std::to_string(stableForSec) +
+            " assert_delay_sec=" + std::to_string(_assertDelaySec) +
+            " clear_delay_sec=" + std::to_string(_clearDelaySec);
 
         if(_faultActive) {
             IncidentMgr::shared()->raise(
