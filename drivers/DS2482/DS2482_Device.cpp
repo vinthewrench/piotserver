@@ -241,60 +241,42 @@ bool DS2482_Device::getValues(keyValueMap_t &results)
         return false;
     }
 
-    int error = 0;
-    vector<DS2482::Temperature> readings;
-
-    if(!_device.readTemps(readings, error)) {
-        LOGT_ERROR("DS2482_Device(%02X) readTemps FAILED: %s",
-                   _device.getDevAddr(),
-                   strerror(error ? error : errno));
-
-        for(const auto &value : _configuredValues) {
-            raiseValueIncident(value.key, "DS2482 temperature read failed");
-        }
-
-        _deviceState = DEVICE_STATE_ERROR;
-        return false;
-    }
-
-    map<string, DS2482::Temperature> readingsByAddress;
-
-    for(const auto &reading : readings) {
-        readingsByAddress[DS2482::romToString(reading.rom)] = reading;
-    }
-
     for(const auto &value : _configuredValues) {
-        auto it = readingsByAddress.find(value.address);
+        int error = 0;
+        DS2482::Temperature reading;
 
-        if(it == readingsByAddress.end()) {
-            LOGT_ERROR("DS2482_Device(%02X) configured DS18B20 missing: key=%s address=%s",
-                       _device.getDevAddr(),
-                       value.key.c_str(),
-                       value.address.c_str());
+        if(!_device.readTemp(value.rom, reading, error)) {
+            string message;
 
-            raiseValueIncident(value.key, "Configured DS18B20 sensor missing");
-            continue;
-        }
+            if(!reading.errorText.empty()) {
+                message = reading.errorText;
+            }
+            else if(error != 0) {
+                message = strerror(error);
+            }
+            else {
+                message = "DS18B20 temperature read failed";
+            }
 
-        const DS2482::Temperature &reading = it->second;
-
-        if(!reading.success) {
-            string message = reading.errorText.empty()
-                           ? string("DS18B20 temperature read failed")
-                           : reading.errorText;
-
-            LOGT_ERROR("DS2482_Device(%02X) DS18B20 read failed: key=%s address=%s error=%s",
-                       _device.getDevAddr(),
-                       value.key.c_str(),
-                       value.address.c_str(),
-                       message.c_str());
+            LOGT_ERROR(
+                "DS2482_Device(%02X) DS18B20 read failed: "
+                "key=%s address=%s error=%s",
+                _device.getDevAddr(),
+                value.key.c_str(),
+                value.address.c_str(),
+                message.c_str()
+            );
 
             raiseValueIncident(value.key, message);
             continue;
         }
 
         results[value.key] = to_string(reading.tempC);
-        clearValueIncident(value.key, "DS18B20 temperature read succeeded");
+        clearValueIncident(
+            value.key,
+            "DS18B20 temperature read succeeded"
+        );
+
         hasData = true;
     }
 

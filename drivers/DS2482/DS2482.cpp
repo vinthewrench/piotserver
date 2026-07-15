@@ -47,6 +47,9 @@ static constexpr useconds_t DS18B20_CONVERSION_US      = 750000;
 static constexpr int DS2482_READY_RETRY_COUNT          = 1000;
 static constexpr useconds_t DS2482_READY_DELAY_US      = 1000;
 
+static constexpr int DS18B20_SCRATCHPAD_READ_ATTEMPTS = 3;
+static constexpr useconds_t DS18B20_SCRATCHPAD_RETRY_DELAY_US = 10000;
+
 DS2482::DS2482()
 : _i2cPort(),
   _isSetup(false),
@@ -716,29 +719,58 @@ bool DS2482::readOneTemperature(const std::array<uint8_t, 8> &rom,
         return false;
     }
 
-    std::array<uint8_t, 9> scratchpad = {};
+    int lastError = 0;
+    bool hadCRCFailure = false;
 
-    if (!readScratchpad(rom, scratchpad, error)) {
-        temperature.success = false;
-        temperature.errorText = "failed to read scratchpad";
-        return false;
+    for (int attempt = 1;
+         attempt <= DS18B20_SCRATCHPAD_READ_ATTEMPTS;
+         attempt++) {
+        std::array<uint8_t, 9> scratchpad = {};
+        int readError = 0;
+
+        if (!readScratchpad(rom, scratchpad, readError)) {
+            lastError = readError != 0 ? readError : EIO;
+        }
+        else if (!validScratchpadCRC(scratchpad)) {
+            hadCRCFailure = true;
+            lastError = EIO;
+        }
+        else {
+            int16_t raw = static_cast<int16_t>(
+                (static_cast<uint16_t>(scratchpad[1]) << 8) |
+                scratchpad[0]
+            );
+
+            temperature.tempC = static_cast<float>(raw) / 16.0f;
+            temperature.tempF =
+                (temperature.tempC * 9.0f / 5.0f) + 32.0f;
+            temperature.success = true;
+            temperature.errorText.clear();
+            error = 0;
+
+            return true;
+        }
+
+        if (attempt < DS18B20_SCRATCHPAD_READ_ATTEMPTS) {
+            usleep(DS18B20_SCRATCHPAD_RETRY_DELAY_US);
+        }
     }
 
-    if (!validScratchpadCRC(scratchpad)) {
-        temperature.success = false;
-        temperature.errorText = "scratchpad CRC failed";
-        error = EIO;
-        return false;
+    temperature.success = false;
+    error = lastError != 0 ? lastError : EIO;
+
+    if (hadCRCFailure) {
+        temperature.errorText =
+            "scratchpad CRC failed after 3 attempts";
+    }
+    else {
+        temperature.errorText =
+            "failed to read scratchpad after 3 attempts";
     }
 
-    int16_t raw = static_cast<int16_t>((static_cast<uint16_t>(scratchpad[1]) << 8) | scratchpad[0]);
-
-    temperature.tempC = static_cast<float>(raw) / 16.0f;
-    temperature.tempF = (temperature.tempC * 9.0f / 5.0f) + 32.0f;
-    temperature.success = true;
-
-    return true;
+    return false;
 }
+
 
 uint8_t DS2482::crc8(const uint8_t *data, size_t len)
 {
