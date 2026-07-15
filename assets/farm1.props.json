@@ -18,6 +18,27 @@
     },
     "devices": [
         {
+            "address": "0x41",
+            "device_type": "PCA9536",
+            "enable": true,
+            "pins": [
+                {
+                    "bit": 0,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RLY41_CH1",
+                    "title": "Greenhouse Light"
+                },
+                {
+                    "bit": 1,
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "RLY41_CH2",
+                    "title": "Floodlight"
+                }
+            ]
+        },
+        {
             "address": "0x08",
             "deviceID": "POWERCONTROL_1",
             "device_type": "POWERCONTROL",
@@ -84,7 +105,7 @@
                     "interval": 30,
                     "key": "PLOT1",
                     "other.props": {
-                        "address": "28-3e-94-35-00-00-00-81"
+                        "address": "28-b9-f5-33-00-00-00-3b"
                     },
                     "title": "Soil Temp Plot A",
                     "tracking": "track.range"
@@ -93,7 +114,7 @@
             "title": "Soil Temperature 1-Wire Bus"
         },
         {
-            "address": "0x48",
+            "address": "0x4F",
             "data_type": "TEMPERATURE",
             "device_type": "TMP10X",
             "interval": 30,
@@ -156,6 +177,8 @@
         },
         {
             "address": "0x27",
+            "description": "Garden Irrigation Plugin board",
+            "deviceID": 4001,
             "device_type": "MCP23008",
             "key": "GARDEN_27",
             "pins": [
@@ -164,82 +187,226 @@
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "GI_1",
-                    "title": "EXTRA2"
+                    "title": "BLUE"
                 },
                 {
                     "bit": 6,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "GI_2",
-                    "title": "EXTRA1"
+                    "title": "YELLOW"
                 },
                 {
                     "bit": 5,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "GI_3",
-                    "title": "GREEN"
+                    "title": "WHITE"
                 },
                 {
                     "bit": 4,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "GI_4",
-                    "title": "BROWN"
+                    "title": "ORANGE"
                 },
                 {
                     "bit": 3,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "GI_5",
-                    "title": "ORANGE"
+                    "title": "BROWN"
                 },
                 {
                     "bit": 0,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "GI_6",
-                    "title": "WHITE"
+                    "title": "GREEN"
                 },
                 {
                     "bit": 1,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "GI_7",
-                    "title": "YELLOW"
+                    "title": "GREY"
                 },
                 {
                     "bit": 2,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
                     "key": "GI_8",
-                    "title": "BLUE"
+                    "title": "PURPLE"
                 }
             ],
             "title": "GI2 plugin 2.0"
         },
         {
-            "address": "0x20",
-            "device_type": "MCP23008",
+            "address": "0x09",
+            "description": "Valve Master I2C to RS-485 irrigation controller",
+            "deviceID": "VALVEMASTER_1",
+            "device_type": "VALVEMASTER",
             "interval": 5,
+            "key": "VALVEMASTER_1",
             "pins": [
                 {
-                    "bit": 0,
                     "data_type": "BOOL",
                     "gpio.mode": "output",
-                    "key": "GREENHOUSE_LIGHT",
-                    "title": "Greenhouse Light"
+                    "key": "SPRK_1",
+                    "other.props": {
+                        "node": 1,
+                        "valve": 1
+                    },
+                    "title": "A. Chard/Kale",
+                    "tracking": "dont.record"
                 },
                 {
-                    "bit": 7,
                     "data_type": "BOOL",
-                    "gpio.mode": "input",
-                    "key": "RAIN_SENSOR",
-                    "title": "Orbit Rain Sensor",
+                    "gpio.mode": "output",
+                    "key": "SPRK_2",
+                    "other.props": {
+                        "node": 1,
+                        "valve": 2
+                    },
+                    "title": "B. Cucumbers",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_3",
+                    "other.props": {
+                        "node": 2,
+                        "valve": 1
+                    },
+                    "title": "C. Tomatoes",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_4",
+                    "other.props": {
+                        "node": 2,
+                        "valve": 2
+                    },
+                    "title": "D. Peppers",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_5",
+                    "other.props": {
+                        "node": 3,
+                        "valve": 1
+                    },
+                    "title": "E. Beans",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_6",
+                    "other.props": {
+                        "node": 3,
+                        "valve": 2
+                    },
+                    "title": "F. Squash",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_7",
+                    "other.props": {
+                        "node": 4,
+                        "valve": 1
+                    },
+                    "title": "G. Corn",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_8",
+                    "other.props": {
+                        "node": 4,
+                        "valve": 2
+                    },
+                    "title": "H. Melons",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_9",
+                    "other.props": {
+                        "node": 5,
+                        "valve": 1
+                    },
+                    "title": "I. Herbs",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_10",
+                    "other.props": {
+                        "node": 5,
+                        "valve": 2
+                    },
+                    "title": "J. Lettuce",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_11",
+                    "other.props": {
+                        "node": 6,
+                        "valve": 1
+                    },
+                    "title": "K. Carrots",
+                    "tracking": "dont.record"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "SPRK_12",
+                    "other.props": {
+                        "node": 6,
+                        "valve": 2
+                    },
+                    "title": "L. Beets",
+                    "tracking": "dont.record"
+                }
+            ],
+            "power_hold_sec": 60,
+            "retry_count": 5,
+            "retry_delay_ms": 300,
+            "title": "Valve Master I2C"
+        },
+        {
+            "deviceID": "FAULT_SIG",
+            "device_type": "FAULT_SIG",
+            "enable": true,
+            "interval": 1,
+            "pins": [
+                {
+                    "data_type": "BOOL",
+                    "key": "FAULT_SIG_ACTIVE",
+                    "other.props": {
+                        "active_low": true,
+                        "assert_delay_sec": 5,
+                        "clear_delay_sec": 1
+                    },
+                    "read_only": true,
+                    "title": "Fault Signal Active",
                     "tracking": "track.changes"
                 }
             ],
-            "title": "NCD Relay+I/O"
+            "title": "Fault Signal"
         }
     ],
     "keys.manual": [
@@ -250,11 +417,24 @@
         "GI_5",
         "GI_6",
         "GI_7",
-        "GI_8"
+        "GI_8",
+        "RLY41_CH2",
+        "SPRK_1",
+        "SPRK_10",
+        "SPRK_11",
+        "SPRK_12",
+        "SPRK_2",
+        "SPRK_3",
+        "SPRK_4",
+        "SPRK_5",
+        "SPRK_6",
+        "SPRK_7",
+        "SPRK_8",
+        "SPRK_9"
     ],
     "prop.file.version": {
-        "file.etag": 34,
-        "last_write": 1784143048
+        "file.etag": 1370,
+        "last_write": 1783275754
     },
     "rule": [
         {
@@ -286,9 +466,224 @@
     "sequence": [
         {
             "condition": "RAIN_SENSOR == 0",
-            "description": "GI_8 through GI_3 for 30 minutes at 9:00 AM",
+            "description": "Runs each Valve Master sprinkler zone in sequence and shuts all zones off on abort.",
             "enable": true,
-            "name": "Garden irrigation morning sequence",
+            "name": "Garden irrigation valve sequence",
+            "on_abort": {
+                "action": [
+                    {
+                        "cmd": "DEVICE_ACTION",
+                        "key": "VALVEMASTER_1",
+                        "value": "ALL_OFF"
+                    },
+                    {
+                        "cmd": "DEVICE_ACTION",
+                        "key": "VALVEMASTER_1",
+                        "value": "POWER_OFF"
+                    }
+                ]
+            },
+            "override_manualmode": true,
+            "sequenceID": "4000",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_1",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 30
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_1",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_2",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 30
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_2",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_3",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 30
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_3",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_4",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 30
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_4",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_5",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 30
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_5",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_6",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 30
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_6",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_7",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 30
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_7",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_8",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 30
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_8",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_9",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 30
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_9",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_10",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 30
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_10",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_11",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 30
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_11",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_12",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 30
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "SPRK_12",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "EVAL",
+                            "expression": "IRRIGATION_RUN_COUNT := IRRIGATION_RUN_COUNT + 1"
+                        }
+                    ],
+                    "duration": 30
+                }
+            ],
+            "trigger": {
+                "cron": "@10minute"
+            }
+        },
+        {
+            "description": "Runs each Garden Irrigation MCP23008 output for 10 seconds in sequence and shuts all outputs off on abort.",
+            "enable": true,
+            "name": "Garden irrigation plugin test sequence",
             "on_abort": {
                 "action": [
                     {
@@ -305,62 +700,42 @@
                     "action": [
                         {
                             "cmd": "SET",
-                            "key": "GI_8",
+                            "key": "GI_1",
                             "value": "on"
                         }
                     ],
-                    "duration": 1800
+                    "duration": 10
                 },
                 {
                     "action": [
                         {
                             "cmd": "SET",
-                            "key": "GI_8",
+                            "key": "GI_1",
                             "value": "off"
                         },
                         {
                             "cmd": "SET",
-                            "key": "GI_7",
+                            "key": "GI_2",
+                            "value": "on"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "GI_3",
                             "value": "on"
                         }
                     ],
-                    "duration": 1800
+                    "duration": 10
                 },
                 {
                     "action": [
                         {
                             "cmd": "SET",
-                            "key": "GI_7",
+                            "key": "GI_2",
                             "value": "off"
                         },
                         {
                             "cmd": "SET",
-                            "key": "GI_6",
-                            "value": "on"
-                        }
-                    ],
-                    "duration": 1800
-                },
-                {
-                    "action": [
-                        {
-                            "cmd": "SET",
-                            "key": "GI_6",
-                            "value": "off"
-                        },
-                        {
-                            "cmd": "SET",
-                            "key": "GI_5",
-                            "value": "on"
-                        }
-                    ],
-                    "duration": 1800
-                },
-                {
-                    "action": [
-                        {
-                            "cmd": "SET",
-                            "key": "GI_5",
+                            "key": "GI_3",
                             "value": "off"
                         },
                         {
@@ -369,7 +744,7 @@
                             "value": "on"
                         }
                     ],
-                    "duration": 1800
+                    "duration": 10
                 },
                 {
                     "action": [
@@ -380,158 +755,151 @@
                         },
                         {
                             "cmd": "SET",
-                            "key": "GI_3",
+                            "key": "GI_5",
                             "value": "on"
                         }
                     ],
-                    "duration": 1800
+                    "duration": 10
                 },
                 {
                     "action": [
                         {
                             "cmd": "SET",
-                            "key": "GI_3",
+                            "key": "GI_5",
                             "value": "off"
                         },
                         {
-                            "cmd": "DEVICE_ACTION",
-                            "key": "GARDEN_27",
-                            "value": "ALL_OFF"
+                            "cmd": "SET",
+                            "key": "GI_6",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GI_6",
+                            "value": "off"
                         },
                         {
-                            "cmd": "EVAL",
-                            "expression": "IRRIGATION_RUN_COUNT := IRRIGATION_RUN_COUNT + 1"
+                            "cmd": "SET",
+                            "key": "GI_7",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GI_7",
+                            "value": "off"
+                        },
+                        {
+                            "cmd": "SET",
+                            "key": "GI_8",
+                            "value": "on"
+                        }
+                    ],
+                    "duration": 10
+                },
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "GI_8",
+                            "value": "off"
                         }
                     ]
                 }
             ],
             "trigger": {
-                "time": "09:00 AM"
+                "cron": "0 */5 * * * ?"
             }
         },
         {
-            "condition": "RAIN_SENSOR == 0",
-            "description": "GI_8 through GI_3 for 30 minutes at 9:00 PM",
-            "enable": true,
-            "name": "Garden irrigation evening sequence",
-            "on_abort": {
-                "action": [
-                    {
-                        "cmd": "DEVICE_ACTION",
-                        "key": "GARDEN_27",
-                        "value": "ALL_OFF"
-                    }
-                ]
-            },
+            "description": "Turn relay light on at sunset.",
+            "enable": false,
+            "name": "Lights on at sunset",
             "override_manualmode": true,
-            "sequenceID": "4002",
+            "sequenceID": "4100",
             "steps": [
                 {
                     "action": [
                         {
                             "cmd": "SET",
-                            "key": "GI_8",
+                            "key": "RLY41_CH2",
                             "value": "on"
-                        }
-                    ],
-                    "duration": 1800
-                },
-                {
-                    "action": [
-                        {
-                            "cmd": "SET",
-                            "key": "GI_8",
-                            "value": "off"
-                        },
-                        {
-                            "cmd": "SET",
-                            "key": "GI_7",
-                            "value": "on"
-                        }
-                    ],
-                    "duration": 1800
-                },
-                {
-                    "action": [
-                        {
-                            "cmd": "SET",
-                            "key": "GI_7",
-                            "value": "off"
-                        },
-                        {
-                            "cmd": "SET",
-                            "key": "GI_6",
-                            "value": "on"
-                        }
-                    ],
-                    "duration": 1800
-                },
-                {
-                    "action": [
-                        {
-                            "cmd": "SET",
-                            "key": "GI_6",
-                            "value": "off"
-                        },
-                        {
-                            "cmd": "SET",
-                            "key": "GI_5",
-                            "value": "on"
-                        }
-                    ],
-                    "duration": 1800
-                },
-                {
-                    "action": [
-                        {
-                            "cmd": "SET",
-                            "key": "GI_5",
-                            "value": "off"
-                        },
-                        {
-                            "cmd": "SET",
-                            "key": "GI_4",
-                            "value": "on"
-                        }
-                    ],
-                    "duration": 1800
-                },
-                {
-                    "action": [
-                        {
-                            "cmd": "SET",
-                            "key": "GI_4",
-                            "value": "off"
-                        },
-                        {
-                            "cmd": "SET",
-                            "key": "GI_3",
-                            "value": "on"
-                        }
-                    ],
-                    "duration": 1800
-                },
-                {
-                    "action": [
-                        {
-                            "cmd": "SET",
-                            "key": "GI_3",
-                            "value": "off"
-                        },
-                        {
-                            "cmd": "DEVICE_ACTION",
-                            "key": "GARDEN_27",
-                            "value": "ALL_OFF"
-                        },
-                        {
-                            "cmd": "EVAL",
-                            "expression": "IRRIGATION_RUN_COUNT := IRRIGATION_RUN_COUNT + 1"
                         }
                     ]
                 }
             ],
             "trigger": {
-                "time": "09:00 PM"
+                "timeBase": "sunset"
+            }
+        },
+        {
+            "description": "Turn relay light off at sunrise.",
+            "enable": true,
+            "name": "Lights off at sunrise",
+            "override_manualmode": true,
+            "sequenceID": "4101",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "SET",
+                            "key": "RLY41_CH2",
+                            "value": "off"
+                        }
+                    ]
+                }
+            ],
+            "trigger": {
+                "timeBase": "sunrise"
+            }
+        },
+        {
+            "enable": true,
+            "name": "VALVEMASTER set fault",
+            "override_manualmode": false,
+            "sequenceID": "9000",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "DEVICE_ACTION",
+                            "key": "VALVEMASTER_1",
+                            "value": "set_error"
+                        }
+                    ]
+                }
+            ],
+            "trigger": {
+                "event": "manual"
+            }
+        },
+        {
+            "enable": true,
+            "name": "VALVEMASTER clear fault",
+            "override_manualmode": false,
+            "sequenceID": "9001",
+            "steps": [
+                {
+                    "action": [
+                        {
+                            "cmd": "DEVICE_ACTION",
+                            "key": "VALVEMASTER_1",
+                            "value": "clear_error"
+                        }
+                    ]
+                }
+            ],
+            "trigger": {
+                "event": "manual"
             }
         }
     ],
@@ -568,6 +936,24 @@
                     "GI_8"
                 ],
                 "kind": "duration"
+            },
+            {
+                "device": "VALVEMASTER_1",
+                "key": [
+                    "SPRK_1",
+                    "SPRK_10",
+                    "SPRK_11",
+                    "SPRK_12",
+                    "SPRK_2",
+                    "SPRK_3",
+                    "SPRK_4",
+                    "SPRK_5",
+                    "SPRK_6",
+                    "SPRK_7",
+                    "SPRK_8",
+                    "SPRK_9"
+                ],
+                "kind": "duration"
             }
         ]
     },
@@ -591,21 +977,47 @@
             "label": "Lights",
             "members": [
                 {
-                    "key": "GREENHOUSE_LIGHT",
+                    "key": "RLY41_CH1",
                     "onIcon": "💡"
+                },
+                {
+                    "key": "RLY41_CH2"
                 }
+            ]
+        },
+        "sprinklers": {
+            "control": "valve",
+            "label": "Sprinklers",
+            "members": [
+                "SPRK_1",
+                "SPRK_2",
+                "SPRK_3",
+                "SPRK_4",
+                "SPRK_5",
+                "SPRK_6",
+                "SPRK_7",
+                "SPRK_8",
+                "SPRK_9",
+                "SPRK_10",
+                "SPRK_11",
+                "SPRK_12"
             ]
         }
     },
     "ui.schedules": {
-        "evening_garden_irrigation": {
-            "description": "PWM sprinkler 9 PM",
-            "label": "Evening Garden Irrigation",
-            "members": ["4002"]
+        "garden_irrigation": {
+            "description": "ValveMaster sprinkler sequence",
+            "label": "New Garden Irrigation",
+            "members": ["4000"]
         },
-        "morning_garden_irrigation": {
-            "description": "PWM sprinkler 9 AM",
-            "label": "Morning Garden Irrigation",
+        "lights": {
+            "description": "Outdoor light schedule",
+            "label": "Lights",
+            "members": ["4100", "4101"]
+        },
+        "old_garden_irrigation": {
+            "description": "PWM sprinkler sequence",
+            "label": "Garden Irrigation",
             "members": ["4001"]
         }
     },
@@ -615,7 +1027,6 @@
             "label": "Cooler",
             "members": [
                 {
-                    "history": true,
                     "key": "COOLER_TEMPERATURE",
                     "kind": "temperature",
                     "label": "Temperature",
@@ -625,7 +1036,6 @@
                     }
                 },
                 {
-                    "history": true,
                     "key": "COOLER_HUMIDITY",
                     "kind": "humidity",
                     "label": "Humidity",
@@ -641,7 +1051,6 @@
             "label": "Garden",
             "members": [
                 {
-                    "history": true,
                     "key": "GARDEN_TEMPERATURE",
                     "kind": "temperature",
                     "label": "Air Temperature",
@@ -651,7 +1060,6 @@
                     }
                 },
                 {
-                    "history": true,
                     "key": "GARDEN_HUMIDITY",
                     "kind": "humidity",
                     "label": "Humidity",
@@ -661,7 +1069,6 @@
                     }
                 },
                 {
-                    "history": true,
                     "key": "PLOT1",
                     "kind": "temperature",
                     "label": "Soil Temperature",
@@ -673,7 +1080,6 @@
                 {
                     "falseIcon": "☀️",
                     "falseLabel": "No Rain",
-                    "history": true,
                     "key": "RAIN_SENSOR",
                     "kind": "binary",
                     "label": "Rain",
@@ -687,7 +1093,6 @@
             "label": "Greenhouse",
             "members": [
                 {
-                    "history": true,
                     "key": "GREENHOUSE",
                     "kind": "temperature",
                     "label": "Temperature",
@@ -700,6 +1105,13 @@
         }
     },
     "values": [
+        {
+            "data_type": "BOOL",
+            "description": "Orbit rain sensor",
+            "initial.value": false,
+            "key": "RAIN_SENSOR",
+            "title": "Rain Sensor"
+        },
         {
             "data_type": "INT",
             "description": "Counter incremented after irrigation sequence completes",
