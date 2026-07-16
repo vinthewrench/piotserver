@@ -16,6 +16,7 @@
 #include <sys/time.h>
 
 #include <array>
+#include <cstdint>
 #include <map>
 #include <string>
 #include <vector>
@@ -59,6 +60,9 @@ private:
         string address;
         array<uint8_t, 8> rom = {};
         uint64_t queryDelay = default_queryDelay;
+
+        uint32_t consecutiveFailures = 0;
+        bool incidentRaised = false;
     } DS18B20Value_t;
 
     bool shouldQuery();
