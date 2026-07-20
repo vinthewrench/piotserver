@@ -1,0 +1,54 @@
+{
+    "config": {
+        "description": "MQTT Test example",
+        "lat_long": "34.465338, -93.362827",
+        "name": "home mqtt"
+    },
+    "devices": [
+        {
+            "description": "Zigbee MQTT",
+            "deviceID": "MQTT_1,
+            "device_type": "MQTT",
+            "interval": 2,
+            "key": "ZIGBEE_1",
+            "mqtt.base_topic": "zigbee2mqtt",
+            "mqtt.host": "<your server>",
+            "mqtt.port": 1883,
+            "pins": [
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "PLUG_1",
+                    "other.props": {
+                        "mqtt.target": "plug_1"
+                    },
+                    "title": "Test Plug 1"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "PLUG_2",
+                    "other.props": {
+                        "mqtt.off": "OFF",
+                        "mqtt.on": "ON",
+                        "mqtt.property": "state",
+                        "mqtt.target": "plug_2",
+                        "mqtt.target_type": "device"
+                    },
+                    "title": "Test Plug 2"
+                },
+                {
+                    "data_type": "BOOL",
+                    "gpio.mode": "output",
+                    "key": "PLUGS",
+                    "other.props": {
+                        "mqtt.target": "plugs",
+                        "mqtt.target_type": "group"
+                    },
+                    "title": "All Test Plugs"
+                }
+            ]
+        }
+    ],
+    "sequence": null
+}
