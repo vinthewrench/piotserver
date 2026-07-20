@@ -195,7 +195,8 @@ PLUGIN_DIRS := \
 	TMP10X	\
 	FAULT_SIG \
 	SHUTDOWN_SIG \
-	DS2482
+	DS2482		\
+	MQTT
 
 .PHONY: \
 	all \
