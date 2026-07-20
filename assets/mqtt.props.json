@@ -7,7 +7,7 @@
     "devices": [
         {
             "description": "Zigbee MQTT",
-            "deviceID": "MQTT_1,
+            "deviceID": "MQTT_1",
             "device_type": "MQTT",
             "interval": 2,
             "key": "ZIGBEE_1",
