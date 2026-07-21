@@ -97,7 +97,8 @@ sudo apt install -y \
     libsqlite3-dev \
     i2c-tools \
     gpiod \
-    libgpiod-dev
+    libgpiod-dev \
+    libcurl4-openssl-dev
 ```
 
 If Raspberry Pi OS installs only the versioned clang binaries, register them as the default `clang` and `clang++` commands:
