@@ -2130,6 +2130,7 @@ bool pIoTServerMgr::processEvents(){
 
                 bool IsEphemeral =  _db.sequenceIsEphemeral(sid);
 
+                const bool wasRunning = _db.sequenceIsRunning(sid);
                 _db.sequenceStartAbort(sid);
 
                 // if we already started a sequence,  run abort
@@ -2139,8 +2140,9 @@ bool pIoTServerMgr::processEvents(){
 
                 // reset the sequence
                 _db.sequenceReset(sid);
-                _db.sequenceSetLastRunTime(sid, localNow);
-                _db.sequenceSetRunning(sid, false);
+                if(!wasRunning) {
+                    _db.sequenceSetLastRunTime(sid, localNow);
+                }
 
                 if(IsEphemeral){
                     _db.sequenceDelete(sid);
@@ -2151,6 +2153,12 @@ bool pIoTServerMgr::processEvents(){
 
             uint stepNo;
             if(_db.sequenceNextStepNumberToRun(sid,stepNo)){
+
+                if(stepNo == 0 && !_db.sequenceIsRunning(sid)) {
+                    if(!_db.sequenceStartRun(sid, time(NULL), localNow)) {
+                        continue;
+                    }
+                }
 
                 { // DEBUG
                     EventTrigger trig;
@@ -2172,20 +2180,14 @@ bool pIoTServerMgr::processEvents(){
 
 
                 runSequenceStep(sid, stepNo, [=, this]( [[maybe_unused]] bool didSucceed){
-
-                   _db.sequenceSetRunning(sid, true);
-
                     time_t now = time(NULL);
-                    struct tm* tm = localtime(&now);
-                    time_t localNow  = (now + tm->tm_gmtoff);
 
-                    if(_db.sequenceCompletedStep(sid, stepNo, localNow)){
+                    if(_db.sequenceCompletedStep(sid, stepNo, now)){
 //                                           printf("Sequence: %04x, Step:%d  - completed -\n", sid, stepNo);
                     }
                     else {
                         // we completed..
-                        _db.sequenceSetRunning(sid, false);
-                        _db.sequenceSetLastRunTime(sid, localNow);
+                        _db.sequenceReset(sid);
                         if(_db.sequenceIsEphemeral(sid)){
                             _db.sequenceDelete(sid);
                         }
@@ -2576,19 +2578,20 @@ bool pIoTServerMgr::abortSequence(sequenceID_t sid){
 
             uint stepNo = 0;
             _db.sequenceNextStepNumberToRun(sid,stepNo);
+            const bool wasRunning = _db.sequenceIsRunning(sid);
 
             bool IsEphemeral =  _db.sequenceIsEphemeral(sid);
 
             _db.sequenceStartAbort(sid);
 
             _db.sequenceReset(sid);
-            _db.sequenceSetLastRunTime(sid, localNow);
+            if(!wasRunning) {
+                _db.sequenceSetLastRunTime(sid, localNow);
+            }
 
             if(stepNo > 0){
                 runAbortActions(sid);
             }
-
-            _db.sequenceSetRunning(sid, false);
 
             string details = "sid=" + SequenceID_to_string(sid)
             + " name=\"" + name + "\""

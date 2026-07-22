@@ -327,6 +327,7 @@ class pIoTServerDB  {
 
     bool sequenceReset(sequenceID_t sid);       // reset the step count
 
+    bool sequenceStartRun(sequenceID_t sid, time_t runStartTime, time_t localNow);
     bool sequenceSetRunning(sequenceID_t sid, bool isrunning);
 
     bool sequenceSetLastRunTime(sequenceID_t sid,time_t localNow);

@@ -268,6 +268,7 @@ void Sequence::commonInit(){
     _trigger     = EventTrigger();
     _steps.clear();
      _nextStepToRun = 0;
+    _runStartTime = 0;
     _lastStepRunTime = 0;
     _currentStepNumber = UINT_MAX;
     _dontLog = true;
@@ -437,6 +438,7 @@ void Sequence::copy(const Sequence &seq1, Sequence *seq2){
     seq2->_steps            = seq1._steps;
     seq2->_enable           = seq1._enable;
     seq2->_nextStepToRun    = seq1._nextStepToRun;
+    seq2->_runStartTime     = seq1._runStartTime;
     seq2->_lastStepRunTime  = seq1._lastStepRunTime;
     seq2->_dontLog           = seq1._dontLog;
     seq2->_overrideManualMode = seq1._overrideManualMode;
@@ -457,6 +459,7 @@ bool Sequence::getStep(uint stepNo, Step &stp){
 
 void Sequence::resetSteps(){
     _nextStepToRun = 0;
+    _runStartTime = 0;
     _lastStepRunTime = 0;
     _currentStepNumber = UINT_MAX;
     _isRunning = false;

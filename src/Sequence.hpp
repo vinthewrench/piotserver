@@ -244,7 +244,8 @@ protected:
 
     bool            _isRunning;
     uint            _nextStepToRun;
-    time_t          _lastStepRunTime;       // in localNow units
+    time_t          _runStartTime;        // UTC Unix time when step 0 started
+    time_t          _lastStepRunTime;      // UTC Unix time of the last completed step
     uint            _currentStepNumber;
 
     bool            _dontLog;

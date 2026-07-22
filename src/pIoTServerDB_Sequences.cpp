@@ -411,32 +411,44 @@ vector<sequenceID_t> pIoTServerDB::sequencesThatNeedToRunNow(solarTimes_t &solar
     std::lock_guard<std::mutex> lock(_mutex);
 
     vector<sequenceID_t> sid;
+    const time_t now = time(NULL);
 
     for (auto& [key, seq] : _sequences) {
 
         if( seq.isEnabled()) {
-            if(seq._trigger.shouldTriggerFromTimeEvent(solar, localNow)
-               || seq.wasManuallyTriggered()){
-
-                if(seq._nextStepToRun  == 0){
-                    sid.push_back( key);
+            if(!seq._isRunning) {
+                if(seq._nextStepToRun == 0
+                   && (seq._trigger.shouldTriggerFromTimeEvent(solar, localNow)
+                       || seq.wasManuallyTriggered())) {
+                    sid.push_back(key);
                 }
-                else {
-                    Step lastStepRun;
-                    seq.getStep(seq._nextStepToRun -1, lastStepRun);
-                    uint64_t lastDuration = lastStepRun.duration();
+                continue;
+            }
 
-                    if(seq._lastStepRunTime == 0){
-                        sid.push_back( key);
-                    }
-                    else if(localNow > seq._lastStepRunTime){
-                        const auto elapsed = static_cast<uint64_t>(localNow - seq._lastStepRunTime);
+            if(seq._nextStepToRun > 0 && seq._runStartTime > 0
+               && now >= seq._runStartTime) {
+                uint64_t dueOffset = 0;
 
-                        if(elapsed > lastDuration){
-                            sid.push_back( key);
-                        }
+                for(uint stepNo = 0; stepNo < seq._nextStepToRun; stepNo++) {
+                    Step completedStep;
+                    if(!seq.getStep(stepNo, completedStep)) {
+                        dueOffset = UINT64_MAX;
+                        break;
                     }
-                 }
+
+                    const uint64_t duration = completedStep.duration();
+                    if(UINT64_MAX - dueOffset < duration) {
+                        dueOffset = UINT64_MAX;
+                        break;
+                    }
+
+                    dueOffset += duration;
+                }
+
+                const uint64_t elapsed = static_cast<uint64_t>(now - seq._runStartTime);
+                if(elapsed >= dueOffset) {
+                    sid.push_back(key);
+                }
             }
          }
     };
@@ -491,11 +503,46 @@ bool pIoTServerDB::sequenceReset(sequenceID_t sid) {
     if(_sequences.count(sid) > 0){
         Sequence* seq =  &_sequences[sid];
         seq->_nextStepToRun = 0;
+        seq->_runStartTime = 0;
+        seq->_lastStepRunTime = 0;
+        seq->_currentStepNumber = UINT_MAX;
+        seq->_isRunning = false;
         seq->_wasManuallyTriggered = false;
         return true;
     };
 
     return false;
+}
+
+bool pIoTServerDB::sequenceStartRun(sequenceID_t sid,
+                                    time_t runStartTime,
+                                    time_t localNow) {
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    if(_sequences.count(sid) == 0 || runStartTime <= 0) {
+        return false;
+    }
+
+    Sequence* seq = &_sequences[sid];
+    if(seq->_isRunning || seq->_nextStepToRun != 0) {
+        return false;
+    }
+
+    bool markedTriggered = true;
+    if(seq->_trigger.isTimed()) {
+        markedTriggered = seq->_trigger.setLastRun(localNow);
+    }
+    else if(seq->_trigger.isCronEvent()) {
+        markedTriggered = seq->_trigger.scheduleNextCronTime();
+    }
+
+    if(!markedTriggered) {
+        return false;
+    }
+
+    seq->_runStartTime = runStartTime;
+    seq->_isRunning = true;
+    return true;
 }
 
 bool pIoTServerDB::sequenceSetRunning(sequenceID_t sid, bool isrunning){
