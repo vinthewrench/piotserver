@@ -54,6 +54,7 @@ typedef enum {
     MASTER_RELAY,       // Master Relay ID
 
     SERIAL_NO,          //Serial Number (String)
+    BRIGHTNESS,         // 0 -100  ON/OFF
 
     UNKNOWN,
 }valueSchemaUnits_t;

@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <array>
 #include <bitset>
+#include <cmath>
 #include <fstream>
 #include <functional>
 #include <iomanip>
@@ -44,6 +45,54 @@ using namespace std;
 
 #define DBL_MAX std::numeric_limits<double>::max()
 #define TIME_MAX    std::numeric_limits<time_t>::max()
+
+static  bool normalizeBrightnessInput(const string& input, string& output)  {
+    const string value = Utils::trim(input);
+
+    if(isNumberString(value)) {
+        char* end = nullptr;
+        const double brightness = strtod(value.c_str(), &end);
+
+        if(end != nullptr &&
+            *end == 0 &&
+            std::isfinite(brightness) &&
+            brightness >= 0.0 &&
+            brightness <= 100.0) {
+
+            if(brightness == 0.0) {
+                output = "0";
+            }
+            else if(brightness == 1.0) {
+                if(value == "1") {
+                    // keyValueMap_t represents Boolean true as "1".
+                    output = "100";
+                }
+                else {
+                    // Preserve actual 1% as a distinguishable value.
+                    output = "1.0";
+                }
+            }
+            else {
+                std::ostringstream stream;
+                stream << std::setprecision(12) << brightness;
+                output = stream.str();
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    bool state = false;
+    if(stringToBool(value, state)) {
+        output = state ? "100" : "0";
+        return true;
+    }
+
+    return false;
+}
+
 
 // MARK: - values
 
@@ -94,6 +143,14 @@ bool pIoTServerDB::insertValue(string key, string value, time_t when, eTag_t eTa
         when = time(NULL);
 
     valueSchema_t schema = schemaForKey(key);
+
+    if(schema.units == BRIGHTNESS) {
+        string normalizedValue;
+        if(!normalizeBrightnessInput(value, normalizedValue)) {
+            return false;
+        }
+        value = normalizedValue;
+    }
 
     if((schema.tracking != TR_DONT_RECORD)
         && canMinMaxForUnit(unitsForKey(key))) {
@@ -234,6 +291,12 @@ bool pIoTServerDB::valueShouldUpdate(string key, string value){
                     triggerDiff = 10;
                     break;
 
+                case BRIGHTNESS:
+                    // Brightness is a commanded actuator value. Every
+                    // numeric change must be visible to the device driver.
+                    triggerDiff = 0;
+                    break;
+
                 default:
                     triggerDiff = 0;
                     break;
@@ -273,6 +336,10 @@ bool pIoTServerDB::isValidDataTypeForKey(string key, string value){
     else if(units == STRING) isValid = true;
     else if(units == BINARY && (isBinaryString(val) || isHexString(val))) isValid = true;
     else if(units == BOOL)  isValid = stringToBool(val,boolState);
+    else if(units == BRIGHTNESS) {
+        string normalizedValue;
+        isValid = normalizeBrightnessInput(val, normalizedValue);
+    }
     else if(units == ACTUATOR) isValid = true;
     else  if (isNumberString(value)) isValid = true;
     else if( stringToBool(value,boolState)) isValid = true;
@@ -382,6 +449,14 @@ string  pIoTServerDB::normalizeStringForUnit(string val,  valueSchemaUnits_t uni
 
     string outStr = val;
 
+    if(unit == BRIGHTNESS) {
+        string normalizedValue;
+        if(normalizeBrightnessInput(val, normalizedValue)) {
+            return normalizedValue;
+        }
+        return Utils::trim(val);
+    }
+
     try {
         if(pIoTServerDB::isUnitNumeric(unit)){
 
@@ -445,6 +520,7 @@ string   pIoTServerDB::unitSuffixForKey(string key){
 
         case RH:
         case PERCENT:
+        case BRIGHTNESS:
             suffix = "%";
             break;
 
@@ -493,6 +569,7 @@ double pIoTServerDB::normalizedDoubleForValue(string key, string value){
                 retVal = val / 1000;
                 break;
             case PERCENT:
+            case BRIGHTNESS:
             case DEGREES_C:
             case WATTS:
             case VOLTS:
@@ -583,6 +660,27 @@ string pIoTServerDB::displayStringForValue(string key, string value){
             }
         }
                break;
+
+        case BRIGHTNESS:
+        {
+            string normalizedValue;
+            if(normalizeBrightnessInput(value, normalizedValue)) {
+                if(normalizedValue == "ON" || normalizedValue == "OFF") {
+                    retVal = normalizedValue;
+                }
+                else {
+                    const double val = strtod(normalizedValue.c_str(), nullptr);
+                    char buffer[32];
+                    snprintf(buffer,
+                             sizeof(buffer),
+                             "%3.2f%s",
+                             val,
+                             suffix.c_str());
+                    retVal = string(buffer);
+                }
+            }
+        }
+            break;
 
         case RH:
         case MILLIVOLTS:
@@ -854,7 +952,25 @@ bool pIoTServerDB::snapshotForKV(string key, string val, numericValueSnapshot_t 
     if(isUnitNumeric(units)){
         double dValue = 0;
 
-        if(units == BOOL) {
+        if(units == BRIGHTNESS) {
+            string normalizedValue;
+            if(normalizeBrightnessInput(val, normalizedValue)) {
+                if(normalizedValue == "ON") {
+                    dValue = 1;
+                    isValid = true;
+                }
+                else if(normalizedValue == "OFF") {
+                    dValue = 0;
+                    isValid = true;
+                }
+                else {
+                    char* p = nullptr;
+                    dValue = strtod(normalizedValue.c_str(), &p);
+                    isValid = p != nullptr && *p == 0;
+                }
+            }
+        }
+        else if(units == BOOL) {
             bool boolState;
             if(stringToBool(val,boolState)){
                 dValue = boolState?1:0;

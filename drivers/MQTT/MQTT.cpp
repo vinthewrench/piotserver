@@ -4,6 +4,7 @@
 //
 
 #include "MQTT.hpp"
+#include "LogMgr.hpp"
 
 #include <mosquitto.h>
 
@@ -248,6 +249,7 @@ bool MQTT::subscribe(const std::string& topic, std::string& errorOut)
 
     if(topic.empty()) {
         errorOut = "MQTT subscription topic is empty";
+        LOGT_ERROR("%s", errorOut.c_str());
         return false;
     }
 
@@ -260,6 +262,7 @@ bool MQTT::subscribe(const std::string& topic, std::string& errorOut)
 
     if(connected && !resubscribe(topic)) {
         errorOut = "Unable to subscribe to MQTT topic " + topic;
+        LOGT_ERROR("%s", errorOut.c_str());
         return false;
     }
 
@@ -274,6 +277,7 @@ bool MQTT::publish(const std::string& topic,
 
     if(topic.empty()) {
         errorOut = "MQTT publish topic is empty";
+        LOGT_ERROR("%s", errorOut.c_str());
         return false;
     }
 
@@ -283,6 +287,10 @@ bool MQTT::publish(const std::string& topic,
             errorOut = _connectionError.empty()
                 ? "MQTT broker is not connected"
                 : _connectionError;
+
+            LOGT_ERROR("MQTT publish topic=%s failed: %s",
+                       topic.c_str(),
+                       errorOut.c_str());
             return false;
         }
     }
@@ -290,6 +298,9 @@ bool MQTT::publish(const std::string& topic,
     const std::string body = payload.dump();
     if(body.size() > static_cast<std::size_t>(std::numeric_limits<int>::max())) {
         errorOut = "MQTT payload is too large";
+        LOGT_ERROR("MQTT publish topic=%s failed: %s",
+                   topic.c_str(),
+                   errorOut.c_str());
         return false;
     }
 
@@ -306,6 +317,8 @@ bool MQTT::publish(const std::string& topic,
     if(result != MOSQ_ERR_SUCCESS) {
         errorOut = std::string("MQTT publish failed for ") + topic + ": " +
                    mosquitto_strerror(result);
+
+        LOGT_ERROR("%s", errorOut.c_str());
         return false;
     }
 
@@ -323,6 +336,7 @@ bool MQTT::publish(const std::string& topic,
 
     if(!completed) {
         errorOut = "Timed out publishing to MQTT topic " + topic;
+        LOGT_ERROR("%s", errorOut.c_str());
         return false;
     }
 
@@ -330,6 +344,10 @@ bool MQTT::publish(const std::string& topic,
         errorOut = _connectionError.empty()
             ? "MQTT connection was lost while publishing"
             : _connectionError;
+
+        LOGT_ERROR("MQTT publish topic=%s failed: %s",
+                   topic.c_str(),
+                   errorOut.c_str());
         return false;
     }
 
@@ -428,12 +446,21 @@ void MQTT::onConnect(int result)
             _connected = true;
             _connectionError.clear();
             subscriptions = _subscriptions;
+
+            LOGT_INFO("MQTT connected to broker %s:%d",
+                      _config.host.c_str(),
+                      _config.port);
         }
         else {
             _connected = false;
             _connectionError = std::string("MQTT connection rejected: ") +
                                mosquitto_connack_string(result);
             status = _connectionError;
+
+            LOGT_ERROR("MQTT connection to %s:%d rejected: %s",
+                       _config.host.c_str(),
+                       _config.port,
+                       status.c_str());
         }
 
         callback = _connectionCallback;
@@ -442,7 +469,9 @@ void MQTT::onConnect(int result)
 
     if(result == 0) {
         for(const auto& topic : subscriptions) {
-            resubscribe(topic);
+            if(!resubscribe(topic)) {
+                LOGT_ERROR("MQTT failed to subscribe topic=%s", topic.c_str());
+            }
         }
     }
 
@@ -466,6 +495,9 @@ void MQTT::onDisconnect(int result)
                                mosquitto_strerror(result);
             status = _connectionError;
             shouldNotify = true;
+
+            LOGT_ERROR("MQTT disconnected unexpectedly: %s",
+                       status.c_str());
         }
 
         callback = _connectionCallback;
@@ -480,6 +512,7 @@ void MQTT::onDisconnect(int result)
 void MQTT::onMessage(const mosquitto_message* message)
 {
     if(message == nullptr || message->topic == nullptr || message->payloadlen < 0) {
+        LOGT_ERROR("MQTT received an invalid message");
         return;
     }
 
@@ -490,6 +523,7 @@ void MQTT::onMessage(const mosquitto_message* message)
 
     json payload = json::parse(body, nullptr, false);
     if(payload.is_discarded()) {
+        LOGT_ERROR("MQTT received invalid JSON on topic %s", message->topic);
         payload = body;
     }
 

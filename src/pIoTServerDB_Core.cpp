@@ -211,6 +211,11 @@ string stringforSchemaUnits(valueSchemaUnits_t unit){
         case SERIAL_NO:          //Serial Number (String)
             result = "SERIAL_NO";
             break;
+
+        case BRIGHTNESS:
+            result = "BRIGHTNESS";
+            break;
+
     }
 
     return result;
@@ -241,6 +246,7 @@ valueSchemaUnits_t schemaUnitsForString(string str){
         {"BOOSTER" , BOOSTER},
         {"MASTER_RELAY" , MASTER_RELAY},
         {"SERIAL_NO" , SERIAL_NO},
+        { "BRIGHTNESS" , BRIGHTNESS }
 
     };
 
@@ -458,8 +464,8 @@ pIoTServerDB::pIoTServerDB (){
         {"Equation", EQUATION},         // equation
         {"ignore", IGNORE},                // ignore
         {"Actuator", ACTUATOR},      // ACTUATOR position code
-        {"SERIAL_NO" , SERIAL_NO}      // SERIAL Number
-
+        {"SERIAL_NO" , SERIAL_NO},     // SERIAL Number
+        {"BRIGHTNESS", BRIGHTNESS }
     };
     _didChangeProperties  = false;
 

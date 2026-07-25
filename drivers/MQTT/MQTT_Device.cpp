@@ -280,6 +280,37 @@ bool MQTT_Device::initWithSchema(deviceSchemaMap_t deviceSchema)
     return _isSetup;
 }
 
+std::string localHostname()
+{
+    std::array<char, 256> hostname{};
+
+    if(::gethostname(hostname.data(), hostname.size() - 1) != 0) {
+        return "unknown";
+    }
+
+    hostname.back() = '\0';
+
+    std::string result = Utils::trim(hostname.data());
+    if(result.empty()) {
+        return "unknown";
+    }
+
+    std::transform(result.begin(),
+                   result.end(),
+                   result.begin(),
+                   [](unsigned char character) {
+                       if(std::isalnum(character) ||
+                          character == '-' ||
+                          character == '_') {
+                           return static_cast<char>(std::tolower(character));
+                       }
+
+                       return '-';
+                   });
+
+    return result;
+}
+
 bool MQTT_Device::parseDeviceConfig(MQTT::config_t& configOut,
                                     std::string& errorOut)
 {
@@ -311,20 +342,33 @@ bool MQTT_Device::parseDeviceConfig(MQTT::config_t& configOut,
     while(!_baseTopic.empty() && _baseTopic.front() == '/') {
         _baseTopic.erase(_baseTopic.begin());
     }
+
     while(!_baseTopic.empty() && _baseTopic.back() == '/') {
         _baseTopic.pop_back();
     }
+
     if(_baseTopic.empty()) {
         errorOut = "mqtt.base_topic cannot be empty";
         return false;
     }
 
-    jsonStringProperty(_deviceProperties, "mqtt.username", configOut.username);
-    jsonStringProperty(_deviceProperties, "mqtt.password", configOut.password);
-    jsonStringProperty(_deviceProperties, "mqtt.client_id", configOut.clientID);
+    jsonStringProperty(_deviceProperties,
+                       "mqtt.username",
+                       configOut.username);
+
+    jsonStringProperty(_deviceProperties,
+                       "mqtt.password",
+                       configOut.password);
+
+    jsonStringProperty(_deviceProperties,
+                       "mqtt.client_id",
+                       configOut.clientID);
+
+    configOut.username = Utils::trim(configOut.username);
+    configOut.clientID = Utils::trim(configOut.clientID);
 
     if(configOut.clientID.empty()) {
-        configOut.clientID = "piotserver-" + _deviceID;
+        configOut.clientID = "piotserver-mqtt-" + localHostname();
     }
 
     if(_deviceProperties.contains("mqtt.keepalive")) {
@@ -344,15 +388,18 @@ bool MQTT_Device::parseDeviceConfig(MQTT::config_t& configOut,
     }
 
     if(_deviceProperties.contains("mqtt.timeout_ms")) {
-        if(!jsonIntProperty(_deviceProperties, "mqtt.timeout_ms", value) || value < 1) {
+        if(!jsonIntProperty(_deviceProperties, "mqtt.timeout_ms", value) ||
+           value < 1) {
             errorOut = "mqtt.timeout_ms must be a positive integer";
             return false;
         }
+
         configOut.timeout = std::chrono::milliseconds(value);
     }
 
     return true;
 }
+
 
 bool MQTT_Device::start()
 {
@@ -424,10 +471,11 @@ bool MQTT_Device::start()
     clearFailure(_deviceID, "MQTT broker connection succeeded");
     requestInitialState();
 
-    LOGT_INFO("MQTT_Device(%s) connected to %s:%d, base_topic=%s, bindings=%zu",
+    LOGT_INFO("MQTT_Device(%s) connected to %s:%d, client_id=%s, base_topic=%s, bindings=%zu",
               _deviceID.c_str(),
               config.host.c_str(),
               config.port,
+              config.clientID.c_str(),
               _baseTopic.c_str(),
               _bindings.size());
 
@@ -512,7 +560,13 @@ void MQTT_Device::requestInitialState()
     for(const auto& [key, binding] : _bindings) {
         (void)key;
         if(!binding.readOnly) {
-            requests[binding.target][binding.property] = "";
+            if(binding.units == BRIGHTNESS) {
+                requests[binding.target][binding.property] = "";
+                requests[binding.target]["brightness"] = "";
+            }
+            else {
+                requests[binding.target][binding.property] = "";
+            }
         }
     }
 
@@ -561,8 +615,10 @@ bool MQTT_Device::publishTarget(const std::string& target,
 
 bool MQTT_Device::setValues(keyValueMap_t values)
 {
+
     if(!isConnected()) {
-        reportFailure(_deviceID, "MQTT SET failed: broker disconnected");
+        reportFailure(_deviceID,
+                      "MQTT SET failed: broker disconnected");
         return false;
     }
 
@@ -572,19 +628,97 @@ bool MQTT_Device::setValues(keyValueMap_t values)
     try {
         for(const auto& [key, value] : values) {
             const auto found = _bindings.find(key);
-            if(found == _bindings.end() || found->second.readOnly) {
+            if(found == _bindings.end() ||
+               found->second.readOnly) {
                 return false;
             }
 
             const binding_t& binding = found->second;
             json& payload = payloads[binding.target];
 
-            if(binding.units == PERCENT && binding.property == "brightness") {
+            if(binding.units == BRIGHTNESS) {
+                if(binding.property != "state") {
+                    throw std::runtime_error(
+                        key + " BRIGHTNESS requires mqtt.property=state");
+                }
+
+                const std::string trimmed = Utils::trim(value);
+
                 std::size_t consumed = 0;
-                const double percent = std::stod(Utils::trim(value), &consumed);
-                if(consumed != Utils::trim(value).size() ||
-                   percent < 0.0 || percent > 100.0) {
-                    throw std::runtime_error("brightness percentage must be between 0 and 100");
+                double percent = 0.0;
+                bool isNumeric = false;
+
+                if(trimmed == "1") {
+                    // keyValueMap_t represents Boolean true as "1".
+                    percent = 100.0;
+                    isNumeric = true;
+                }
+                else {
+                    try {
+                        percent = std::stod(trimmed, &consumed);
+                        isNumeric =
+                            consumed == trimmed.size() &&
+                            std::isfinite(percent);
+                    }
+                    catch(const std::invalid_argument&) {
+                        // It may be ON/OFF or TRUE/FALSE.
+                    }
+                }
+
+                if(isNumeric) {
+                    if(percent < 0.0 || percent > 100.0) {
+                        throw std::runtime_error(
+                            key + " brightness must be between 0 and 100");
+                    }
+
+                    if(percent == 0.0) {
+                        payload[binding.property] =
+                            binding.offValue;
+                    }
+                    else {
+                        payload[binding.property] =
+                            binding.onValue;
+
+                        payload["brightness"] =
+                            static_cast<int>(
+                                std::lround(
+                                    (percent / 100.0) * 254.0));
+                    }
+                }
+                else {
+                    bool state = false;
+                    if(!stringToBool(trimmed, state)) {
+                        throw std::runtime_error(
+                            key +
+                            " brightness requires 0-100, "
+                            "ON/OFF, or TRUE/FALSE");
+                    }
+
+                    if(state) {
+                        payload[binding.property] =
+                            binding.onValue;
+                        payload["brightness"] = 254;
+                    }
+                    else {
+                        payload[binding.property] =
+                            binding.offValue;
+                    }
+                }
+            }
+            else if(binding.units == PERCENT &&
+                    binding.property == "brightness") {
+                const std::string trimmed = Utils::trim(value);
+
+                std::size_t consumed = 0;
+                const double percent =
+                    std::stod(trimmed, &consumed);
+
+                if(consumed != trimmed.size() ||
+                   percent < 0.0 ||
+                   percent > 100.0) {
+                    throw std::runtime_error(
+                        "brightness percentage must be "
+                        "between 0 and 100");
                 }
 
                 if(percent == 0.0) {
@@ -592,12 +726,15 @@ bool MQTT_Device::setValues(keyValueMap_t values)
                 }
                 else {
                     payload["state"] = "ON";
-                    payload["brightness"] = static_cast<int>(
-                        std::lround((percent / 100.0) * 254.0));
+                    payload["brightness"] =
+                        static_cast<int>(
+                            std::lround(
+                                (percent / 100.0) * 254.0));
                 }
             }
             else {
-                payload[binding.property] = outboundValue(binding, value);
+                payload[binding.property] =
+                    outboundValue(binding, value);
             }
 
             keysByTarget[binding.target].push_back(key);
@@ -605,9 +742,12 @@ bool MQTT_Device::setValues(keyValueMap_t values)
     }
     catch(const std::exception& exception) {
         reportFailure(_deviceID, exception.what());
-        LOGT_ERROR("MQTT_Device(%s) value conversion failed: %s",
-                   _deviceID.c_str(),
-                   exception.what());
+
+        LOGT_ERROR(
+            "MQTT_Device(%s) value conversion failed: %s",
+            _deviceID.c_str(),
+            exception.what());
+
         return false;
     }
 
@@ -616,9 +756,18 @@ bool MQTT_Device::setValues(keyValueMap_t values)
     }
 
     bool success = true;
+
     for(const auto& [target, payload] : payloads) {
+        const std::string payloadText = payload.dump();
+        LOGT_DEBUG(
+            "MQTT_Device(%s) sending SET target=%s payload=%s",
+            _deviceID.c_str(),
+            target.c_str(),
+            payloadText.c_str());
+
         std::string error;
-        const bool published = publishTarget(target, payload, true, error);
+        const bool published =
+            publishTarget(target, payload, true, error);
 
         for(const auto& key : keysByTarget[target]) {
             if(published) {
@@ -630,16 +779,19 @@ bool MQTT_Device::setValues(keyValueMap_t values)
         }
 
         if(!published) {
-            LOGT_ERROR("MQTT_Device(%s) SET %s failed: %s",
-                       _deviceID.c_str(),
-                       target.c_str(),
-                       error.c_str());
+            LOGT_ERROR(
+                "MQTT_Device(%s) SET %s failed: %s",
+                _deviceID.c_str(),
+                target.c_str(),
+                error.c_str());
+
             success = false;
         }
     }
 
     return success;
 }
+
 
 bool MQTT_Device::allOff()
 {
@@ -705,9 +857,20 @@ void MQTT_Device::handleMQTTMessage(const std::string& topic,
         return;
     }
 
+    json currentState;
     {
         std::lock_guard<std::mutex> lock(_cacheMutex);
-        _rawState[topic] = payload;
+
+        json& rawState = _rawState[topic];
+        if(!rawState.is_object()) {
+            rawState = json::object();
+        }
+
+        for(const auto& [property, value] : payload.items()) {
+            rawState[property] = value;
+        }
+
+        currentState = rawState;
     }
 
     for(const auto& key : topicFound->second) {
@@ -717,12 +880,76 @@ void MQTT_Device::handleMQTTMessage(const std::string& topic,
         }
 
         const binding_t& binding = bindingFound->second;
-        if(!payload.contains(binding.property)) {
-            continue;
-        }
+        std::optional<std::string> converted;
 
-        const std::optional<std::string> converted =
-            inboundValue(binding, payload[binding.property]);
+        if(binding.units == BRIGHTNESS) {
+            bool stateKnown = false;
+            bool stateOn = false;
+
+            if(currentState.contains(binding.property)) {
+                const json& state = currentState[binding.property];
+
+                if(state == binding.onValue) {
+                    stateKnown = true;
+                    stateOn = true;
+                }
+                else if(state == binding.offValue) {
+                    stateKnown = true;
+                    stateOn = false;
+                }
+                else if(state.is_boolean()) {
+                    stateKnown = true;
+                    stateOn = state.get<bool>();
+                }
+                else if(state.is_number_integer()) {
+                    const long long numericState = state.get<long long>();
+                    if(numericState == 0 || numericState == 1) {
+                        stateKnown = true;
+                        stateOn = numericState == 1;
+                    }
+                }
+                else if(state.is_string()) {
+                    bool parsedState = false;
+                    if(stringToBool(state.get<std::string>(), parsedState)) {
+                        stateKnown = true;
+                        stateOn = parsedState;
+                    }
+                }
+            }
+
+            // Zigbee2MQTT commonly retains the previous brightness while the
+            // device is off. The effective brightness is therefore 0 whenever
+            // the reported state is off.
+            if(stateKnown && !stateOn) {
+                converted = "0";
+            }
+            else if(currentState.contains("brightness") &&
+                    currentState["brightness"].is_number()) {
+                const double nativeBrightness =
+                    currentState["brightness"].get<double>();
+                const int percent = static_cast<int>(
+                    std::lround(
+                        (std::clamp(nativeBrightness, 0.0, 254.0) / 254.0) *
+                        100.0));
+
+                // "1" is reserved by keyValueMap_t for Boolean true. Preserve
+                // an actual one-percent device report as "1.0".
+                if(percent == 1) {
+                    converted = "1.0";
+                }
+                else {
+                    converted = std::to_string(percent);
+                }
+            }
+        }
+        else {
+            if(!currentState.contains(binding.property)) {
+                continue;
+            }
+
+            converted =
+                inboundValue(binding, currentState[binding.property]);
+        }
 
         if(converted.has_value()) {
             cacheValue(key, *converted, true);
